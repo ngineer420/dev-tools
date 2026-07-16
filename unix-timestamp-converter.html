@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unix Timestamp Converter — Free Online Tool — devboxkit.com</title>
+<meta name="description" content="Free online Unix timestamp converter. Convert epoch time to human-readable local and UTC dates and back, with seconds/milliseconds auto-detect. Runs entirely in your browser.">
+<link rel="canonical" href="https://devboxkit.com/unix-timestamp-converter.html">
+<meta name="theme-color" content="#0b0e14">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Unix Timestamp Converter — Free Online Tool">
+<meta property="og:description" content="Convert epoch time to local and UTC dates and back, with seconds/milliseconds auto-detect. Runs entirely client-side.">
+<meta property="og:url" content="https://devboxkit.com/unix-timestamp-converter.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Unix Timestamp Converter — Free Online Tool">
+<meta name="twitter:description" content="Convert epoch time to local and UTC dates and back, with seconds/milliseconds auto-detect. Runs entirely client-side.">
+
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Unix Timestamp Converter — DevBox Kit",
+  "url": "https://devboxkit.com/unix-timestamp-converter.html",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Free browser-based Unix timestamp converter: epoch time to local and UTC dates and back, with seconds/milliseconds auto-detect."
+}
+</script>
+
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+      <span class="brand-tag">JSON, Base64, URL, timestamps, regex — one page</span>
+    </a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark/light theme" title="Toggle theme">◐</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="hero">
+    <h1>Unix Timestamp Converter</h1>
+    <p>Convert epoch time to human-readable local and UTC dates — and back again.</p>
+    <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
+  </div>
+
+  <!-- ===================== TIMESTAMP CONVERTER ===================== -->
+  <section aria-label="Unix Timestamp Converter tool">
+    <div class="tool-grid split">
+      <div class="panel">
+        <h2>Epoch → Date</h2>
+        <div class="field">
+          <label for="ts-epoch-input">Unix timestamp</label>
+          <div class="field-row">
+            <input type="text" id="ts-epoch-input" inputmode="numeric" placeholder="e.g. 1700000000">
+            <select id="ts-unit" style="max-width:150px;">
+              <option value="auto">Auto-detect</option>
+              <option value="seconds">Seconds</option>
+              <option value="milliseconds">Milliseconds</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button type="button" id="ts-now">Now</button>
+          <button type="button" id="ts-to-date" class="primary">Convert to date</button>
+        </div>
+        <div class="error-banner" id="ts-epoch-error" role="alert"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Date → Epoch</h2>
+        <div class="field">
+          <label for="ts-date-input">Date &amp; time (local)</label>
+          <input type="datetime-local" id="ts-date-input" step="1">
+        </div>
+        <div class="btn-row">
+          <button type="button" id="ts-to-epoch" class="primary">Convert to epoch</button>
+        </div>
+        <div class="error-banner" id="ts-date-error" role="alert"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <div class="output-toolbar">
+        <h2 style="margin:0;">Result</h2>
+        <div class="btn-row">
+          <button type="button" id="ts-copy" class="icon-btn">Copy epoch (seconds)</button>
+        </div>
+      </div>
+      <div class="result-grid" id="ts-result">
+        <div class="result-item"><div class="result-label">Local time</div><div class="result-value" id="ts-out-local">—</div></div>
+        <div class="result-item"><div class="result-label">UTC time</div><div class="result-value" id="ts-out-utc">—</div></div>
+        <div class="result-item"><div class="result-label">ISO 8601</div><div class="result-value" id="ts-out-iso">—</div></div>
+        <div class="result-item"><div class="result-label">Epoch (seconds)</div><div class="result-value" id="ts-out-seconds">—</div></div>
+        <div class="result-item"><div class="result-label">Epoch (milliseconds)</div><div class="result-value" id="ts-out-millis">—</div></div>
+        <div class="result-item"><div class="result-label">Detected unit</div><div class="result-value" id="ts-out-unit">—</div></div>
+      </div>
+      <span class="copy-flash" id="ts-copy-flash">Copied!</span>
+    </div>
+  </section>
+
+  <section class="container-narrow" style="padding-top:40px;">
+    <h2 style="margin-top:0;">About this timestamp converter</h2>
+    <p>Enter a Unix timestamp and convert it to local time, UTC, and ISO 8601 all at once — or go the other way and turn a date into epoch seconds and milliseconds. Auto-detect figures out whether your number is in seconds or milliseconds, and the <strong>Now</strong> button drops in the current time. Everything runs locally in your browser — nothing is uploaded. For the Y2038 problem, the seconds-vs-milliseconds ambiguity, and timezone gotchas, read the <a href="/articles/unix-timestamp-guide.html">Unix timestamp guide</a>.</p>
+
+    <h2>More developer tools</h2>
+    <ul>
+      <li><a href="/json-formatter.html">JSON Formatter</a></li>
+      <li><a href="/base64-encode-decode.html">Base64 Encode / Decode</a></li>
+      <li><a href="/url-encoder-decoder.html">URL Encoder / Decoder</a></li>
+      <li><a href="/regex-tester.html">Regex Tester</a></li>
+      <li><a href="/">All tools on one page (home)</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/app.js"></script>
+</body>
+</html>

@@ -311,7 +311,9 @@ if (typeof document !== "undefined") {
     (function initTheme() {
       const stored = localStorage.getItem("dbk-theme");
       if (stored) document.documentElement.setAttribute("data-theme", stored);
-      document.getElementById("theme-toggle").addEventListener("click", () => {
+      const toggle = document.getElementById("theme-toggle");
+      if (!toggle) return;
+      toggle.addEventListener("click", () => {
         const current =
           document.documentElement.getAttribute("data-theme") ||
           (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
@@ -324,7 +326,9 @@ if (typeof document !== "undefined") {
     /* ---- tabs ---- */
     (function initTabs() {
       const tabIds = ["tab-json", "tab-base64", "tab-url", "tab-timestamp", "tab-regex"];
-      const tabs = tabIds.map((id) => document.getElementById(id));
+      const tabs = tabIds.map((id) => document.getElementById(id)).filter(Boolean);
+      // Single-tool pages have no tabbar; nothing to wire up.
+      if (!tabs.length) return;
       const panels = {};
       tabs.forEach((t) => { panels[t.id] = document.getElementById(t.getAttribute("aria-controls")); });
 
@@ -350,7 +354,8 @@ if (typeof document !== "undefined") {
       });
     })();
 
-    document.getElementById("year").textContent = new Date().getFullYear();
+    const yearEl = document.getElementById("year");
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
 
     /* ---- JSON tool ---- */
     (function jsonTool() {
@@ -358,6 +363,7 @@ if (typeof document !== "undefined") {
       const output = document.getElementById("json-output");
       const errorEl = document.getElementById("json-error");
       const copyFlash = document.getElementById("json-copy-flash");
+      if (!input || !output) return;
 
       function render(result) {
         if (result.ok) {
@@ -397,6 +403,7 @@ if (typeof document !== "undefined") {
       const output = document.getElementById("b64-output");
       const errorEl = document.getElementById("b64-error");
       const copyFlash = document.getElementById("b64-copy-flash");
+      if (!input || !output) return;
 
       document.getElementById("b64-encode").addEventListener("click", () => {
         hideError(errorEl);
@@ -430,6 +437,7 @@ if (typeof document !== "undefined") {
       const output = document.getElementById("url-output");
       const errorEl = document.getElementById("url-error");
       const copyFlash = document.getElementById("url-copy-flash");
+      if (!input || !output) return;
 
       document.getElementById("url-encode").addEventListener("click", () => {
         hideError(errorEl);
@@ -464,6 +472,7 @@ if (typeof document !== "undefined") {
       const dateInput = document.getElementById("ts-date-input");
       const dateError = document.getElementById("ts-date-error");
       const copyFlash = document.getElementById("ts-copy-flash");
+      if (!epochInput || !dateInput) return;
 
       const outLocal = document.getElementById("ts-out-local");
       const outUtc = document.getElementById("ts-out-utc");
@@ -522,6 +531,7 @@ if (typeof document !== "undefined") {
       const highlightEl = document.getElementById("regex-highlight");
       const matchesEmptyEl = document.getElementById("regex-matches-empty");
       const matchesEl = document.getElementById("regex-matches");
+      if (!patternInput || !testInput) return;
 
       const flagIds = { g: "regex-flag-g", i: "regex-flag-i", m: "regex-flag-m", s: "regex-flag-s", u: "regex-flag-u", y: "regex-flag-y" };
 
