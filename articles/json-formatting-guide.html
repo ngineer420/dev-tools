@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JSON Formatting Guide: Syntax Rules, Common Errors &amp; When to Minify — devboxkit.com</title>
+<meta name="description" content="A practical guide to JSON syntax rules, the most common JSON errors (trailing commas, unescaped quotes, single quotes), why JSON.parse errors are cryptic, and when to minify vs pretty-print.">
+<link rel="canonical" href="https://devboxkit.com/articles/json-formatting-guide.html">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/styles.css">
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+      <span class="brand-tag">JSON, Base64, URL, timestamps, regex — one page</span>
+    </a>
+  </div>
+</header>
+<main class="container-narrow">
+  <h1>JSON Formatting Guide: Syntax Rules, Common Errors &amp; When to Minify</h1>
+
+  <p>JSON looks simple enough that most developers never read its actual grammar — they learn it by pattern-matching against examples, which works fine until a payload from some other system doesn't parse and the error message is no help at all. This guide covers the syntax rules that actually matter, the handful of mistakes that account for almost every real-world JSON error, and why <code>JSON.parse</code>'s error messages are so much less helpful than they could be. You can follow along with any of the examples in our <a href="/">JSON formatter</a>, which reports the line and column of a parse failure instead of leaving you to guess.</p>
+
+  <h2>The syntax rules, precisely</h2>
+  <p>JSON (JavaScript Object Notation) is deliberately smaller than JavaScript object literal syntax, and most JSON errors come from developers unconsciously reaching for a JavaScript habit that JSON simply doesn't allow. The full grammar fits in a page:</p>
+  <p>An object is <code>{ }</code> containing zero or more <code>&ldquo;key&rdquo;: value</code> pairs separated by commas. Keys must be double-quoted strings — always, with no exceptions. An array is <code>[ ]</code> containing zero or more values separated by commas. A value is a string, a number, <code>true</code>, <code>false</code>, <code>null</code>, an object, or an array — nothing else. Strings must use double quotes, never single quotes, and certain characters inside them must be escaped: <code>\&quot;</code> for a literal quote, <code>\\</code> for a backslash, <code>\n</code> for a newline, and <code>\uXXXX</code> for arbitrary Unicode code points. Numbers follow a stricter format than JavaScript's — no leading zeros (<code>0123</code> is invalid), no leading <code>+</code>, and no trailing decimal point without digits after it (<code>1.</code> is invalid, <code>1.0</code> is fine).</p>
+  <p>What's conspicuously absent is everything that makes JavaScript object literals convenient: unquoted keys, trailing commas, comments, single-quoted strings, <code>undefined</code>, functions, and <code>NaN</code>/<code>Infinity</code>. JSON is a data-interchange format, not a programming language snippet, and its strictness is what makes it parseable identically by every language's JSON library. That strictness is also where nearly all real-world errors come from.</p>
+
+  <h2>The three errors that account for almost everything</h2>
+  <p><strong>Trailing commas.</strong> This is, by a wide margin, the single most common JSON error developers hit, because it's completely legal in modern JavaScript object and array literals. Writing <code>{"a": 1, "b": 2,}</code> works fine in a <code>.js</code> file but throws in JSON, because JSON has no concept of an &ldquo;optional&rdquo; trailing separator — the grammar requires a value after every comma. This bites people constantly when copy-pasting a JavaScript object literal into a JSON file, or when a template deletes the last item from a list and leaves the comma from the item before it dangling.</p>
+  <p><strong>Single quotes instead of double quotes.</strong> JSON has exactly one string delimiter: <code>"</code>. Python developers especially get tripped up here, since Python treats <code>'single'</code> and <code>&quot;double&quot;</code> quoted strings as fully interchangeable, and <code>json.dumps()</code> on a Python dict that was hand-written with single quotes will happily produce valid JSON — but a JSON-like string that a human typed by hand with single quotes, or that came from a `repr()`-style debug print rather than an actual serializer, is not JSON at all as far as a parser is concerned.</p>
+  <p><strong>Unescaped quotes or backslashes inside strings.</strong> If a string value itself contains a double quote — say, a value like <code>He said &quot;hello&quot;</code> — that inner quote has to be escaped as <code>\&quot;</code>, or the parser reads it as the end of the string and chokes on whatever comes after. The same applies to literal backslashes, which are common in Windows file paths (<code>C:\Users\name</code>) and regular expression patterns embedded as string values — each backslash needs to become <code>\\</code>. This is the error category most likely to come from user-generated content or log data that was assembled into JSON by naive string concatenation rather than a real serializer.</p>
+  <p>A close runner-up worth naming: mismatched or missing brackets and braces, usually from manually editing a large JSON blob and losing track of nesting depth. These are individually simple but can be maddening to locate by eye in a large file, which is exactly what line/column error reporting is for.</p>
+
+  <h2>Why JSON.parse errors are so cryptic</h2>
+  <p>If you've ever seen <code>SyntaxError: Unexpected token , in JSON at position 47</code> and wondered why it couldn't just tell you the line number, the short answer is that <code>JSON.parse</code> is a thin wrapper around a low-level tokenizer that was never designed with human-friendly diagnostics as a priority. Historically it reported only a raw character offset into the string — &ldquo;position 47&rdquo; — which is nearly useless for a multi-hundred-line file since you'd have to count characters by hand to find it. Newer JavaScript engines (recent V8, which powers Node.js and Chrome) have started including a line and column number directly in the message, but the format isn't standardized across engines, and plenty of environments still only give you the raw position.</p>
+  <p>There's a deeper reason the messages feel unhelpful even when they do include a location: a JSON parser can only report where it noticed something was wrong, not where the actual mistake is. A missing closing brace, for instance, is only detected when the parser reaches the end of the input still expecting more — so the reported position might be the very last character of the file, even though the real problem is an unclosed <code>{</code> from ten lines earlier. Similarly, a stray trailing comma is reported at the position of whatever comes after it (often a closing bracket), not at the comma itself. Reading these errors well means treating the reported position as a strong hint about the neighborhood of the bug rather than a precise pin on its location, and working outward from there — which is exactly why translating a raw character offset into a line and column, and highlighting that spot in the actual text, saves so much time over squinting at a raw number.</p>
+
+  <h2>When to minify vs. pretty-print</h2>
+  <p>Pretty-printing (indenting nested structures, one key per line) exists purely for human eyes: reviewing an API response, debugging a config file, or diffing two versions of a document in version control. The indentation and line breaks add bytes but zero semantic value — a JSON parser treats <code>{"a":1}</code> and a nicely indented multi-line version of the same object as identical data.</p>
+  <p>Minifying (stripping all non-essential whitespace) matters whenever size or parse speed is on the critical path: JSON sent over the network in an API response or request body, JSON embedded in a URL query parameter, JSON stored in a database column, or JSON bundled into a JavaScript file at build time. The savings add up — a deeply nested, verbosely indented config can easily be 30-40% smaller minified, which matters on high-traffic APIs and mobile connections. The practical workflow most developers settle into is: keep source-of-truth JSON files (configs, fixtures, test data) pretty-printed in version control where diffs matter, and minify automatically at build or send time for anything that crosses the network or gets embedded elsewhere. Neither format is more &ldquo;correct&rdquo; — they're the same data optimized for two different readers, a human and a wire protocol.</p>
+
+  <h2>Keep reading</h2>
+  <ul>
+    <li><a href="/articles/base64-and-url-encoding-explained.html">Base64 and URL encoding explained</a></li>
+    <li><a href="/articles/unix-timestamp-guide.html">Unix timestamp guide</a></li>
+    <li><a href="/articles/regex-cheat-sheet.html">Regex cheat sheet</a></li>
+    <li><a href="/">Try the JSON formatter</a></li>
+  </ul>
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unix Timestamp Guide: Epoch Time, Y2038, and Seconds vs. Milliseconds — devboxkit.com</title>
+<meta name="description" content="What Unix epoch time actually is, why systems use it, the Y2038 problem, how to tell seconds from milliseconds timestamps, and common timezone/UTC conversion gotchas.">
+<link rel="canonical" href="https://devboxkit.com/articles/unix-timestamp-guide.html">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/styles.css">
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+      <span class="brand-tag">JSON, Base64, URL, timestamps, regex — one page</span>
+    </a>
+  </div>
+</header>
+<main class="container-narrow">
+  <h1>Unix Timestamp Guide: Epoch Time, Y2038, and Seconds vs. Milliseconds</h1>
+
+  <p>A Unix timestamp is just a number — 1700000000, say — and yet it's responsible for a disproportionate share of confused bug reports: dates that land 50 years in the future, times that are off by exactly one hour, or a database column full of numbers nobody's sure whether to divide by 1000. Almost all of that confusion traces back to a small set of facts about what the number actually represents. This guide covers them, and you can check any of the specifics against our <a href="/">timestamp converter</a>, which shows local time, UTC, ISO 8601, and both seconds and milliseconds side by side for a given value.</p>
+
+  <h2>What epoch time actually is</h2>
+  <p>A Unix timestamp (also called epoch time or POSIX time) is the number of seconds that have elapsed since <strong>January 1, 1970, 00:00:00 UTC</strong> — a moment called &ldquo;the Unix epoch.&rdquo; That instant is arbitrary; it was chosen in the early 1970s during the development of Unix simply as a convenient recent reference point, not for any deeper reason. Every timestamp is a count forward (positive) or backward (negative, for dates before 1970) from that single fixed instant.</p>
+  <p>The reason this design won out over storing a year/month/day/hour/etc. breakdown is that a single integer is trivial to compare, sort, and do arithmetic on. Figuring out which of two dates comes first, or how many seconds elapsed between two events, is a single subtraction if both are epoch timestamps — versus a genuinely fiddly calendar calculation (accounting for varying month lengths, leap years, and leap seconds) if both are stored as human-readable date strings. Nearly every operating system, database, and programming language uses epoch time somewhere under the hood — file modification times, database <code>created_at</code> columns, JWT expiration claims, and log timestamps are all commonly stored this way — precisely because it turns date math into ordinary integer math.</p>
+
+  <h2>The Y2038 problem</h2>
+  <p>Classic Unix timestamps are stored as a signed 32-bit integer, which can represent values from roughly -2.1 billion to +2.1 billion. Counting forward in seconds from 1970, that positive range runs out at <strong>03:14:07 UTC on January 19, 2038</strong> — the instant a signed 32-bit second-counter overflows and wraps around to a large negative number, which most systems interpret as a date back in 1901. This is the Y2038 problem, and it's a direct structural echo of the Y2K bug: a fixed-width numeric field that seemed to have plenty of headroom when it was designed decades earlier turns out not to.</p>
+  <p>The practical impact today is smaller than Y2K's was, mainly because the fix is already well underway: modern 64-bit systems generally use a 64-bit time value, which pushes the overflow date out roughly 292 billion years — long enough not to matter. The real risk is concentrated in embedded systems, older 32-bit hardware, and legacy software still running with a 32-bit <code>time_t</code> that may not get updated before 2038 arrives, plus any database schema or file format that was designed around a 32-bit timestamp column decades ago. If you're building something with a multi-decade expected lifetime — firmware, an embedded device, a long-lived file format — it's worth explicitly confirming your timestamp field is 64-bit rather than assuming it.</p>
+
+  <h2>Seconds vs. milliseconds: how to tell them apart</h2>
+  <p>This is the single most common practical timestamp bug: JavaScript's <code>Date.now()</code> and <code>new Date().getTime()</code> return milliseconds since the epoch, while Unix timestamps in most other contexts — Python's <code>time.time()</code> by convention often gets treated as seconds, PostgreSQL's <code>EXTRACT(EPOCH FROM ...)</code>, and most Unix command-line tools — return or expect seconds. Mixing the two silently produces wildly wrong dates without throwing any error, because both are just plain numbers to whatever's consuming them.</p>
+  <p>Feed a millisecond timestamp to a function expecting seconds and you get a date roughly 1,000 times too far in the future — a timestamp meant to mean &ldquo;a few days ago&rdquo; can resolve to a date centuries out, since multiplying by 1000 instead of dividing pushes you that far off in the wrong direction. Feed a seconds timestamp to something expecting milliseconds and you get a date suspiciously close to January 1, 1970, since a normal current-day seconds value is a small number when read as if it were milliseconds.</p>
+  <p>The reliable way to tell them apart, since there's no header or type tag on a bare number: check the order of magnitude. As of the mid-2020s, current seconds-based timestamps are 10-digit numbers (roughly 1.7-1.8 billion), while current milliseconds-based timestamps are 13-digit numbers (roughly 1.7-1.8 trillion). A useful rule of thumb — the one our own converter's auto-detect uses — is that any value at or above 10^12 is almost certainly milliseconds, since a seconds-based timestamp doesn't cross that threshold until the year 33658. When in doubt, converting the value both ways and checking which result lands on a plausible, recent-looking date is a fast sanity check.</p>
+
+  <h2>Timezone and UTC conversion gotchas</h2>
+  <p>The timestamp number itself has no timezone — it's an absolute count of seconds from a fixed instant, identical everywhere on Earth at any given moment. Timezone only enters the picture when you convert that number into a human-readable string, and that's exactly where bugs creep in. &ldquo;Store times in UTC, display in local time&rdquo; is the standard advice for a reason: if you instead store a timestamp that's already been shifted to a particular local timezone, you've baked an assumption into the data that becomes wrong the moment it's read from a different timezone, or the moment daylight saving time flips.</p>
+  <p>Daylight saving time is its own frequent source of off-by-one-hour bugs, particularly around scheduled or recurring events: a job scheduled for &ldquo;2:30 AM local time&rdquo; on the day clocks spring forward may not exist at all in some timezones (that local time is skipped entirely), and on the day they fall back it can occur twice. Storing the timestamp as UTC entirely sidesteps this ambiguity — there's no such thing as a DST transition in UTC — and the conversion to a specific local time only needs to happen at the point of display, using the viewer's actual timezone rather than the server's. A related trap: JavaScript's <code>Date</code> object always displays in the browser's local timezone by default (via <code>toString()</code>) unless you explicitly call a UTC-specific method like <code>toISOString()</code> or <code>toUTCString()</code>, which is an easy thing to overlook when a server and a browser in different timezones are comparing the &ldquo;same&rdquo; date and seeing different wall-clock values for it.</p>
+
+  <h2>Keep reading</h2>
+  <ul>
+    <li><a href="/articles/json-formatting-guide.html">JSON formatting guide</a></li>
+    <li><a href="/articles/base64-and-url-encoding-explained.html">Base64 and URL encoding explained</a></li>
+    <li><a href="/articles/regex-cheat-sheet.html">Regex cheat sheet</a></li>
+    <li><a href="/">Try the timestamp converter</a></li>
+  </ul>
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>
