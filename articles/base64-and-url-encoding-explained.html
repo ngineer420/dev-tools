@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base64 and URL Encoding Explained: What They Actually Do — devboxkit.com</title>
+<meta name="description" content="What Base64 encoding actually does (binary-to-text, not encryption), common use cases like data URIs and email attachments, and when URL/percent-encoding is needed instead.">
+<link rel="canonical" href="https://devboxkit.com/articles/base64-and-url-encoding-explained.html">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/styles.css">
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+      <span class="brand-tag">JSON, Base64, URL, timestamps, regex — one page</span>
+    </a>
+  </div>
+</header>
+<main class="container-narrow">
+  <h1>Base64 and URL Encoding Explained: What They Actually Do</h1>
+
+  <p>Base64 and URL encoding get confused with each other, and both get confused with encryption, more often than almost any other pair of concepts in web development. Neither is encryption. Both are encodings — reversible, publicly documented transformations that make data safe to carry through a system that wasn't designed to handle it — but they solve different problems. This guide walks through what each one actually does, using our <a href="/">Base64 and URL encode/decode tools</a> as a reference for the concrete input/output behavior.</p>
+
+  <h2>What Base64 actually does</h2>
+  <p>Base64 converts arbitrary binary data into a string made up of only 64 &ldquo;safe&rdquo; ASCII characters: uppercase and lowercase letters, digits, plus <code>+</code> and <code>/</code> (with <code>=</code> used for padding at the end). It does this by reading the input three bytes (24 bits) at a time and re-slicing those 24 bits into four 6-bit chunks, each of which maps to one of the 64 output characters. That's the entire algorithm — there's no key, no secret, and no randomness involved. Anyone can decode a Base64 string back to its original bytes with nothing but the Base64 alphabet, which is exactly why it provides zero confidentiality.</p>
+  <p>This is worth stating directly because it's such a common misconception: <strong>Base64 is not encryption, and it does not provide security.</strong> If you've ever seen a password or an API token &ldquo;encoded&rdquo; in Base64 and assumed it was protected, it wasn't — decoding it takes one line of code in any language, or a few keystrokes in a browser console, with no password required. Base64 is obfuscation at best, in the sense that it isn't human-readable at a glance, but it should never be relied on to keep anything secret. If you need confidentiality, that's a job for actual encryption (like AES) or, for passwords specifically, a one-way hash — Base64 solves a completely different problem: making binary data survive a trip through systems that only understand text.</p>
+  <p>The 33% size overhead is a direct consequence of the 3-bytes-in, 4-characters-out ratio: 3 bytes of binary (24 bits) become 4 characters of output (since each character encodes only 6 usable bits instead of a full 8), so Base64 output is always roughly a third larger than the original binary. That overhead is the price of making the data safely representable as plain text, and it's a fair trade whenever the alternative is that the binary data can't be transmitted at all in a given context.</p>
+
+  <h2>Where Base64 actually gets used</h2>
+  <p><strong>Data URIs</strong> are probably the most common everyday use — embedding a small image, font, or icon directly inside a CSS file or HTML document as <code>data:image/png;base64,iVBORw0KG...</code> instead of a separate file request. This trades an extra network round-trip for a larger inline payload, which is a good deal for small assets (tiny icons, inline SVG fallbacks) and a bad one for large images, since Base64's size overhead compounds with the fact that inlined data can't be cached separately from the page that contains it.</p>
+  <p><strong>Email attachments</strong> are a classic use case with real history behind it: the SMTP protocol that email runs on was designed for 7-bit ASCII text and historically couldn't reliably carry raw binary data (some mail relays would strip the 8th bit of every byte, corrupting anything binary). The MIME standard solves this by Base64-encoding attachments — images, PDFs, zip files — into plain text blocks that any SMTP server can pass along untouched, which is why the raw source of an email with an attachment shows a long block of Base64 text rather than the actual file bytes.</p>
+  <p><strong>Embedding binary in JSON, XML, or URLs</strong> is the other major case: these formats are fundamentally text-based and have no native way to represent arbitrary binary bytes (a raw null byte or an unpaired UTF-16 surrogate would break a JSON string outright). Base64-encoding a binary blob — an image thumbnail, a cryptographic signature, a serialized protocol buffer — turns it into a plain string that fits into a JSON field or a URL parameter without any special handling. Basic auth headers (<code>Authorization: Basic &lt;base64 of user:pass&gt;</code>) and JWTs (each of the three dot-separated segments is Base64url-encoded JSON) both lean on this property.</p>
+
+  <h2>URL encoding: a different problem entirely</h2>
+  <p>URL encoding, also called percent-encoding, solves a completely separate problem: URLs have a limited set of characters that are allowed to appear literally, because certain characters are reserved as syntax — <code>?</code> starts the query string, <code>&amp;</code> separates parameters, <code>#</code> starts a fragment, <code>/</code> separates path segments, and space isn't legal in a URL at all. Percent-encoding replaces any character outside the safe set with <code>%</code> followed by its byte value in hex, so a space becomes <code>%20</code>, an ampersand becomes <code>%26</code>, and a UTF-8 character like <code>é</code> becomes a multi-byte sequence like <code>%C3%A9</code>.</p>
+  <p>The practical rule for when you need it: any time a value you don't fully control — user input, a search query, a file name, an email address used as a lookup key — gets inserted into a URL as a query parameter or path segment, it needs to be percent-encoded so that any reserved characters it happens to contain don't get misinterpreted as URL syntax. In JavaScript this is <code>encodeURIComponent()</code> for individual values (it encodes almost everything except unreserved characters) versus <code>encodeURI()</code> for encoding a complete URL that should keep its own structural characters like <code>/</code> and <code>?</code> intact. Getting this distinction wrong is a frequent source of bugs: run <code>encodeURIComponent</code> on an entire URL and you'll percent-encode the <code>://</code> and turn the whole thing into an unusable string; forget to encode a single query value and a search term containing <code>&amp;</code> or <code>#</code> will silently truncate the rest of the query string.</p>
+  <p>The two encodings are not interchangeable and solve different layers of the same broader problem — Base64 makes binary data safe to store as text at all, while URL encoding makes text data safe to embed inside the specific syntax of a URL. It's common to need both at once: Base64-encode a binary value, then URL-encode the result before putting it in a query string, since Base64's own alphabet includes <code>+</code> and <code>/</code>, both of which are meaningful characters in a URL and would otherwise be misread as a space or a path separator.</p>
+
+  <h2>Keep reading</h2>
+  <ul>
+    <li><a href="/articles/json-formatting-guide.html">JSON formatting guide</a></li>
+    <li><a href="/articles/unix-timestamp-guide.html">Unix timestamp guide</a></li>
+    <li><a href="/articles/regex-cheat-sheet.html">Regex cheat sheet</a></li>
+    <li><a href="/">Try the Base64 &amp; URL tools</a></li>
+  </ul>
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>

@@ -10,6 +10,8 @@ A free, ad-supported developer toolkit with five tools in one page:
 
 Everything runs client-side — no backend, no build step, nothing is ever uploaded. Deployed as static files on GitHub Pages.
 
+There's also an `articles/` directory with four original written guides (JSON formatting, Base64/URL encoding, Unix timestamps, regex) linked from the homepage's "Learn more" section and from `sitemap.xml` — content-depth pages for AdSense review, not part of the tool functionality itself.
+
 ## Local development
 
 No build tooling required. Serve the folder with any static file server, e.g.:
@@ -24,6 +26,7 @@ Then open `http://localhost:8000`.
 
 ```
 index.html            Main app (all five tools, tabbed)
+articles/              Written guides for content depth (JSON, Base64/URL, timestamps, regex)
 privacy.html           Privacy policy (required for ad networks)
 terms.html             Terms of use
 404.html               Custom 404 page

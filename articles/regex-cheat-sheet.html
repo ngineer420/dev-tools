@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Practical Regex Cheat Sheet: Patterns, Flags &amp; Common Gotchas — devboxkit.com</title>
+<meta name="description" content="A practical regex reference: common patterns for email/URL/phone matching and their caveats, anchors, character classes, greedy vs. lazy quantifiers, flags, and gotchas like catastrophic backtracking.">
+<link rel="canonical" href="https://devboxkit.com/articles/regex-cheat-sheet.html">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/styles.css">
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+      <span class="brand-tag">JSON, Base64, URL, timestamps, regex — one page</span>
+    </a>
+  </div>
+</header>
+<main class="container-narrow">
+  <h1>Practical Regex Cheat Sheet: Patterns, Flags &amp; Common Gotchas</h1>
+
+  <p>Regular expressions are one of those tools every developer uses regularly and re-learns from scratch every few months, because the syntax is dense and the mental model doesn't stick between uses. This is a practical reference rather than a full tutorial: the patterns people actually search for, the flags that change how matching behaves, and the gotchas that cause the most head-scratching. Every example here works directly in our <a href="/">regex tester</a>, which highlights matches inline and lists out each match's capture groups as you type.</p>
+
+  <h2>Anchors: pinning a match to a position</h2>
+  <p><code>^</code> matches the start of the string (or the start of a line, if the multiline flag is set), and <code>$</code> matches the end of the string or line the same way. <code>\b</code> matches a word boundary — the transition between a word character (<code>\w</code>, i.e. a letter, digit, or underscore) and anything that isn't one — without consuming any characters itself, which makes it the right tool for matching a whole word like <code>cat</code> without also matching it inside <code>category</code>: the pattern <code>\bcat\b</code> does that, while plain <code>cat</code> does not.</p>
+  <p>A common mistake is forgetting that <code>^</code> and <code>$</code> match the whole string by default, not each line — so a pattern meant to validate &ldquo;every line starts with a number&rdquo; needs the multiline flag (<code>m</code>) explicitly, or <code>^</code> will only ever match the very first line.</p>
+
+  <h2>Character classes</h2>
+  <p>A character class matches one character from a set. The built-in shorthand classes cover the cases people need most often: <code>\d</code> is any digit (<code>0-9</code>), <code>\w</code> is any word character (letters, digits, and underscore), <code>\s</code> is any whitespace character (space, tab, newline), and the uppercase versions — <code>\D</code>, <code>\W</code>, <code>\S</code> — match the exact opposite of each. A custom class in square brackets, like <code>[aeiou]</code>, matches any single character listed inside it, and a leading <code>^</code> inside the brackets negates it — <code>[^aeiou]</code> matches any character that isn't a vowel. Ranges work inside brackets too: <code>[a-z]</code>, <code>[A-Z0-9]</code>, and so on.</p>
+  <p>One easy-to-miss detail: inside a character class, most special characters lose their special meaning. <code>[.]</code> matches a literal period, not &ldquo;any character&rdquo; — you don't need to escape the dot inside brackets the way you would outside them. The one character that keeps a special meaning inside brackets is <code>^</code> (negation, only when it's the first character) and, in some flavors, <code>-</code> if it isn't clearly part of a range.</p>
+
+  <h2>Quantifiers, and greedy vs. lazy matching</h2>
+  <p><code>*</code> means zero or more, <code>+</code> means one or more, <code>?</code> means zero or one, and <code>{n,m}</code> means between <code>n</code> and <code>m</code> repetitions (either bound can be omitted — <code>{2,}</code> means &ldquo;2 or more&rdquo;). By default all of these are <strong>greedy</strong>: they match as much as possible and only give characters back if that's required for the rest of the pattern to match at all.</p>
+  <p>This is the single most common source of &ldquo;why did my regex match way more than I expected&rdquo; bugs. Given the text <code>&lt;b&gt;bold&lt;/b&gt; and &lt;i&gt;italic&lt;/i&gt;</code> and the pattern <code>&lt;.+&gt;</code>, a greedy quantifier matches from the very first <code>&lt;</code> all the way to the very last <code>&gt;</code> — the whole string — rather than stopping at the first closing tag, because <code>.+</code> greedily consumes everything it can and <code>&gt;</code> is satisfied by the last one available. Adding <code>?</code> after a quantifier makes it <strong>lazy</strong> instead — <code>&lt;.+?&gt;</code> matches as little as possible, stopping at the first <code>&gt;</code> it can, which correctly isolates <code>&lt;b&gt;</code> alone. The rule of thumb: reach for a lazy quantifier whenever you're matching &ldquo;everything up to the next occurrence of X,&rdquo; and a greedy one whenever you genuinely want the longest possible match.</p>
+
+  <h2>Email, URL, and phone matching — and their real caveats</h2>
+  <p>A pattern like <code>\w+@\w+\.\w+</code> — the default example loaded in our regex tester — matches the shape of a typical email address well enough for casual highlighting or a quick sanity check, but it's worth being honest about its limits. The actual grammar for valid email addresses (RFC 5322) is notoriously permissive — it technically allows quoted strings, comments, and characters like <code>+</code> and <code>.</code> in the local part — to the point that a fully spec-compliant regex is hundreds of characters long and still debated. In practice almost nobody needs full RFC compliance: a pragmatic pattern that accepts common real-world addresses and rejects obvious garbage, paired with an actual verification email, beats a monster regex chasing 100% correctness.</p>
+  <p>URL matching has a similar honesty problem: a simple pattern like <code>https?:\/\/\S+</code> catches the common case but doesn't validate structure — a malformed host, invalid port, or bad encoding will still match. A robust URL validator has to account for internationalized domain names and query-string edge cases that make a simple regex the wrong tool; that job is better handed to a language's built-in URL parser (like JavaScript's <code>URL</code> constructor) once &ldquo;does this look like a URL&rdquo; needs to become &ldquo;is this a valid URL.&rdquo;</p>
+  <p>Phone number matching is the worst-behaved of the three: formats vary by country and even within one country (parentheses, dashes, spaces, country codes, extensions are all optional). A pattern loose enough to accept every legitimate format a user might type is usually too loose to reject much of anything, which is why most production systems normalize phone input as digits are typed rather than validating a final string against one pattern.</p>
+
+  <h2>Flags: how matching behavior changes</h2>
+  <p>Flags configure how a pattern is applied rather than what it matches. The six standard JavaScript flags are <code>g</code> (global — find all matches instead of stopping at the first one), <code>i</code> (ignore case), <code>m</code> (multiline — makes <code>^</code>/<code>$</code> match at line boundaries, not just string boundaries), <code>s</code> (dot-all — makes <code>.</code> also match newline characters, which it doesn't by default), <code>u</code> (unicode — treats the pattern and input as full Unicode code points rather than raw UTF-16 code units, which matters for emoji and other characters outside the Basic Multilingual Plane), and <code>y</code> (sticky — anchors matching to start exactly at <code>lastIndex</code> rather than searching forward).</p>
+  <p>The <code>g</code> flag specifically changes how repeated calls to <code>.exec()</code> behave: without it, calling <code>.exec()</code> on the same regex object always returns the first match; with it, each call picks up from where the previous one left off (tracked via the regex object's <code>lastIndex</code> property), which is how a single pattern object walks through every match in a string one at a time inside a loop.</p>
+
+  <h2>Gotchas worth knowing by name</h2>
+  <p><strong>Catastrophic backtracking</strong> is the one that turns a working regex into a hung process. It happens when a pattern contains nested or ambiguous repetition — something like <code>(a+)+b</code> — applied against input that almost, but doesn't quite, match. The engine tries an exponential number of ways to split the repeated group before giving up, and what's instant on a 20-character string can take longer than the age of the universe on a 40-character one. The fix is almost always to make the repetition unambiguous: avoid nesting one unbounded quantifier directly inside another that could match the same characters.</p>
+  <p><strong>Zero-length matches</strong> are the other subtle trap, and they show up directly in how a global match loop has to be written: a pattern like <code>\b</code> or <code>x*</code> can match successfully without advancing the string position, so a naive loop that just keeps calling <code>.exec()</code> will spin forever at the same index. The standard fix is to manually bump <code>lastIndex</code> forward by one whenever a match's start equals the regex's <code>lastIndex</code> afterward — exactly the guard a correct global-match implementation needs to stay safe on patterns capable of matching an empty string.</p>
+  <p><strong>Forgetting to escape special characters</strong> in dynamic patterns — matching a literal period, dollar sign, or parenthesis that came from user input — is the last common gotcha: those characters mean something in regex syntax, so a literal <code>.</code> needs to be written as <code>\.</code>, or the &ldquo;any character&rdquo; behavior of an unescaped dot will silently make the pattern too permissive.</p>
+
+  <h2>Keep reading</h2>
+  <ul>
+    <li><a href="/articles/json-formatting-guide.html">JSON formatting guide</a></li>
+    <li><a href="/articles/base64-and-url-encoding-explained.html">Base64 and URL encoding explained</a></li>
+    <li><a href="/articles/unix-timestamp-guide.html">Unix timestamp guide</a></li>
+    <li><a href="/">Try the regex tester</a></li>
+  </ul>
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>
