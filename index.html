@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DevBox Kit — Free JSON Formatter, Base64, URL, Timestamp &amp; Regex Tools</title>
+<meta name="description" content="Format &amp; validate JSON, encode/decode Base64 and URLs, convert Unix timestamps, and test regular expressions — five free developer tools in one page. Runs entirely in your browser, nothing is uploaded.">
+<link rel="canonical" href="https://devboxkit.com/">
+<meta name="theme-color" content="#0b0e14">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="DevBox Kit — Free JSON Formatter, Base64, URL, Timestamp &amp; Regex Tools">
+<meta property="og:description" content="Five free developer tools in one page: JSON formatter/validator, Base64 encode/decode, URL encode/decode, timestamp converter, and regex tester. Runs entirely client-side.">
+<meta property="og:url" content="https://devboxkit.com/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DevBox Kit — Free JSON Formatter, Base64, URL, Timestamp &amp; Regex Tools">
+<meta name="twitter:description" content="Five free developer tools in one page: JSON formatter/validator, Base64 encode/decode, URL encode/decode, timestamp converter, and regex tester. Runs entirely client-side.">
+
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "DevBox Kit",
+  "url": "https://devboxkit.com/",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Free browser-based developer toolkit: JSON formatter/validator, Base64 encode/decode, URL encode/decode, Unix timestamp converter, and regex tester."
+}
+</script>
+
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+      <span class="brand-tag">JSON, Base64, URL, timestamps, regex — one page</span>
+    </a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark/light theme" title="Toggle theme">◐</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="hero">
+    <h1>Free Developer Formatting &amp; Conversion Tools</h1>
+    <p>JSON formatting, Base64, URL encoding, Unix timestamps, and regex testing — five tools, one page, no sign-up.</p>
+    <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
+  </div>
+
+  <div role="tablist" class="tabbar" aria-label="Developer tool">
+    <button role="tab" id="tab-json" aria-controls="panel-json" aria-selected="true" class="tab-btn" type="button">JSON Formatter</button>
+    <button role="tab" id="tab-base64" aria-controls="panel-base64" aria-selected="false" class="tab-btn" type="button" tabindex="-1">Base64</button>
+    <button role="tab" id="tab-url" aria-controls="panel-url" aria-selected="false" class="tab-btn" type="button" tabindex="-1">URL Encode/Decode</button>
+    <button role="tab" id="tab-timestamp" aria-controls="panel-timestamp" aria-selected="false" class="tab-btn" type="button" tabindex="-1">Timestamp</button>
+    <button role="tab" id="tab-regex" aria-controls="panel-regex" aria-selected="false" class="tab-btn" type="button" tabindex="-1">Regex Tester</button>
+  </div>
+
+  <!-- ===================== JSON FORMATTER ===================== -->
+  <section role="tabpanel" id="panel-json" aria-labelledby="tab-json" class="tab-panel active">
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Input</h2>
+          <div class="field">
+            <label for="json-input" class="visually-hidden">JSON input</label>
+            <textarea id="json-input" class="code-area" rows="16" spellcheck="false" placeholder="Paste JSON here...">{"name":"DevBox Kit","tools":["json","base64","url","timestamp","regex"],"free":true,"count":5,"notes":null}</textarea>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="json-format" class="primary">Format / Beautify</button>
+            <button type="button" id="json-minify">Minify</button>
+            <button type="button" id="json-clear">Clear</button>
+          </div>
+          <div class="error-banner" id="json-error" role="alert"></div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Output</h2>
+            <div class="btn-row">
+              <button type="button" id="json-copy" class="icon-btn">Copy</button>
+            </div>
+          </div>
+          <div class="surface" id="json-output-wrap">
+            <pre id="json-output" class="code-area" tabindex="0"></pre>
+          </div>
+          <span class="copy-flash" id="json-copy-flash">Copied!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== BASE64 ===================== -->
+  <section role="tabpanel" id="panel-base64" aria-labelledby="tab-base64" class="tab-panel" hidden>
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Input</h2>
+          <div class="field">
+            <label for="b64-input" class="visually-hidden">Text or Base64 input</label>
+            <textarea id="b64-input" class="code-area" rows="12" spellcheck="false" placeholder="Type plain text to encode, or Base64 to decode...">Hello, DevBox Kit!</textarea>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="b64-encode" class="primary">Encode →</button>
+            <button type="button" id="b64-decode">Decode →</button>
+            <button type="button" id="b64-clear">Clear</button>
+          </div>
+          <div class="error-banner" id="b64-error" role="alert"></div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Output</h2>
+            <div class="btn-row">
+              <button type="button" id="b64-copy" class="icon-btn">Copy</button>
+            </div>
+          </div>
+          <div class="surface" id="b64-output-wrap">
+            <pre id="b64-output" class="code-area" tabindex="0"></pre>
+          </div>
+          <span class="copy-flash" id="b64-copy-flash">Copied!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== URL ENCODE/DECODE ===================== -->
+  <section role="tabpanel" id="panel-url" aria-labelledby="tab-url" class="tab-panel" hidden>
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Input</h2>
+          <div class="field">
+            <label for="url-input" class="visually-hidden">Text or URL input</label>
+            <textarea id="url-input" class="code-area" rows="12" spellcheck="false" placeholder="Type a URL or text to encode, or a percent-encoded string to decode...">https://example.com/search?q=devbox kit &amp; tools</textarea>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="url-encode" class="primary">Encode →</button>
+            <button type="button" id="url-decode">Decode →</button>
+            <button type="button" id="url-clear">Clear</button>
+          </div>
+          <div class="error-banner" id="url-error" role="alert"></div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Output</h2>
+            <div class="btn-row">
+              <button type="button" id="url-copy" class="icon-btn">Copy</button>
+            </div>
+          </div>
+          <div class="surface" id="url-output-wrap">
+            <pre id="url-output" class="code-area" tabindex="0"></pre>
+          </div>
+          <span class="copy-flash" id="url-copy-flash">Copied!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TIMESTAMP CONVERTER ===================== -->
+  <section role="tabpanel" id="panel-timestamp" aria-labelledby="tab-timestamp" class="tab-panel" hidden>
+    <div class="tool-grid split">
+      <div class="panel">
+        <h2>Epoch → Date</h2>
+        <div class="field">
+          <label for="ts-epoch-input">Unix timestamp</label>
+          <div class="field-row">
+            <input type="text" id="ts-epoch-input" inputmode="numeric" placeholder="e.g. 1700000000">
+            <select id="ts-unit" style="max-width:150px;">
+              <option value="auto">Auto-detect</option>
+              <option value="seconds">Seconds</option>
+              <option value="milliseconds">Milliseconds</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button type="button" id="ts-now">Now</button>
+          <button type="button" id="ts-to-date" class="primary">Convert to date</button>
+        </div>
+        <div class="error-banner" id="ts-epoch-error" role="alert"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Date → Epoch</h2>
+        <div class="field">
+          <label for="ts-date-input">Date &amp; time (local)</label>
+          <input type="datetime-local" id="ts-date-input" step="1">
+        </div>
+        <div class="btn-row">
+          <button type="button" id="ts-to-epoch" class="primary">Convert to epoch</button>
+        </div>
+        <div class="error-banner" id="ts-date-error" role="alert"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <div class="output-toolbar">
+        <h2 style="margin:0;">Result</h2>
+        <div class="btn-row">
+          <button type="button" id="ts-copy" class="icon-btn">Copy epoch (seconds)</button>
+        </div>
+      </div>
+      <div class="result-grid" id="ts-result">
+        <div class="result-item"><div class="result-label">Local time</div><div class="result-value" id="ts-out-local">—</div></div>
+        <div class="result-item"><div class="result-label">UTC time</div><div class="result-value" id="ts-out-utc">—</div></div>
+        <div class="result-item"><div class="result-label">ISO 8601</div><div class="result-value" id="ts-out-iso">—</div></div>
+        <div class="result-item"><div class="result-label">Epoch (seconds)</div><div class="result-value" id="ts-out-seconds">—</div></div>
+        <div class="result-item"><div class="result-label">Epoch (milliseconds)</div><div class="result-value" id="ts-out-millis">—</div></div>
+        <div class="result-item"><div class="result-label">Detected unit</div><div class="result-value" id="ts-out-unit">—</div></div>
+      </div>
+      <span class="copy-flash" id="ts-copy-flash">Copied!</span>
+    </div>
+  </section>
+
+  <!-- ===================== REGEX TESTER ===================== -->
+  <section role="tabpanel" id="panel-regex" aria-labelledby="tab-regex" class="tab-panel" hidden>
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Pattern</h2>
+          <div class="field">
+            <label for="regex-pattern">Regular expression</label>
+            <input type="text" id="regex-pattern" class="code-area" spellcheck="false" placeholder="e.g. (\w+)@(\w+\.\w+)" value="\w+@\w+\.\w+">
+          </div>
+          <div class="field">
+            <label>Flags</label>
+            <div class="checkbox-row">
+              <label><input type="checkbox" id="regex-flag-g" checked> g <span class="visually-hidden">global</span></label>
+              <label><input type="checkbox" id="regex-flag-i"> i <span class="visually-hidden">ignore case</span></label>
+              <label><input type="checkbox" id="regex-flag-m"> m <span class="visually-hidden">multiline</span></label>
+              <label><input type="checkbox" id="regex-flag-s"> s <span class="visually-hidden">dot all</span></label>
+              <label><input type="checkbox" id="regex-flag-u"> u <span class="visually-hidden">unicode</span></label>
+              <label><input type="checkbox" id="regex-flag-y"> y <span class="visually-hidden">sticky</span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="regex-test">Test string</label>
+            <textarea id="regex-test" class="code-area" rows="10" spellcheck="false" placeholder="Paste text to test against the pattern...">Contact us at hello@devboxkit.com or support@example.org for help.</textarea>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="regex-run" class="primary">Test</button>
+            <button type="button" id="regex-clear">Clear</button>
+          </div>
+          <div class="error-banner" id="regex-error" role="alert"></div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <h2>Highlighted matches</h2>
+          <div class="surface" id="regex-highlight-wrap">
+            <pre id="regex-highlight" class="code-area"></pre>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Matches &amp; capture groups</h2>
+          <div id="regex-matches-empty" class="surface is-empty" style="min-height:80px;">Run a test to see matches here.</div>
+          <ul class="match-list" id="regex-matches" hidden></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container-narrow" style="padding-top:0;">
+    <h2>About DevBox Kit</h2>
+    <p>DevBox Kit bundles five everyday developer utilities into a single page: a <strong>JSON formatter and validator</strong> with precise syntax-error locations, a two-way <strong>Base64 encoder/decoder</strong>, a two-way <strong>URL encoder/decoder</strong>, a <strong>Unix timestamp converter</strong> that shows both local and UTC time, and a <strong>regex tester</strong> with live match highlighting and capture groups.</p>
+    <p>Everything runs entirely client-side in your browser — nothing you paste in is ever uploaded to a server, so there's no wait and nothing to worry about privacy-wise. Use it for debugging API responses, decoding tokens, sanity-checking query strings, converting timestamps from logs, or testing a regular expression before you commit to it.</p>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/app.js"></script>
+</body>
+</html>
