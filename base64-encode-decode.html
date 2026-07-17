@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Base64 Encode / Decode — Free Online Tool — devboxkit.com</title>
+<meta name="description" content="Free online Base64 encoder and decoder. Convert text to Base64 and decode Base64 back to text, with clear validation. Runs entirely in your browser — nothing is uploaded.">
+<link rel="canonical" href="https://devboxkit.com/base64-encode-decode.html">
+<meta name="theme-color" content="#0b0e14">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Base64 Encode / Decode — Free Online Tool">
+<meta property="og:description" content="Encode text to Base64 and decode Base64 back to text, with clear validation. Runs entirely client-side.">
+<meta property="og:url" content="https://devboxkit.com/base64-encode-decode.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Base64 Encode / Decode — Free Online Tool">
+<meta name="twitter:description" content="Encode text to Base64 and decode Base64 back to text, with clear validation. Runs entirely client-side.">
+
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Base64 Encode / Decode — DevBox Kit",
+  "url": "https://devboxkit.com/base64-encode-decode.html",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Free browser-based Base64 encoder and decoder: convert text to Base64 and Base64 back to text."
+}
+</script>
+
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+      <span class="brand-tag">JSON, Base64, URL, timestamps, regex — one page</span>
+    </a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark/light theme" title="Toggle theme">◐</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="hero">
+    <h1>Base64 Encode / Decode</h1>
+    <p>Convert plain text to Base64 and decode Base64 back to text — with clear validation.</p>
+    <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
+  </div>
+
+  <!-- ===================== BASE64 ===================== -->
+  <section aria-label="Base64 Encode / Decode tool">
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Input</h2>
+          <div class="field">
+            <label for="b64-input" class="visually-hidden">Text or Base64 input</label>
+            <textarea id="b64-input" class="code-area" rows="12" spellcheck="false" placeholder="Type plain text to encode, or Base64 to decode...">Hello, DevBox Kit!</textarea>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="b64-encode" class="primary">Encode →</button>
+            <button type="button" id="b64-decode">Decode →</button>
+            <button type="button" id="b64-clear">Clear</button>
+          </div>
+          <div class="error-banner" id="b64-error" role="alert"></div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Output</h2>
+            <div class="btn-row">
+              <button type="button" id="b64-copy" class="icon-btn">Copy</button>
+            </div>
+          </div>
+          <div class="surface" id="b64-output-wrap">
+            <pre id="b64-output" class="code-area" tabindex="0"></pre>
+          </div>
+          <span class="copy-flash" id="b64-copy-flash">Copied!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container-narrow" style="padding-top:40px;">
+    <h2 style="margin-top:0;">About this Base64 tool</h2>
+    <p>Type text and hit <strong>Encode</strong> to get its Base64 representation, or paste Base64 and hit <strong>Decode</strong> to get the original text back. The decoder validates its input and tells you when a string isn't valid Base64 rather than returning garbage. It handles full Unicode via UTF-8, and everything runs locally in your browser — nothing you paste is uploaded. To understand what Base64 is actually for (and why it isn't encryption), read <a href="/articles/base64-and-url-encoding-explained.html">Base64 and URL encoding explained</a>.</p>
+
+    <h2>More developer tools</h2>
+    <ul>
+      <li><a href="/json-formatter.html">JSON Formatter</a></li>
+      <li><a href="/url-encoder-decoder.html">URL Encoder / Decoder</a></li>
+      <li><a href="/unix-timestamp-converter.html">Unix Timestamp Converter</a></li>
+      <li><a href="/regex-tester.html">Regex Tester</a></li>
+      <li><a href="/">All tools on one page (home)</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/app.js"></script>
+</body>
+</html>
