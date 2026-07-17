@@ -323,35 +323,88 @@ if (typeof document !== "undefined") {
       });
     })();
 
-    /* ---- tabs ---- */
+    /* ---- tabs / tool menu ---- */
     (function initTabs() {
       const tabIds = ["tab-json", "tab-base64", "tab-url", "tab-timestamp", "tab-regex"];
       const tabs = tabIds.map((id) => document.getElementById(id)).filter(Boolean);
-      // Single-tool pages have no tabbar; nothing to wire up.
+      // No tool menu on this page; nothing to wire up.
       if (!tabs.length) return;
-      const panels = {};
-      tabs.forEach((t) => { panels[t.id] = document.getElementById(t.getAttribute("aria-controls")); });
 
-      function select(tab) {
+      const panels = {};
+      let allPanels = true;
+      tabs.forEach((t) => {
+        const p = document.getElementById(t.getAttribute("aria-controls"));
+        panels[t.id] = p;
+        if (!p) allPanels = false;
+      });
+      // Only the homepage keeps all five tool panels in the DOM. On a standalone
+      // tool page the menu links are plain navigation — do not intercept them.
+      if (!allPanels) return;
+
+      // Clean-path <-> tab id mapping for pushState / popstate.
+      const pathToId = {
+        "/json-formatter": "tab-json",
+        "/base64-encode-decode": "tab-base64",
+        "/url-encoder-decoder": "tab-url",
+        "/unix-timestamp-converter": "tab-timestamp",
+        "/regex-tester": "tab-regex",
+      };
+
+      function tabIdForPath(pathname) {
+        const clean = pathname.replace(/\.html$/, "").replace(/\/+$/, "");
+        return pathToId[clean] || "tab-json"; // "/" (home) defaults to JSON Formatter
+      }
+
+      function activate(tab, opts) {
+        const options = opts || {};
         tabs.forEach((t) => {
           const active = t === tab;
           t.setAttribute("aria-selected", String(active));
           t.tabIndex = active ? 0 : -1;
+          t.classList.toggle("active", active);
+          if (active) t.setAttribute("aria-current", "page");
+          else t.removeAttribute("aria-current");
           panels[t.id].hidden = !active;
           panels[t.id].classList.toggle("active", active);
         });
-        tab.focus();
+        if (options.focus) tab.focus();
+        if (options.push) {
+          history.pushState({ tool: tab.id }, "", tab.getAttribute("href"));
+        }
       }
 
       tabs.forEach((tab, i) => {
-        tab.addEventListener("click", () => select(tab));
+        tab.addEventListener("click", (e) => {
+          // Real anchors: middle-click / modified click still open the standalone
+          // page. Only intercept plain left-clicks for instant in-page switching.
+          if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          e.preventDefault();
+          activate(tab, { push: true, focus: true });
+        });
         tab.addEventListener("keydown", (e) => {
-          if (e.key === "ArrowRight") select(tabs[(i + 1) % tabs.length]);
-          if (e.key === "ArrowLeft") select(tabs[(i - 1 + tabs.length) % tabs.length]);
-          if (e.key === "Home") select(tabs[0]);
-          if (e.key === "End") select(tabs[tabs.length - 1]);
+          let target;
+          if (e.key === "ArrowRight") target = tabs[(i + 1) % tabs.length];
+          else if (e.key === "ArrowLeft") target = tabs[(i - 1 + tabs.length) % tabs.length];
+          else if (e.key === "Home") target = tabs[0];
+          else if (e.key === "End") target = tabs[tabs.length - 1];
+          if (target) {
+            e.preventDefault();
+            activate(target, { push: true, focus: true });
+          }
         });
       });
+
+      // Browser back/forward restores the correct panel without pushing new state.
+      window.addEventListener("popstate", (e) => {
+        const id = (e.state && e.state.tool) || tabIdForPath(location.pathname);
+        const tab = document.getElementById(id);
+        if (tab) activate(tab, { push: false, focus: false });
+      });
+
+      // Normalize initial state. Default active on load = JSON Formatter; if the
+      // page was loaded directly at a clean tool path, reflect that instead.
+      const initial = document.getElementById(tabIdForPath(location.pathname)) || tabs[0];
+      activate(initial, { push: false, focus: false });
     })();
 
     const yearEl = document.getElementById("year");
