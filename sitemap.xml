@@ -6,27 +6,27 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/json-formatter.html</loc>
+    <loc>https://devboxkit.com/json-formatter</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/base64-encode-decode.html</loc>
+    <loc>https://devboxkit.com/base64-encode-decode</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/url-encoder-decoder.html</loc>
+    <loc>https://devboxkit.com/url-encoder-decoder</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/unix-timestamp-converter.html</loc>
+    <loc>https://devboxkit.com/unix-timestamp-converter</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/regex-tester.html</loc>
+    <loc>https://devboxkit.com/regex-tester</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

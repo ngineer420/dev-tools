@@ -57,11 +57,11 @@
   </div>
 
   <div role="tablist" class="tabbar" aria-label="Developer tool">
-    <button role="tab" id="tab-json" aria-controls="panel-json" aria-selected="true" class="tab-btn" type="button">JSON Formatter</button>
-    <button role="tab" id="tab-base64" aria-controls="panel-base64" aria-selected="false" class="tab-btn" type="button" tabindex="-1">Base64</button>
-    <button role="tab" id="tab-url" aria-controls="panel-url" aria-selected="false" class="tab-btn" type="button" tabindex="-1">URL Encode/Decode</button>
-    <button role="tab" id="tab-timestamp" aria-controls="panel-timestamp" aria-selected="false" class="tab-btn" type="button" tabindex="-1">Timestamp</button>
-    <button role="tab" id="tab-regex" aria-controls="panel-regex" aria-selected="false" class="tab-btn" type="button" tabindex="-1">Regex Tester</button>
+    <a role="tab" id="tab-json" href="/json-formatter" aria-controls="panel-json" aria-selected="true" aria-current="page" class="tab-btn active">JSON Formatter</a>
+    <a role="tab" id="tab-base64" href="/base64-encode-decode" aria-controls="panel-base64" aria-selected="false" class="tab-btn" tabindex="-1">Base64</a>
+    <a role="tab" id="tab-url" href="/url-encoder-decoder" aria-controls="panel-url" aria-selected="false" class="tab-btn" tabindex="-1">URL Encode/Decode</a>
+    <a role="tab" id="tab-timestamp" href="/unix-timestamp-converter" aria-controls="panel-timestamp" aria-selected="false" class="tab-btn" tabindex="-1">Timestamp</a>
+    <a role="tab" id="tab-regex" href="/regex-tester" aria-controls="panel-regex" aria-selected="false" class="tab-btn" tabindex="-1">Regex Tester</a>
   </div>
 
   <!-- ===================== JSON FORMATTER ===================== -->
@@ -280,7 +280,7 @@
     <h2>About DevBox Kit</h2>
     <p>DevBox Kit bundles five everyday developer utilities into a single page: a <strong>JSON formatter and validator</strong> with precise syntax-error locations, a two-way <strong>Base64 encoder/decoder</strong>, a two-way <strong>URL encoder/decoder</strong>, a <strong>Unix timestamp converter</strong> that shows both local and UTC time, and a <strong>regex tester</strong> with live match highlighting and capture groups.</p>
     <p>Everything runs entirely client-side in your browser — nothing you paste in is ever uploaded to a server, so there's no wait and nothing to worry about privacy-wise. Use it for debugging API responses, decoding tokens, sanity-checking query strings, converting timestamps from logs, or testing a regular expression before you commit to it.</p>
-    <p>Prefer a dedicated page for a single tool? Each one also lives on its own: <a href="/json-formatter.html">JSON Formatter</a>, <a href="/base64-encode-decode.html">Base64 Encode / Decode</a>, <a href="/url-encoder-decoder.html">URL Encoder / Decoder</a>, <a href="/unix-timestamp-converter.html">Unix Timestamp Converter</a>, and <a href="/regex-tester.html">Regex Tester</a>.</p>
+    <p>Prefer a dedicated page for a single tool? Each one also lives on its own: <a href="/json-formatter">JSON Formatter</a>, <a href="/base64-encode-decode">Base64 Encode / Decode</a>, <a href="/url-encoder-decoder">URL Encoder / Decoder</a>, <a href="/unix-timestamp-converter">Unix Timestamp Converter</a>, and <a href="/regex-tester">Regex Tester</a>.</p>
   </section>
 
   <section class="container-narrow" style="padding-top:0;" id="articles">
