@@ -247,6 +247,388 @@ function highlightMatches(text, matches) {
   return result;
 }
 
+/* ============================= UUID tool ============================= */
+
+function bytesToUuid(bytes) {
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0"));
+  return [
+    hex.slice(0, 4).join(""),
+    hex.slice(4, 6).join(""),
+    hex.slice(6, 8).join(""),
+    hex.slice(8, 10).join(""),
+    hex.slice(10, 16).join(""),
+  ].join("-");
+}
+
+function uuidV4() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+  bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant 10xx
+  return bytesToUuid(bytes);
+}
+
+// Not a spec-faithful RFC 4122 v1 UUID (no real MAC address, no persistent
+// clock sequence across calls) — a "time-ordered" UUID that packs the current
+// timestamp into the same fields a real v1 UUID uses, with a random node ID
+// and clock sequence. Good enough for roughly time-sortable IDs; labeled
+// "v1-style" in the UI rather than claiming full v1 semantics.
+function uuidV1Like() {
+  const UUID_EPOCH_OFFSET_100NS = 122192928000000000n; // 1582-10-15 -> 1970-01-01, in 100ns units
+  const timestamp = BigInt(Date.now()) * 10000n + UUID_EPOCH_OFFSET_100NS;
+
+  const timeLow = Number(timestamp & 0xffffffffn);
+  const timeMid = Number((timestamp >> 32n) & 0xffffn);
+  const timeHiAndVersion = Number(((timestamp >> 48n) & 0x0fffn) | 0x1000n); // version 1
+
+  const rand = new Uint8Array(8);
+  crypto.getRandomValues(rand);
+  const clockSeq = (((rand[0] << 8) | rand[1]) & 0x3fff) | 0x8000; // variant 10xx
+  const node = rand.slice(2, 8); // random stand-in for a MAC address
+
+  const hex = (n, width) => n.toString(16).padStart(width, "0");
+  return [
+    hex(timeLow, 8),
+    hex(timeMid, 4),
+    hex(timeHiAndVersion, 4),
+    hex(clockSeq, 4),
+    Array.from(node, (b) => hex(b, 2)).join(""),
+  ].join("-");
+}
+
+function generateUuids(count, version) {
+  const n = Math.max(1, Math.min(1000, Math.floor(Number(count) || 1)));
+  const out = [];
+  for (let i = 0; i < n; i++) out.push(version === "v1" ? uuidV1Like() : uuidV4());
+  return out;
+}
+
+/* ============================= Hash generator tool ============================= */
+
+// Self-contained MD5 (RFC 1321). SubtleCrypto has no MD5, so this is the one
+// algorithm implemented by hand here; SHA-1/256/512 use crypto.subtle below.
+function md5(message) {
+  function rotl(x, n) { return (x << n) | (x >>> (32 - n)); }
+  function toBytesUtf8(str) {
+    const bytes = [];
+    for (let i = 0; i < str.length; i++) {
+      let code = str.codePointAt(i);
+      if (code > 0xffff) i++; // consumed a surrogate pair
+      if (code < 0x80) {
+        bytes.push(code);
+      } else if (code < 0x800) {
+        bytes.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f));
+      } else if (code < 0x10000) {
+        bytes.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+      } else {
+        bytes.push(
+          0xf0 | (code >> 18),
+          0x80 | ((code >> 12) & 0x3f),
+          0x80 | ((code >> 6) & 0x3f),
+          0x80 | (code & 0x3f)
+        );
+      }
+    }
+    return bytes;
+  }
+
+  const K = new Array(64);
+  for (let i = 0; i < 64; i++) K[i] = Math.floor(Math.abs(Math.sin(i + 1)) * 4294967296) >>> 0;
+
+  const S = [
+    7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
+    5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
+    4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
+    6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
+  ];
+
+  const bytes = toBytesUtf8(message === undefined || message === null ? "" : String(message));
+  const bitLenLo = (bytes.length * 8) >>> 0;
+  const bitLenHi = Math.floor(bytes.length / 0x20000000);
+
+  const padded = bytes.slice();
+  padded.push(0x80);
+  while (padded.length % 64 !== 56) padded.push(0);
+  for (let i = 0; i < 4; i++) padded.push((bitLenLo >>> (8 * i)) & 0xff);
+  for (let i = 0; i < 4; i++) padded.push((bitLenHi >>> (8 * i)) & 0xff);
+
+  let a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
+
+  for (let chunkStart = 0; chunkStart < padded.length; chunkStart += 64) {
+    const M = new Array(16);
+    for (let i = 0; i < 16; i++) {
+      const o = chunkStart + i * 4;
+      M[i] = (padded[o] | (padded[o + 1] << 8) | (padded[o + 2] << 16) | (padded[o + 3] << 24)) >>> 0;
+    }
+
+    let A = a0, B = b0, C = c0, D = d0;
+
+    for (let i = 0; i < 64; i++) {
+      let F, g;
+      if (i < 16) {
+        F = (B & C) | (~B & D);
+        g = i;
+      } else if (i < 32) {
+        F = (D & B) | (~D & C);
+        g = (5 * i + 1) % 16;
+      } else if (i < 48) {
+        F = B ^ C ^ D;
+        g = (3 * i + 5) % 16;
+      } else {
+        F = C ^ (B | ~D);
+        g = (7 * i) % 16;
+      }
+      F = (F + A + K[i] + M[g]) >>> 0;
+      A = D;
+      D = C;
+      C = B;
+      B = (B + rotl(F, S[i])) >>> 0;
+    }
+
+    a0 = (a0 + A) >>> 0;
+    b0 = (b0 + B) >>> 0;
+    c0 = (c0 + C) >>> 0;
+    d0 = (d0 + D) >>> 0;
+  }
+
+  function toHexLE(n) {
+    let hex = "";
+    for (let i = 0; i < 4; i++) hex += ((n >>> (8 * i)) & 0xff).toString(16).padStart(2, "0");
+    return hex;
+  }
+
+  return toHexLE(a0) + toHexLE(b0) + toHexLE(c0) + toHexLE(d0);
+}
+
+// Requires a secure context (crypto.subtle) — https:// or localhost.
+async function subtleDigestHex(algorithm, text) {
+  const bytes = new TextEncoder().encode(text === undefined || text === null ? "" : String(text));
+  const buf = await crypto.subtle.digest(algorithm, bytes);
+  return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function hashText(text) {
+  const [sha1, sha256, sha512] = await Promise.all([
+    subtleDigestHex("SHA-1", text),
+    subtleDigestHex("SHA-256", text),
+    subtleDigestHex("SHA-512", text),
+  ]);
+  return { md5: md5(text), sha1, sha256, sha512 };
+}
+
+/* ============================= JWT decoder tool ============================= */
+
+function base64UrlDecode(str) {
+  let s = String(str).replace(/-/g, "+").replace(/_/g, "/");
+  while (s.length % 4) s += "=";
+  const binary = atob(s);
+  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+// Decodes header + payload only — this is a decoder, not a verifier. The
+// signature segment is surfaced as-is so users can see it exists, never
+// checked against a key.
+function decodeJwt(token) {
+  const trimmed = (token || "").trim();
+  if (!trimmed) return { ok: false, message: "Paste a JWT to decode." };
+  const parts = trimmed.split(".");
+  if (parts.length !== 3) {
+    return { ok: false, message: `A JWT has 3 dot-separated parts (header.payload.signature); found ${parts.length}.` };
+  }
+
+  let header, payload;
+  try {
+    header = JSON.parse(base64UrlDecode(parts[0]));
+  } catch (e) {
+    return { ok: false, message: "Could not decode/parse the header: " + e.message };
+  }
+  try {
+    payload = JSON.parse(base64UrlDecode(parts[1]));
+  } catch (e) {
+    return { ok: false, message: "Could not decode/parse the payload: " + e.message };
+  }
+
+  const claimDates = {};
+  ["iat", "exp", "nbf"].forEach((k) => {
+    if (typeof payload[k] === "number") claimDates[k] = new Date(payload[k] * 1000).toString();
+  });
+  const expired = typeof payload.exp === "number" ? payload.exp * 1000 < Date.now() : null;
+
+  return { ok: true, header, payload, signature: parts[2], claimDates, expired };
+}
+
+/* ============================= Password generator tool ============================= */
+
+const PW_CHAR_SETS = {
+  lower: "abcdefghijklmnopqrstuvwxyz",
+  upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  digits: "0123456789",
+  symbols: "!@#$%^&*()-_=+[]{};:,.<>?/~",
+};
+const PW_AMBIGUOUS_RE = /[il1LoO0|]/;
+
+function buildPasswordCharset(options) {
+  let charset = "";
+  if (options.lower) charset += PW_CHAR_SETS.lower;
+  if (options.upper) charset += PW_CHAR_SETS.upper;
+  if (options.digits) charset += PW_CHAR_SETS.digits;
+  if (options.symbols) charset += PW_CHAR_SETS.symbols;
+  if (options.excludeAmbiguous) charset = charset.split("").filter((c) => !PW_AMBIGUOUS_RE.test(c)).join("");
+  return charset;
+}
+
+function passwordStrengthLabel(bits) {
+  if (bits < 40) return "Very weak";
+  if (bits < 60) return "Weak";
+  if (bits < 80) return "Reasonable";
+  if (bits < 100) return "Strong";
+  return "Very strong";
+}
+
+function generatePassword(options) {
+  const length = Math.max(4, Math.min(256, Math.floor(Number(options.length) || 16)));
+  const charset = buildPasswordCharset(options);
+  if (!charset) return { ok: false, message: "Select at least one character set." };
+
+  const randomValues = new Uint32Array(length);
+  crypto.getRandomValues(randomValues);
+  let value = "";
+  for (let i = 0; i < length; i++) value += charset[randomValues[i] % charset.length];
+
+  const bits = Math.round(length * Math.log2(charset.length));
+  return { ok: true, value, bits, strength: passwordStrengthLabel(bits) };
+}
+
+/* ============================= JSON <-> CSV tool ============================= */
+
+function csvEscapeField(value) {
+  const s = value === undefined || value === null ? "" : String(value);
+  return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function jsonToCsv(jsonString) {
+  let data;
+  try {
+    data = JSON.parse(jsonString);
+  } catch (e) {
+    return { ok: false, message: "Invalid JSON: " + e.message };
+  }
+  if (!Array.isArray(data)) return { ok: false, message: "Top-level JSON must be an array of objects." };
+  if (data.length === 0) return { ok: true, value: "" };
+  if (!data.every((row) => row !== null && typeof row === "object" && !Array.isArray(row))) {
+    return { ok: false, message: "Every array item must be a flat object (not an array or primitive)." };
+  }
+
+  const columns = [];
+  const seen = new Set();
+  data.forEach((row) => {
+    Object.keys(row).forEach((k) => {
+      if (!seen.has(k)) { seen.add(k); columns.push(k); }
+    });
+  });
+
+  const lines = [columns.map(csvEscapeField).join(",")];
+  data.forEach((row) => {
+    lines.push(
+      columns
+        .map((col) => {
+          const v = row[col];
+          if (v === undefined || v === null) return "";
+          if (typeof v === "object") return csvEscapeField(JSON.stringify(v));
+          return csvEscapeField(v);
+        })
+        .join(",")
+    );
+  });
+  return { ok: true, value: lines.join("\r\n") };
+}
+
+// Minimal RFC-4180-ish CSV row parser: quoted fields, embedded commas,
+// embedded newlines, and doubled-quote escaping.
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let field = "";
+  let inQuotes = false;
+  let i = 0;
+  const s = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+  while (i < s.length) {
+    const c = s[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (s[i + 1] === '"') { field += '"'; i += 2; continue; }
+        inQuotes = false; i++; continue;
+      }
+      field += c; i++; continue;
+    }
+    if (c === '"') { inQuotes = true; i++; continue; }
+    if (c === ",") { row.push(field); field = ""; i++; continue; }
+    if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; i++; continue; }
+    field += c; i++;
+  }
+  row.push(field);
+  rows.push(row);
+  // Drop a single trailing empty row caused by a final trailing newline.
+  if (rows.length > 1 && rows[rows.length - 1].length === 1 && rows[rows.length - 1][0] === "") rows.pop();
+  return rows;
+}
+
+function csvToJson(csvString) {
+  const trimmed = csvString === undefined || csvString === null ? "" : String(csvString);
+  if (!trimmed.trim()) return { ok: false, message: "Input is empty." };
+  const rows = parseCsv(trimmed);
+  if (!rows.length) return { ok: false, message: "No rows found." };
+  const header = rows[0];
+  const objects = rows.slice(1).map((r) => {
+    const obj = {};
+    header.forEach((col, i) => { obj[col] = r[i] === undefined ? "" : r[i]; });
+    return obj;
+  });
+  return { ok: true, value: JSON.stringify(objects, null, 2) };
+}
+
+/* ============================= HTML entity encoder/decoder tool ============================= */
+
+const HTML_NAMED_ENCODE = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+
+function htmlEntityEncode(str) {
+  const input = str === undefined || str === null ? "" : String(str);
+  let out = "";
+  for (const ch of input) {
+    if (HTML_NAMED_ENCODE[ch]) { out += HTML_NAMED_ENCODE[ch]; continue; }
+    const cp = ch.codePointAt(0);
+    out += cp > 126 ? `&#${cp};` : ch;
+  }
+  return out;
+}
+
+const HTML_NAMED_DECODE = {
+  amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ",
+  copy: "©", reg: "®", trade: "™", hellip: "…",
+  mdash: "—", ndash: "–", lsquo: "‘", rsquo: "’",
+  ldquo: "“", rdquo: "”", euro: "€", pound: "£",
+  yen: "¥", cent: "¢", deg: "°", plusmn: "±",
+  times: "×", divide: "÷", laquo: "«", raquo: "»",
+};
+
+function htmlEntityDecode(str) {
+  const input = str === undefined || str === null ? "" : String(str);
+  return input.replace(/&(#x[0-9a-fA-F]+|#\d+|[a-zA-Z][a-zA-Z0-9]*);/g, (match, body) => {
+    if (body[0] === "#") {
+      const code = body[1] === "x" || body[1] === "X" ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10);
+      if (Number.isNaN(code)) return match;
+      try {
+        return String.fromCodePoint(code);
+      } catch {
+        return match;
+      }
+    }
+    return Object.prototype.hasOwnProperty.call(HTML_NAMED_DECODE, body) ? HTML_NAMED_DECODE[body] : match;
+  });
+}
+
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     escapeHtml,
@@ -266,6 +648,24 @@ if (typeof module !== "undefined" && module.exports) {
     buildFlagString,
     testRegex,
     highlightMatches,
+    bytesToUuid,
+    uuidV4,
+    uuidV1Like,
+    generateUuids,
+    md5,
+    subtleDigestHex,
+    hashText,
+    base64UrlDecode,
+    decodeJwt,
+    buildPasswordCharset,
+    passwordStrengthLabel,
+    generatePassword,
+    csvEscapeField,
+    jsonToCsv,
+    parseCsv,
+    csvToJson,
+    htmlEntityEncode,
+    htmlEntityDecode,
   };
 }
 
@@ -325,7 +725,10 @@ if (typeof document !== "undefined") {
 
     /* ---- tabs / tool menu ---- */
     (function initTabs() {
-      const tabIds = ["tab-json", "tab-base64", "tab-url", "tab-timestamp", "tab-regex"];
+      const tabIds = [
+        "tab-json", "tab-base64", "tab-url", "tab-timestamp", "tab-regex",
+        "tab-uuid", "tab-hash", "tab-jwt", "tab-password", "tab-csv", "tab-entity",
+      ];
       const tabs = tabIds.map((id) => document.getElementById(id)).filter(Boolean);
       // No tool menu on this page; nothing to wire up.
       if (!tabs.length) return;
@@ -348,6 +751,12 @@ if (typeof document !== "undefined") {
         "/url-encoder-decoder": "tab-url",
         "/unix-timestamp-converter": "tab-timestamp",
         "/regex-tester": "tab-regex",
+        "/uuid-generator": "tab-uuid",
+        "/hash-generator": "tab-hash",
+        "/jwt-decoder": "tab-jwt",
+        "/password-generator": "tab-password",
+        "/json-csv-converter": "tab-csv",
+        "/html-entity-encoder": "tab-entity",
       };
 
       function tabIdForPath(pathname) {
@@ -647,6 +1056,285 @@ if (typeof document !== "undefined") {
       });
 
       run();
+    })();
+
+    /* ---- UUID tool ---- */
+    (function uuidTool() {
+      const countInput = document.getElementById("uuid-count");
+      const output = document.getElementById("uuid-output");
+      const copyFlash = document.getElementById("uuid-copy-flash");
+      const versionBtns = {
+        v4: document.getElementById("uuid-version-v4"),
+        v1: document.getElementById("uuid-version-v1"),
+      };
+      if (!countInput || !output || !versionBtns.v4) return;
+
+      let version = "v4";
+      function setVersion(v) {
+        version = v;
+        versionBtns.v4.setAttribute("aria-pressed", String(v === "v4"));
+        versionBtns.v1.setAttribute("aria-pressed", String(v === "v1"));
+      }
+      versionBtns.v4.addEventListener("click", () => setVersion("v4"));
+      versionBtns.v1.addEventListener("click", () => setVersion("v1"));
+
+      function render() {
+        output.textContent = generateUuids(countInput.value, version).join("\n");
+      }
+
+      document.getElementById("uuid-generate").addEventListener("click", render);
+      document.getElementById("uuid-clear").addEventListener("click", () => {
+        output.textContent = "";
+      });
+      document.getElementById("uuid-copy").addEventListener("click", () => {
+        copyText(output.textContent || "", copyFlash);
+      });
+
+      render();
+    })();
+
+    /* ---- Hash generator tool ---- */
+    (function hashTool() {
+      const input = document.getElementById("hash-input");
+      const errorEl = document.getElementById("hash-error");
+      const copyFlash = document.getElementById("hash-copy-flash");
+      const outputs = {
+        md5: document.getElementById("hash-out-md5"),
+        sha1: document.getElementById("hash-out-sha1"),
+        sha256: document.getElementById("hash-out-sha256"),
+        sha512: document.getElementById("hash-out-sha512"),
+      };
+      if (!input || !outputs.md5) return;
+
+      async function run() {
+        if (!window.crypto || !crypto.subtle) {
+          showError(errorEl, "SHA hashing needs a secure context (HTTPS or localhost). MD5 alone can't cover this.");
+          return;
+        }
+        try {
+          const result = await hashText(input.value);
+          hideError(errorEl);
+          outputs.md5.textContent = result.md5;
+          outputs.sha1.textContent = result.sha1;
+          outputs.sha256.textContent = result.sha256;
+          outputs.sha512.textContent = result.sha512;
+        } catch (e) {
+          showError(errorEl, "Could not compute hashes: " + e.message);
+        }
+      }
+
+      document.getElementById("hash-run").addEventListener("click", run);
+      document.getElementById("hash-clear").addEventListener("click", () => {
+        input.value = "";
+        Object.values(outputs).forEach((el) => { el.textContent = "—"; });
+        hideError(errorEl);
+        input.focus();
+      });
+      document.querySelectorAll(".hash-copy-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = document.getElementById(btn.dataset.target);
+          copyText(target && target.textContent !== "—" ? target.textContent : "", copyFlash);
+        });
+      });
+
+      run();
+    })();
+
+    /* ---- JWT decoder tool ---- */
+    (function jwtTool() {
+      const input = document.getElementById("jwt-input");
+      const errorEl = document.getElementById("jwt-error");
+      const headerOut = document.getElementById("jwt-header-output");
+      const payloadOut = document.getElementById("jwt-payload-output");
+      const claimsEl = document.getElementById("jwt-claims");
+      const headerFlash = document.getElementById("jwt-copy-header-flash");
+      const payloadFlash = document.getElementById("jwt-copy-payload-flash");
+      if (!input || !headerOut || !payloadOut) return;
+
+      function claimItem(label, value) {
+        const div = document.createElement("div");
+        div.className = "result-item";
+        div.innerHTML = `<div class="result-label">${escapeHtml(label)}</div><div class="result-value">${escapeHtml(value)}</div>`;
+        return div;
+      }
+
+      function render() {
+        const result = decodeJwt(input.value);
+        claimsEl.innerHTML = "";
+        if (!result.ok) {
+          showError(errorEl, result.message);
+          headerOut.innerHTML = "";
+          headerOut.dataset.raw = "";
+          payloadOut.innerHTML = "";
+          payloadOut.dataset.raw = "";
+          return;
+        }
+        hideError(errorEl);
+        const headerJson = JSON.stringify(result.header, null, 2);
+        const payloadJson = JSON.stringify(result.payload, null, 2);
+        headerOut.innerHTML = highlightJson(headerJson);
+        headerOut.dataset.raw = headerJson;
+        payloadOut.innerHTML = highlightJson(payloadJson);
+        payloadOut.dataset.raw = payloadJson;
+
+        ["iat", "nbf", "exp"].forEach((k) => {
+          if (result.claimDates[k]) claimsEl.appendChild(claimItem(k, result.claimDates[k]));
+        });
+        if (result.expired !== null) {
+          claimsEl.appendChild(claimItem("Status", result.expired ? "Expired" : "Not expired"));
+        }
+        claimsEl.appendChild(claimItem("Signature (unverified)", result.signature));
+      }
+
+      document.getElementById("jwt-decode").addEventListener("click", render);
+      document.getElementById("jwt-clear").addEventListener("click", () => {
+        input.value = "";
+        headerOut.innerHTML = "";
+        headerOut.dataset.raw = "";
+        payloadOut.innerHTML = "";
+        payloadOut.dataset.raw = "";
+        claimsEl.innerHTML = "";
+        hideError(errorEl);
+        input.focus();
+      });
+      document.getElementById("jwt-copy-header").addEventListener("click", () => {
+        copyText(headerOut.dataset.raw || "", headerFlash);
+      });
+      document.getElementById("jwt-copy-payload").addEventListener("click", () => {
+        copyText(payloadOut.dataset.raw || "", payloadFlash);
+      });
+
+      render();
+    })();
+
+    /* ---- Password generator tool ---- */
+    (function passwordTool() {
+      const lengthInput = document.getElementById("pw-length");
+      const lengthValue = document.getElementById("pw-length-value");
+      const output = document.getElementById("pw-output");
+      const bitsEl = document.getElementById("pw-bits");
+      const strengthEl = document.getElementById("pw-strength");
+      const errorEl = document.getElementById("pw-error");
+      const copyFlash = document.getElementById("pw-copy-flash");
+      if (!lengthInput || !output) return;
+
+      const optionIds = { lower: "pw-lower", upper: "pw-upper", digits: "pw-digits", symbols: "pw-symbols", excludeAmbiguous: "pw-exclude-ambiguous" };
+
+      function currentOptions() {
+        const opts = { length: lengthInput.value };
+        Object.keys(optionIds).forEach((k) => { opts[k] = document.getElementById(optionIds[k]).checked; });
+        return opts;
+      }
+
+      function render() {
+        const result = generatePassword(currentOptions());
+        if (!result.ok) {
+          showError(errorEl, result.message);
+          output.textContent = "";
+          bitsEl.textContent = "—";
+          strengthEl.textContent = "—";
+          return;
+        }
+        hideError(errorEl);
+        output.textContent = result.value;
+        bitsEl.textContent = `~${result.bits} bits`;
+        strengthEl.textContent = result.strength;
+      }
+
+      lengthInput.addEventListener("input", () => {
+        lengthValue.textContent = lengthInput.value;
+      });
+      document.getElementById("pw-generate").addEventListener("click", render);
+      document.getElementById("pw-copy").addEventListener("click", () => {
+        copyText(output.textContent || "", copyFlash);
+      });
+
+      lengthValue.textContent = lengthInput.value;
+      render();
+    })();
+
+    /* ---- JSON <-> CSV tool ---- */
+    (function csvTool() {
+      const input = document.getElementById("csv-input");
+      const output = document.getElementById("csv-output");
+      const errorEl = document.getElementById("csv-error");
+      const copyFlash = document.getElementById("csv-copy-flash");
+      if (!input || !output) return;
+
+      let lastFormat = "csv"; // drives the downloaded filename/MIME type
+
+      function downloadText(text, filename, mime) {
+        const blob = new Blob([text], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      document.getElementById("csv-to-csv").addEventListener("click", () => {
+        const result = jsonToCsv(input.value);
+        if (result.ok) {
+          hideError(errorEl);
+          output.textContent = result.value;
+          lastFormat = "csv";
+        } else {
+          output.textContent = "";
+          showError(errorEl, result.message);
+        }
+      });
+      document.getElementById("csv-to-json").addEventListener("click", () => {
+        const result = csvToJson(input.value);
+        if (result.ok) {
+          hideError(errorEl);
+          output.textContent = result.value;
+          lastFormat = "json";
+        } else {
+          output.textContent = "";
+          showError(errorEl, result.message);
+        }
+      });
+      document.getElementById("csv-clear").addEventListener("click", () => {
+        input.value = "";
+        output.textContent = "";
+        hideError(errorEl);
+        input.focus();
+      });
+      document.getElementById("csv-copy").addEventListener("click", () => {
+        copyText(output.textContent || "", copyFlash);
+      });
+      document.getElementById("csv-download").addEventListener("click", () => {
+        if (!output.textContent) return;
+        const filename = lastFormat === "json" ? "data.json" : "data.csv";
+        const mime = lastFormat === "json" ? "application/json" : "text/csv";
+        downloadText(output.textContent, filename, mime);
+      });
+    })();
+
+    /* ---- HTML entity encoder/decoder tool ---- */
+    (function htmlEntityTool() {
+      const input = document.getElementById("entity-input");
+      const output = document.getElementById("entity-output");
+      const copyFlash = document.getElementById("entity-copy-flash");
+      if (!input || !output) return;
+
+      document.getElementById("entity-encode").addEventListener("click", () => {
+        output.textContent = htmlEntityEncode(input.value);
+      });
+      document.getElementById("entity-decode").addEventListener("click", () => {
+        output.textContent = htmlEntityDecode(input.value);
+      });
+      document.getElementById("entity-clear").addEventListener("click", () => {
+        input.value = "";
+        output.textContent = "";
+        input.focus();
+      });
+      document.getElementById("entity-copy").addEventListener("click", () => {
+        copyText(output.textContent || "", copyFlash);
+      });
     })();
   })();
 }

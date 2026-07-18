@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DevBox Kit — Free JSON Formatter, Base64, URL, Timestamp &amp; Regex Tools</title>
-<meta name="description" content="Format &amp; validate JSON, encode/decode Base64 and URLs, convert Unix timestamps, and test regular expressions — five free developer tools in one page. Runs entirely in your browser, nothing is uploaded.">
+<title>DevBox Kit — Free JSON, Base64, Hash, JWT, UUID &amp; Password Tools</title>
+<meta name="description" content="Format &amp; validate JSON, encode/decode Base64/URL/HTML entities, generate UUIDs/hashes/passwords, decode JWTs, convert timestamps and JSON⇄CSV, and test regex — eleven free developer tools in one page. Runs entirely in your browser, nothing is uploaded.">
 <link rel="canonical" href="https://devboxkit.com/">
 <meta name="theme-color" content="#0b0e14">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="DevBox Kit — Free JSON Formatter, Base64, URL, Timestamp &amp; Regex Tools">
-<meta property="og:description" content="Five free developer tools in one page: JSON formatter/validator, Base64 encode/decode, URL encode/decode, timestamp converter, and regex tester. Runs entirely client-side.">
+<meta property="og:title" content="DevBox Kit — Free JSON, Base64, Hash, JWT, UUID &amp; Password Tools">
+<meta property="og:description" content="Eleven free developer tools in one page: JSON, Base64, URL, and HTML-entity conversion, UUID/hash/password generators, a JWT decoder, JSON⇄CSV, a timestamp converter, and a regex tester. Runs entirely client-side.">
 <meta property="og:url" content="https://devboxkit.com/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="DevBox Kit — Free JSON Formatter, Base64, URL, Timestamp &amp; Regex Tools">
-<meta name="twitter:description" content="Five free developer tools in one page: JSON formatter/validator, Base64 encode/decode, URL encode/decode, timestamp converter, and regex tester. Runs entirely client-side.">
+<meta name="twitter:title" content="DevBox Kit — Free JSON, Base64, Hash, JWT, UUID &amp; Password Tools">
+<meta name="twitter:description" content="Eleven free developer tools in one page: JSON, Base64, URL, and HTML-entity conversion, UUID/hash/password generators, a JWT decoder, JSON⇄CSV, a timestamp converter, and a regex tester. Runs entirely client-side.">
 
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/styles.css">
@@ -28,7 +28,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "description": "Free browser-based developer toolkit: JSON formatter/validator, Base64 encode/decode, URL encode/decode, Unix timestamp converter, and regex tester."
+  "description": "Free browser-based developer toolkit: JSON formatter/validator, Base64/URL/HTML-entity encode-decode, UUID/hash/password generators, a JWT decoder, a JSON-CSV converter, a Unix timestamp converter, and a regex tester."
 }
 </script>
 
@@ -41,7 +41,7 @@
   <div class="header-inner">
     <a class="brand" href="/" aria-label="devboxkit.com home">
       <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
-      <span class="brand-tag">JSON, Base64, URL, timestamps, regex — one page</span>
+      <span class="brand-tag">JSON, hashes, JWTs, passwords &amp; more — one page</span>
     </a>
     <div class="header-actions">
       <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark/light theme" title="Toggle theme">◐</button>
@@ -52,16 +52,22 @@
 <main id="main">
   <div class="hero">
     <h1>Free Developer Formatting &amp; Conversion Tools</h1>
-    <p>JSON formatting, Base64, URL encoding, Unix timestamps, and regex testing — five tools, one page, no sign-up.</p>
+    <p>JSON, Base64, URL &amp; HTML-entity conversion, UUID/hash/password generators, JWT decoding, JSON⇄CSV, timestamps, and regex — eleven tools, one page, no sign-up.</p>
     <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
   </div>
 
   <div role="tablist" class="tabbar" aria-label="Developer tool">
     <a role="tab" id="tab-json" href="/json-formatter" aria-controls="panel-json" aria-selected="true" aria-current="page" class="tab-btn active">JSON Formatter</a>
-    <a role="tab" id="tab-base64" href="/base64-encode-decode" aria-controls="panel-base64" aria-selected="false" class="tab-btn" tabindex="-1">Base64</a>
-    <a role="tab" id="tab-url" href="/url-encoder-decoder" aria-controls="panel-url" aria-selected="false" class="tab-btn" tabindex="-1">URL Encode/Decode</a>
-    <a role="tab" id="tab-timestamp" href="/unix-timestamp-converter" aria-controls="panel-timestamp" aria-selected="false" class="tab-btn" tabindex="-1">Timestamp</a>
-    <a role="tab" id="tab-regex" href="/regex-tester" aria-controls="panel-regex" aria-selected="false" class="tab-btn" tabindex="-1">Regex Tester</a>
+    <a role="tab" id="tab-base64" href="/base64-encode-decode" aria-controls="panel-base64" aria-selected="false" tabindex="-1" class="tab-btn">Base64</a>
+    <a role="tab" id="tab-url" href="/url-encoder-decoder" aria-controls="panel-url" aria-selected="false" tabindex="-1" class="tab-btn">URL Encode/Decode</a>
+    <a role="tab" id="tab-timestamp" href="/unix-timestamp-converter" aria-controls="panel-timestamp" aria-selected="false" tabindex="-1" class="tab-btn">Timestamp</a>
+    <a role="tab" id="tab-regex" href="/regex-tester" aria-controls="panel-regex" aria-selected="false" tabindex="-1" class="tab-btn">Regex Tester</a>
+    <a role="tab" id="tab-uuid" href="/uuid-generator" aria-controls="panel-uuid" aria-selected="false" tabindex="-1" class="tab-btn">UUID Generator</a>
+    <a role="tab" id="tab-hash" href="/hash-generator" aria-controls="panel-hash" aria-selected="false" tabindex="-1" class="tab-btn">Hash Generator</a>
+    <a role="tab" id="tab-jwt" href="/jwt-decoder" aria-controls="panel-jwt" aria-selected="false" tabindex="-1" class="tab-btn">JWT Decoder</a>
+    <a role="tab" id="tab-password" href="/password-generator" aria-controls="panel-password" aria-selected="false" tabindex="-1" class="tab-btn">Password Generator</a>
+    <a role="tab" id="tab-csv" href="/json-csv-converter" aria-controls="panel-csv" aria-selected="false" tabindex="-1" class="tab-btn">JSON ⇄ CSV</a>
+    <a role="tab" id="tab-entity" href="/html-entity-encoder" aria-controls="panel-entity" aria-selected="false" tabindex="-1" class="tab-btn">HTML Entities</a>
   </div>
 
   <!-- ===================== JSON FORMATTER ===================== -->
@@ -276,11 +282,261 @@
     </div>
   </section>
 
+  <!-- ===================== UUID GENERATOR ===================== -->
+  <section role="tabpanel" id="panel-uuid" aria-labelledby="tab-uuid" class="tab-panel" hidden>
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Options</h2>
+          <div class="field">
+            <label>UUID version</label>
+            <div class="segmented" id="uuid-version" role="group" aria-label="UUID version">
+              <button type="button" id="uuid-version-v4" aria-pressed="true">v4 (random)</button>
+              <button type="button" id="uuid-version-v1" aria-pressed="false">v1-style (time-based)</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="uuid-count">How many</label>
+            <input type="number" id="uuid-count" inputmode="numeric" min="1" max="1000" value="1">
+          </div>
+          <div class="btn-row">
+            <button type="button" id="uuid-generate" class="primary">Generate</button>
+            <button type="button" id="uuid-clear">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Output</h2>
+            <div class="btn-row">
+              <button type="button" id="uuid-copy" class="icon-btn">Copy</button>
+            </div>
+          </div>
+          <div class="surface" id="uuid-output-wrap">
+            <pre id="uuid-output" class="code-area" tabindex="0"></pre>
+          </div>
+          <span class="copy-flash" id="uuid-copy-flash">Copied!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HASH GENERATOR ===================== -->
+  <section role="tabpanel" id="panel-hash" aria-labelledby="tab-hash" class="tab-panel" hidden>
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Input</h2>
+          <div class="field">
+            <label for="hash-input" class="visually-hidden">Text to hash</label>
+            <textarea id="hash-input" class="code-area" rows="12" spellcheck="false" placeholder="Type or paste text to hash...">The quick brown fox jumps over the lazy dog</textarea>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="hash-run" class="primary">Hash</button>
+            <button type="button" id="hash-clear">Clear</button>
+          </div>
+          <div class="error-banner" id="hash-error" role="alert"></div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <h2>Digests</h2>
+          <div class="result-grid" style="grid-template-columns:1fr;">
+            <div class="result-item">
+              <div class="result-label">MD5</div>
+              <div class="hash-row"><div class="result-value" id="hash-out-md5">—</div><button type="button" class="icon-btn hash-copy-btn" data-target="hash-out-md5">Copy</button></div>
+            </div>
+            <div class="result-item">
+              <div class="result-label">SHA-1</div>
+              <div class="hash-row"><div class="result-value" id="hash-out-sha1">—</div><button type="button" class="icon-btn hash-copy-btn" data-target="hash-out-sha1">Copy</button></div>
+            </div>
+            <div class="result-item">
+              <div class="result-label">SHA-256</div>
+              <div class="hash-row"><div class="result-value" id="hash-out-sha256">—</div><button type="button" class="icon-btn hash-copy-btn" data-target="hash-out-sha256">Copy</button></div>
+            </div>
+            <div class="result-item">
+              <div class="result-label">SHA-512</div>
+              <div class="hash-row"><div class="result-value" id="hash-out-sha512">—</div><button type="button" class="icon-btn hash-copy-btn" data-target="hash-out-sha512">Copy</button></div>
+            </div>
+          </div>
+          <span class="copy-flash" id="hash-copy-flash">Copied!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== JWT DECODER ===================== -->
+  <section role="tabpanel" id="panel-jwt" aria-labelledby="tab-jwt" class="tab-panel" hidden>
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Input</h2>
+          <div class="field">
+            <label for="jwt-input" class="visually-hidden">JWT</label>
+            <textarea id="jwt-input" class="code-area" rows="10" spellcheck="false" placeholder="Paste a JWT (header.payload.signature)...">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</textarea>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="jwt-decode" class="primary">Decode</button>
+            <button type="button" id="jwt-clear">Clear</button>
+          </div>
+          <div class="error-banner" id="jwt-error" role="alert"></div>
+          <p style="font-size:12.5px;color:var(--text-faint);margin-top:12px;">Decoding only — the signature is shown but never verified against a key.</p>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Header</h2>
+            <div class="btn-row"><button type="button" id="jwt-copy-header" class="icon-btn">Copy</button></div>
+          </div>
+          <div class="surface"><pre id="jwt-header-output" class="code-area" tabindex="0"></pre></div>
+          <span class="copy-flash" id="jwt-copy-header-flash">Copied!</span>
+        </div>
+        <div class="panel">
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Payload</h2>
+            <div class="btn-row"><button type="button" id="jwt-copy-payload" class="icon-btn">Copy</button></div>
+          </div>
+          <div class="surface"><pre id="jwt-payload-output" class="code-area" tabindex="0"></pre></div>
+          <div class="result-grid" id="jwt-claims" style="margin-top:12px;"></div>
+          <span class="copy-flash" id="jwt-copy-payload-flash">Copied!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== PASSWORD GENERATOR ===================== -->
+  <section role="tabpanel" id="panel-password" aria-labelledby="tab-password" class="tab-panel" hidden>
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Options</h2>
+          <div class="field">
+            <div class="range-label"><span>Length</span><span id="pw-length-value">16</span></div>
+            <input type="range" id="pw-length" min="4" max="64" value="16">
+          </div>
+          <div class="field">
+            <label>Character sets</label>
+            <div class="checkbox-row">
+              <label><input type="checkbox" id="pw-lower" checked> a-z</label>
+              <label><input type="checkbox" id="pw-upper" checked> A-Z</label>
+              <label><input type="checkbox" id="pw-digits" checked> 0-9</label>
+              <label><input type="checkbox" id="pw-symbols" checked> !@#$%</label>
+            </div>
+          </div>
+          <div class="field">
+            <div class="checkbox-row">
+              <label><input type="checkbox" id="pw-exclude-ambiguous"> Exclude ambiguous characters (il1LoO0|)</label>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="pw-generate" class="primary">Generate</button>
+          </div>
+          <div class="error-banner" id="pw-error" role="alert"></div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Generated password</h2>
+            <div class="btn-row">
+              <button type="button" id="pw-copy" class="icon-btn">Copy</button>
+            </div>
+          </div>
+          <div class="surface" id="pw-output-wrap">
+            <pre id="pw-output" class="code-area" tabindex="0" style="font-size:19px;letter-spacing:.03em;"></pre>
+          </div>
+          <span class="copy-flash" id="pw-copy-flash">Copied!</span>
+          <div class="result-grid" style="margin-top:12px;">
+            <div class="result-item"><div class="result-label">Estimated entropy</div><div class="result-value" id="pw-bits">—</div></div>
+            <div class="result-item"><div class="result-label">Strength</div><div class="result-value" id="pw-strength">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== JSON <-> CSV CONVERTER ===================== -->
+  <section role="tabpanel" id="panel-csv" aria-labelledby="tab-csv" class="tab-panel" hidden>
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Input</h2>
+          <div class="field">
+            <label for="csv-input" class="visually-hidden">JSON or CSV input</label>
+            <textarea id="csv-input" class="code-area" rows="16" spellcheck="false" placeholder="Paste a JSON array of objects, or CSV with a header row...">[
+  {"name": "Ada Lovelace", "role": "Mathematician", "year": 1843},
+  {"name": "Grace Hopper", "role": "Computer scientist", "year": 1944}
+]</textarea>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="csv-to-csv" class="primary">JSON → CSV</button>
+            <button type="button" id="csv-to-json">CSV → JSON</button>
+            <button type="button" id="csv-clear">Clear</button>
+          </div>
+          <div class="error-banner" id="csv-error" role="alert"></div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Output</h2>
+            <div class="btn-row">
+              <button type="button" id="csv-copy" class="icon-btn">Copy</button>
+              <button type="button" id="csv-download" class="icon-btn">Download</button>
+            </div>
+          </div>
+          <div class="surface" id="csv-output-wrap">
+            <pre id="csv-output" class="code-area" tabindex="0"></pre>
+          </div>
+          <span class="copy-flash" id="csv-copy-flash">Copied!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HTML ENTITY ENCODER/DECODER ===================== -->
+  <section role="tabpanel" id="panel-entity" aria-labelledby="tab-entity" class="tab-panel" hidden>
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Input</h2>
+          <div class="field">
+            <label for="entity-input" class="visually-hidden">Text or HTML-entity-encoded input</label>
+            <textarea id="entity-input" class="code-area" rows="12" spellcheck="false" placeholder="Type text to encode, or HTML entities to decode...">Tom &amp; Jerry's &lt;b&gt;café&lt;/b&gt; — &quot;classic&quot;</textarea>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="entity-encode" class="primary">Encode →</button>
+            <button type="button" id="entity-decode">Decode →</button>
+            <button type="button" id="entity-clear">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Output</h2>
+            <div class="btn-row"><button type="button" id="entity-copy" class="icon-btn">Copy</button></div>
+          </div>
+          <div class="surface" id="entity-output-wrap"><pre id="entity-output" class="code-area" tabindex="0"></pre></div>
+          <span class="copy-flash" id="entity-copy-flash">Copied!</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="container-narrow" style="padding-top:0;">
     <h2>About DevBox Kit</h2>
-    <p>DevBox Kit bundles five everyday developer utilities into a single page: a <strong>JSON formatter and validator</strong> with precise syntax-error locations, a two-way <strong>Base64 encoder/decoder</strong>, a two-way <strong>URL encoder/decoder</strong>, a <strong>Unix timestamp converter</strong> that shows both local and UTC time, and a <strong>regex tester</strong> with live match highlighting and capture groups.</p>
-    <p>Everything runs entirely client-side in your browser — nothing you paste in is ever uploaded to a server, so there's no wait and nothing to worry about privacy-wise. Use it for debugging API responses, decoding tokens, sanity-checking query strings, converting timestamps from logs, or testing a regular expression before you commit to it.</p>
-    <p>Prefer a dedicated page for a single tool? Each one also lives on its own: <a href="/json-formatter">JSON Formatter</a>, <a href="/base64-encode-decode">Base64 Encode / Decode</a>, <a href="/url-encoder-decoder">URL Encoder / Decoder</a>, <a href="/unix-timestamp-converter">Unix Timestamp Converter</a>, and <a href="/regex-tester">Regex Tester</a>.</p>
+    <p>DevBox Kit bundles eleven everyday developer utilities into a single page: a <strong>JSON formatter and validator</strong> with precise syntax-error locations, two-way <strong>Base64</strong>, <strong>URL</strong>, and <strong>HTML entity</strong> encoders/decoders, a <strong>UUID generator</strong> (v4 random or v1-style time-ordered, single or bulk), a <strong>hash generator</strong> (MD5, SHA-1, SHA-256, SHA-512), a <strong>JWT decoder</strong> that pretty-prints the header/payload and spells out expiry claims, a <strong>password generator</strong> with a strength meter, a two-way <strong>JSON ⇄ CSV converter</strong>, a <strong>Unix timestamp converter</strong> that shows both local and UTC time, and a <strong>regex tester</strong> with live match highlighting and capture groups.</p>
+    <p>Everything runs entirely client-side in your browser — nothing you paste in is ever uploaded to a server, so there's no wait and nothing to worry about privacy-wise. Use it for debugging API responses, decoding tokens, generating throwaway IDs and passwords, checksumming files, converting between JSON and CSV, sanity-checking query strings, converting timestamps from logs, or testing a regular expression before you commit to it.</p>
+    <p>Prefer a dedicated page for a single tool? Each one also lives on its own: <a href="/json-formatter">JSON Formatter</a>, <a href="/base64-encode-decode">Base64 Encode / Decode</a>, <a href="/url-encoder-decoder">URL Encoder / Decoder</a>, <a href="/unix-timestamp-converter">Unix Timestamp Converter</a>, <a href="/regex-tester">Regex Tester</a>, <a href="/uuid-generator">UUID Generator</a>, <a href="/hash-generator">Hash Generator</a>, <a href="/jwt-decoder">JWT Decoder</a>, <a href="/password-generator">Password Generator</a>, <a href="/json-csv-converter">JSON ⇄ CSV Converter</a>, and <a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a>.</p>
   </section>
 
   <section class="container-narrow" style="padding-top:0;" id="articles">

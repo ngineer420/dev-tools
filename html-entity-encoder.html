@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JSON Formatter &amp; Validator — Free Online Tool — devboxkit.com</title>
-<meta name="description" content="Free online JSON formatter and validator. Beautify or minify JSON and get the exact line and column of any syntax error. Runs entirely in your browser — nothing is uploaded.">
-<link rel="canonical" href="https://devboxkit.com/json-formatter">
+<title>HTML Entity Encoder / Decoder — Free Online Tool — devboxkit.com</title>
+<meta name="description" content="Encode text to HTML entities (&amp;amp;, &amp;lt;, &amp;gt;, &amp;quot;, numeric entities for non-ASCII) or decode HTML entities back to plain text. Runs entirely in your browser.">
+<link rel="canonical" href="https://devboxkit.com/html-entity-encoder">
 <meta name="theme-color" content="#0b0e14">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="JSON Formatter &amp; Validator — Free Online Tool">
-<meta property="og:description" content="Beautify, minify, and validate JSON with precise line/column error locations. Runs entirely client-side.">
-<meta property="og:url" content="https://devboxkit.com/json-formatter">
+<meta property="og:title" content="HTML Entity Encoder / Decoder — Free Online Tool">
+<meta property="og:description" content="Encode text to HTML entities or decode HTML entities back to plain text. Runs entirely client-side.">
+<meta property="og:url" content="https://devboxkit.com/html-entity-encoder">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="JSON Formatter &amp; Validator — Free Online Tool">
-<meta name="twitter:description" content="Beautify, minify, and validate JSON with precise line/column error locations. Runs entirely client-side.">
+<meta name="twitter:title" content="HTML Entity Encoder / Decoder — Free Online Tool">
+<meta name="twitter:description" content="Encode text to HTML entities or decode HTML entities back to plain text. Runs entirely client-side.">
 
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/styles.css">
@@ -23,16 +23,16 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "JSON Formatter & Validator — DevBox Kit",
-  "url": "https://devboxkit.com/json-formatter",
+  "name": "HTML Entity Encoder / Decoder — DevBox Kit",
+  "url": "https://devboxkit.com/html-entity-encoder",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "description": "Free browser-based JSON formatter and validator: beautify, minify, and locate syntax errors by line and column."
+  "description": "Free browser-based HTML entity encoder and decoder: named and numeric entities, both directions."
 }
 </script>
 
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7560786263587509" crossorigin="anonymous"></script>
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7560786263587509" crossorigin="anonymous"></script> -->
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -51,13 +51,13 @@
 
 <main id="main">
   <div class="hero">
-    <h1>JSON Formatter &amp; Validator</h1>
-    <p>Beautify, minify, and validate JSON — with the exact line and column of any syntax error.</p>
+    <h1>HTML Entity Encoder / Decoder</h1>
+    <p>Encode text to HTML entities, or decode HTML entities back to plain text.</p>
     <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
   </div>
 
   <div role="tablist" class="tabbar" aria-label="Developer tool">
-    <a role="tab" id="tab-json" href="/json-formatter" aria-controls="panel-json" aria-selected="true" aria-current="page" class="tab-btn active">JSON Formatter</a>
+    <a role="tab" id="tab-json" href="/json-formatter" aria-controls="panel-json" aria-selected="false" class="tab-btn">JSON Formatter</a>
     <a role="tab" id="tab-base64" href="/base64-encode-decode" aria-controls="panel-base64" aria-selected="false" class="tab-btn">Base64</a>
     <a role="tab" id="tab-url" href="/url-encoder-decoder" aria-controls="panel-url" aria-selected="false" class="tab-btn">URL Encode/Decode</a>
     <a role="tab" id="tab-timestamp" href="/unix-timestamp-converter" aria-controls="panel-timestamp" aria-selected="false" class="tab-btn">Timestamp</a>
@@ -67,25 +67,24 @@
     <a role="tab" id="tab-jwt" href="/jwt-decoder" aria-controls="panel-jwt" aria-selected="false" class="tab-btn">JWT Decoder</a>
     <a role="tab" id="tab-password" href="/password-generator" aria-controls="panel-password" aria-selected="false" class="tab-btn">Password Generator</a>
     <a role="tab" id="tab-csv" href="/json-csv-converter" aria-controls="panel-csv" aria-selected="false" class="tab-btn">JSON ⇄ CSV</a>
-    <a role="tab" id="tab-entity" href="/html-entity-encoder" aria-controls="panel-entity" aria-selected="false" class="tab-btn">HTML Entities</a>
+    <a role="tab" id="tab-entity" href="/html-entity-encoder" aria-controls="panel-entity" aria-selected="true" aria-current="page" class="tab-btn active">HTML Entities</a>
   </div>
 
-  <!-- ===================== JSON FORMATTER ===================== -->
-  <section aria-label="JSON Formatter tool">
+  <!-- ===================== HTML ENTITY ENCODER/DECODER ===================== -->
+  <section aria-label="HTML Entity Encoder / Decoder tool">
     <div class="tool-grid split">
       <div class="controls-col">
         <div class="panel">
           <h2>Input</h2>
           <div class="field">
-            <label for="json-input" class="visually-hidden">JSON input</label>
-            <textarea id="json-input" class="code-area" rows="16" spellcheck="false" placeholder="Paste JSON here...">{"name":"DevBox Kit","tools":["json","base64","url","timestamp","regex"],"free":true,"count":5,"notes":null}</textarea>
+            <label for="entity-input" class="visually-hidden">Text or HTML-entity-encoded input</label>
+            <textarea id="entity-input" class="code-area" rows="12" spellcheck="false" placeholder="Type text to encode, or HTML entities to decode...">Tom &amp; Jerry's &lt;b&gt;café&lt;/b&gt; — &quot;classic&quot;</textarea>
           </div>
           <div class="btn-row">
-            <button type="button" id="json-format" class="primary">Format / Beautify</button>
-            <button type="button" id="json-minify">Minify</button>
-            <button type="button" id="json-clear">Clear</button>
+            <button type="button" id="entity-encode" class="primary">Encode →</button>
+            <button type="button" id="entity-decode">Decode →</button>
+            <button type="button" id="entity-clear">Clear</button>
           </div>
-          <div class="error-banner" id="json-error" role="alert"></div>
         </div>
       </div>
 
@@ -93,25 +92,22 @@
         <div class="panel">
           <div class="output-toolbar">
             <h2 style="margin:0;">Output</h2>
-            <div class="btn-row">
-              <button type="button" id="json-copy" class="icon-btn">Copy</button>
-            </div>
+            <div class="btn-row"><button type="button" id="entity-copy" class="icon-btn">Copy</button></div>
           </div>
-          <div class="surface" id="json-output-wrap">
-            <pre id="json-output" class="code-area" tabindex="0"></pre>
-          </div>
-          <span class="copy-flash" id="json-copy-flash">Copied!</span>
+          <div class="surface" id="entity-output-wrap"><pre id="entity-output" class="code-area" tabindex="0"></pre></div>
+          <span class="copy-flash" id="entity-copy-flash">Copied!</span>
         </div>
       </div>
     </div>
   </section>
 
   <section class="container-narrow" style="padding-top:40px;">
-    <h2 style="margin-top:0;">About this JSON formatter</h2>
-    <p>Paste any JSON and hit <strong>Format / Beautify</strong> to indent it cleanly, or <strong>Minify</strong> to strip every non-essential byte for the wire. If the JSON is invalid, the validator reports the precise line and column so you can jump straight to the problem instead of counting characters. Everything runs locally in your browser — nothing you paste is ever uploaded. For the syntax rules and the errors that trip people up most, read the <a href="/articles/json-formatting-guide.html">JSON formatting guide</a>.</p>
+    <h2 style="margin-top:0;">About this HTML entity encoder</h2>
+    <p>Hit Encode to convert <code>&amp;</code>, <code>&lt;</code>, <code>&gt;</code>, <code>"</code>, and <code>'</code> to their named HTML entities and every other non-ASCII character to a numeric entity, so the result is safe to drop directly into HTML markup. Hit Decode to reverse the process — it understands numeric entities (decimal and hex) plus common named entities (<code>amp</code>, <code>lt</code>, <code>gt</code>, <code>quot</code>, <code>apos</code>, <code>nbsp</code>, <code>mdash</code>, and more). Anything it doesn't recognize as a valid entity is left untouched rather than mangled. Runs entirely in your browser — nothing you paste is uploaded.</p>
 
     <h2>More developer tools</h2>
     <ul>
+      <li><a href="/json-formatter">JSON Formatter</a></li>
       <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
       <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
       <li><a href="/unix-timestamp-converter">Unix Timestamp Converter</a></li>
@@ -121,7 +117,6 @@
       <li><a href="/jwt-decoder">JWT Decoder</a></li>
       <li><a href="/password-generator">Password Generator</a></li>
       <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
-      <li><a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a></li>
       <li><a href="/">All tools on one page (home)</a></li>
     </ul>
   </section>
