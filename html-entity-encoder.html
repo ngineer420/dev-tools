@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Regex Tester — Free Online Tool — devboxkit.com</title>
-<meta name="description" content="Free online regex tester. Test regular expressions with live match highlighting, capture groups, and all JavaScript flags. Runs entirely in your browser — nothing is uploaded.">
-<link rel="canonical" href="https://devboxkit.com/regex-tester">
+<title>HTML Entity Encoder / Decoder — Free Online Tool — devboxkit.com</title>
+<meta name="description" content="Encode text to HTML entities (&amp;amp;, &amp;lt;, &amp;gt;, &amp;quot;, numeric entities for non-ASCII) or decode HTML entities back to plain text. Runs entirely in your browser.">
+<link rel="canonical" href="https://devboxkit.com/html-entity-encoder">
 <meta name="theme-color" content="#0b0e14">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Regex Tester — Free Online Tool">
-<meta property="og:description" content="Test regular expressions with live match highlighting, capture groups, and all JavaScript flags. Runs entirely client-side.">
-<meta property="og:url" content="https://devboxkit.com/regex-tester">
+<meta property="og:title" content="HTML Entity Encoder / Decoder — Free Online Tool">
+<meta property="og:description" content="Encode text to HTML entities or decode HTML entities back to plain text. Runs entirely client-side.">
+<meta property="og:url" content="https://devboxkit.com/html-entity-encoder">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Regex Tester — Free Online Tool">
-<meta name="twitter:description" content="Test regular expressions with live match highlighting, capture groups, and all JavaScript flags. Runs entirely client-side.">
+<meta name="twitter:title" content="HTML Entity Encoder / Decoder — Free Online Tool">
+<meta name="twitter:description" content="Encode text to HTML entities or decode HTML entities back to plain text. Runs entirely client-side.">
 
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/styles.css">
@@ -23,12 +23,12 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Regex Tester — DevBox Kit",
-  "url": "https://devboxkit.com/regex-tester",
+  "name": "HTML Entity Encoder / Decoder — DevBox Kit",
+  "url": "https://devboxkit.com/html-entity-encoder",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "description": "Free browser-based regex tester with live match highlighting, capture groups, and all JavaScript flags."
+  "description": "Free browser-based HTML entity encoder and decoder: named and numeric entities, both directions."
 }
 </script>
 
@@ -51,8 +51,8 @@
 
 <main id="main">
   <div class="hero">
-    <h1>Regex Tester</h1>
-    <p>Test regular expressions with live match highlighting, capture groups, and every JavaScript flag.</p>
+    <h1>HTML Entity Encoder / Decoder</h1>
+    <p>Encode text to HTML entities, or decode HTML entities back to plain text.</p>
     <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
   </div>
 
@@ -61,67 +61,49 @@
     <a role="tab" id="tab-base64" href="/base64-encode-decode" aria-controls="panel-base64" aria-selected="false" class="tab-btn">Base64</a>
     <a role="tab" id="tab-url" href="/url-encoder-decoder" aria-controls="panel-url" aria-selected="false" class="tab-btn">URL Encode/Decode</a>
     <a role="tab" id="tab-timestamp" href="/unix-timestamp-converter" aria-controls="panel-timestamp" aria-selected="false" class="tab-btn">Timestamp</a>
-    <a role="tab" id="tab-regex" href="/regex-tester" aria-controls="panel-regex" aria-selected="true" aria-current="page" class="tab-btn active">Regex Tester</a>
+    <a role="tab" id="tab-regex" href="/regex-tester" aria-controls="panel-regex" aria-selected="false" class="tab-btn">Regex Tester</a>
     <a role="tab" id="tab-uuid" href="/uuid-generator" aria-controls="panel-uuid" aria-selected="false" class="tab-btn">UUID Generator</a>
     <a role="tab" id="tab-hash" href="/hash-generator" aria-controls="panel-hash" aria-selected="false" class="tab-btn">Hash Generator</a>
     <a role="tab" id="tab-jwt" href="/jwt-decoder" aria-controls="panel-jwt" aria-selected="false" class="tab-btn">JWT Decoder</a>
     <a role="tab" id="tab-password" href="/password-generator" aria-controls="panel-password" aria-selected="false" class="tab-btn">Password Generator</a>
     <a role="tab" id="tab-csv" href="/json-csv-converter" aria-controls="panel-csv" aria-selected="false" class="tab-btn">JSON ⇄ CSV</a>
-    <a role="tab" id="tab-entity" href="/html-entity-encoder" aria-controls="panel-entity" aria-selected="false" class="tab-btn">HTML Entities</a>
+    <a role="tab" id="tab-entity" href="/html-entity-encoder" aria-controls="panel-entity" aria-selected="true" aria-current="page" class="tab-btn active">HTML Entities</a>
   </div>
 
-  <!-- ===================== REGEX TESTER ===================== -->
-  <section aria-label="Regex Tester tool">
+  <!-- ===================== HTML ENTITY ENCODER/DECODER ===================== -->
+  <section aria-label="HTML Entity Encoder / Decoder tool">
     <div class="tool-grid split">
       <div class="controls-col">
         <div class="panel">
-          <h2>Pattern</h2>
+          <h2>Input</h2>
           <div class="field">
-            <label for="regex-pattern">Regular expression</label>
-            <input type="text" id="regex-pattern" class="code-area" spellcheck="false" placeholder="e.g. (\w+)@(\w+\.\w+)" value="\w+@\w+\.\w+">
-          </div>
-          <div class="field">
-            <label>Flags</label>
-            <div class="checkbox-row">
-              <label><input type="checkbox" id="regex-flag-g" checked> g <span class="visually-hidden">global</span></label>
-              <label><input type="checkbox" id="regex-flag-i"> i <span class="visually-hidden">ignore case</span></label>
-              <label><input type="checkbox" id="regex-flag-m"> m <span class="visually-hidden">multiline</span></label>
-              <label><input type="checkbox" id="regex-flag-s"> s <span class="visually-hidden">dot all</span></label>
-              <label><input type="checkbox" id="regex-flag-u"> u <span class="visually-hidden">unicode</span></label>
-              <label><input type="checkbox" id="regex-flag-y"> y <span class="visually-hidden">sticky</span></label>
-            </div>
-          </div>
-          <div class="field">
-            <label for="regex-test">Test string</label>
-            <textarea id="regex-test" class="code-area" rows="10" spellcheck="false" placeholder="Paste text to test against the pattern...">Contact us at hello@devboxkit.com or support@example.org for help.</textarea>
+            <label for="entity-input" class="visually-hidden">Text or HTML-entity-encoded input</label>
+            <textarea id="entity-input" class="code-area" rows="12" spellcheck="false" placeholder="Type text to encode, or HTML entities to decode...">Tom &amp; Jerry's &lt;b&gt;café&lt;/b&gt; — &quot;classic&quot;</textarea>
           </div>
           <div class="btn-row">
-            <button type="button" id="regex-run" class="primary">Test</button>
-            <button type="button" id="regex-clear">Clear</button>
+            <button type="button" id="entity-encode" class="primary">Encode →</button>
+            <button type="button" id="entity-decode">Decode →</button>
+            <button type="button" id="entity-clear">Clear</button>
           </div>
-          <div class="error-banner" id="regex-error" role="alert"></div>
         </div>
       </div>
 
       <div class="output-col">
         <div class="panel">
-          <h2>Highlighted matches</h2>
-          <div class="surface" id="regex-highlight-wrap">
-            <pre id="regex-highlight" class="code-area"></pre>
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Output</h2>
+            <div class="btn-row"><button type="button" id="entity-copy" class="icon-btn">Copy</button></div>
           </div>
-        </div>
-        <div class="panel">
-          <h2>Matches &amp; capture groups</h2>
-          <div id="regex-matches-empty" class="surface is-empty" style="min-height:80px;">Run a test to see matches here.</div>
-          <ul class="match-list" id="regex-matches" hidden></ul>
+          <div class="surface" id="entity-output-wrap"><pre id="entity-output" class="code-area" tabindex="0"></pre></div>
+          <span class="copy-flash" id="entity-copy-flash">Copied!</span>
         </div>
       </div>
     </div>
   </section>
 
   <section class="container-narrow" style="padding-top:40px;">
-    <h2 style="margin-top:0;">About this regex tester</h2>
-    <p>Type a pattern, toggle the flags you need, and hit <strong>Test</strong> to see every match highlighted in your test string along with each match's index and capture groups. Invalid patterns are reported instead of failing silently, and named groups are shown when you use them. Everything runs locally in your browser using the native JavaScript regex engine — nothing you paste is uploaded. For anchors, quantifiers, and how to avoid catastrophic backtracking, read the <a href="/articles/regex-cheat-sheet.html">regex cheat sheet</a>.</p>
+    <h2 style="margin-top:0;">About this HTML entity encoder</h2>
+    <p>Hit Encode to convert <code>&amp;</code>, <code>&lt;</code>, <code>&gt;</code>, <code>"</code>, and <code>'</code> to their named HTML entities and every other non-ASCII character to a numeric entity, so the result is safe to drop directly into HTML markup. Hit Decode to reverse the process — it understands numeric entities (decimal and hex) plus common named entities (<code>amp</code>, <code>lt</code>, <code>gt</code>, <code>quot</code>, <code>apos</code>, <code>nbsp</code>, <code>mdash</code>, and more). Anything it doesn't recognize as a valid entity is left untouched rather than mangled. Runs entirely in your browser — nothing you paste is uploaded.</p>
 
     <h2>More developer tools</h2>
     <ul>
@@ -129,12 +111,12 @@
       <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
       <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
       <li><a href="/unix-timestamp-converter">Unix Timestamp Converter</a></li>
+      <li><a href="/regex-tester">Regex Tester</a></li>
       <li><a href="/uuid-generator">UUID Generator</a></li>
       <li><a href="/hash-generator">Hash Generator (MD5 / SHA)</a></li>
       <li><a href="/jwt-decoder">JWT Decoder</a></li>
       <li><a href="/password-generator">Password Generator</a></li>
       <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
-      <li><a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a></li>
       <li><a href="/">All tools on one page (home)</a></li>
     </ul>
   </section>

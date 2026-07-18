@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Regex Tester — Free Online Tool — devboxkit.com</title>
-<meta name="description" content="Free online regex tester. Test regular expressions with live match highlighting, capture groups, and all JavaScript flags. Runs entirely in your browser — nothing is uploaded.">
-<link rel="canonical" href="https://devboxkit.com/regex-tester">
+<title>JWT Decoder — Free Online Tool — devboxkit.com</title>
+<meta name="description" content="Decode a JSON Web Token's header and payload, pretty-printed, with exp/iat/nbf shown as human-readable dates. Decoding only, nothing uploaded.">
+<link rel="canonical" href="https://devboxkit.com/jwt-decoder">
 <meta name="theme-color" content="#0b0e14">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Regex Tester — Free Online Tool">
-<meta property="og:description" content="Test regular expressions with live match highlighting, capture groups, and all JavaScript flags. Runs entirely client-side.">
-<meta property="og:url" content="https://devboxkit.com/regex-tester">
+<meta property="og:title" content="JWT Decoder — Free Online Tool">
+<meta property="og:description" content="Decode a JWT's header and payload with exp/iat/nbf shown as human dates. Decode-only, runs entirely client-side.">
+<meta property="og:url" content="https://devboxkit.com/jwt-decoder">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Regex Tester — Free Online Tool">
-<meta name="twitter:description" content="Test regular expressions with live match highlighting, capture groups, and all JavaScript flags. Runs entirely client-side.">
+<meta name="twitter:title" content="JWT Decoder — Free Online Tool">
+<meta name="twitter:description" content="Decode a JWT's header and payload with exp/iat/nbf shown as human dates. Decode-only, runs entirely client-side.">
 
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/styles.css">
@@ -23,12 +23,12 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Regex Tester — DevBox Kit",
-  "url": "https://devboxkit.com/regex-tester",
+  "name": "JWT Decoder — DevBox Kit",
+  "url": "https://devboxkit.com/jwt-decoder",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "description": "Free browser-based regex tester with live match highlighting, capture groups, and all JavaScript flags."
+  "description": "Free browser-based JWT decoder: pretty-printed header and payload with human-readable exp/iat/nbf dates. Decoding only, no signature verification."
 }
 </script>
 
@@ -51,8 +51,8 @@
 
 <main id="main">
   <div class="hero">
-    <h1>Regex Tester</h1>
-    <p>Test regular expressions with live match highlighting, capture groups, and every JavaScript flag.</p>
+    <h1>JWT Decoder</h1>
+    <p>Paste a JWT to see its decoded header and payload, with expiry and issued-at times spelled out.</p>
     <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
   </div>
 
@@ -61,67 +61,59 @@
     <a role="tab" id="tab-base64" href="/base64-encode-decode" aria-controls="panel-base64" aria-selected="false" class="tab-btn">Base64</a>
     <a role="tab" id="tab-url" href="/url-encoder-decoder" aria-controls="panel-url" aria-selected="false" class="tab-btn">URL Encode/Decode</a>
     <a role="tab" id="tab-timestamp" href="/unix-timestamp-converter" aria-controls="panel-timestamp" aria-selected="false" class="tab-btn">Timestamp</a>
-    <a role="tab" id="tab-regex" href="/regex-tester" aria-controls="panel-regex" aria-selected="true" aria-current="page" class="tab-btn active">Regex Tester</a>
+    <a role="tab" id="tab-regex" href="/regex-tester" aria-controls="panel-regex" aria-selected="false" class="tab-btn">Regex Tester</a>
     <a role="tab" id="tab-uuid" href="/uuid-generator" aria-controls="panel-uuid" aria-selected="false" class="tab-btn">UUID Generator</a>
     <a role="tab" id="tab-hash" href="/hash-generator" aria-controls="panel-hash" aria-selected="false" class="tab-btn">Hash Generator</a>
-    <a role="tab" id="tab-jwt" href="/jwt-decoder" aria-controls="panel-jwt" aria-selected="false" class="tab-btn">JWT Decoder</a>
+    <a role="tab" id="tab-jwt" href="/jwt-decoder" aria-controls="panel-jwt" aria-selected="true" aria-current="page" class="tab-btn active">JWT Decoder</a>
     <a role="tab" id="tab-password" href="/password-generator" aria-controls="panel-password" aria-selected="false" class="tab-btn">Password Generator</a>
     <a role="tab" id="tab-csv" href="/json-csv-converter" aria-controls="panel-csv" aria-selected="false" class="tab-btn">JSON ⇄ CSV</a>
     <a role="tab" id="tab-entity" href="/html-entity-encoder" aria-controls="panel-entity" aria-selected="false" class="tab-btn">HTML Entities</a>
   </div>
 
-  <!-- ===================== REGEX TESTER ===================== -->
-  <section aria-label="Regex Tester tool">
+  <!-- ===================== JWT DECODER ===================== -->
+  <section aria-label="JWT Decoder tool">
     <div class="tool-grid split">
       <div class="controls-col">
         <div class="panel">
-          <h2>Pattern</h2>
+          <h2>Input</h2>
           <div class="field">
-            <label for="regex-pattern">Regular expression</label>
-            <input type="text" id="regex-pattern" class="code-area" spellcheck="false" placeholder="e.g. (\w+)@(\w+\.\w+)" value="\w+@\w+\.\w+">
-          </div>
-          <div class="field">
-            <label>Flags</label>
-            <div class="checkbox-row">
-              <label><input type="checkbox" id="regex-flag-g" checked> g <span class="visually-hidden">global</span></label>
-              <label><input type="checkbox" id="regex-flag-i"> i <span class="visually-hidden">ignore case</span></label>
-              <label><input type="checkbox" id="regex-flag-m"> m <span class="visually-hidden">multiline</span></label>
-              <label><input type="checkbox" id="regex-flag-s"> s <span class="visually-hidden">dot all</span></label>
-              <label><input type="checkbox" id="regex-flag-u"> u <span class="visually-hidden">unicode</span></label>
-              <label><input type="checkbox" id="regex-flag-y"> y <span class="visually-hidden">sticky</span></label>
-            </div>
-          </div>
-          <div class="field">
-            <label for="regex-test">Test string</label>
-            <textarea id="regex-test" class="code-area" rows="10" spellcheck="false" placeholder="Paste text to test against the pattern...">Contact us at hello@devboxkit.com or support@example.org for help.</textarea>
+            <label for="jwt-input" class="visually-hidden">JWT</label>
+            <textarea id="jwt-input" class="code-area" rows="10" spellcheck="false" placeholder="Paste a JWT (header.payload.signature)...">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</textarea>
           </div>
           <div class="btn-row">
-            <button type="button" id="regex-run" class="primary">Test</button>
-            <button type="button" id="regex-clear">Clear</button>
+            <button type="button" id="jwt-decode" class="primary">Decode</button>
+            <button type="button" id="jwt-clear">Clear</button>
           </div>
-          <div class="error-banner" id="regex-error" role="alert"></div>
+          <div class="error-banner" id="jwt-error" role="alert"></div>
+          <p style="font-size:12.5px;color:var(--text-faint);margin-top:12px;">Decoding only — the signature is shown but never verified against a key.</p>
         </div>
       </div>
 
       <div class="output-col">
         <div class="panel">
-          <h2>Highlighted matches</h2>
-          <div class="surface" id="regex-highlight-wrap">
-            <pre id="regex-highlight" class="code-area"></pre>
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Header</h2>
+            <div class="btn-row"><button type="button" id="jwt-copy-header" class="icon-btn">Copy</button></div>
           </div>
+          <div class="surface"><pre id="jwt-header-output" class="code-area" tabindex="0"></pre></div>
+          <span class="copy-flash" id="jwt-copy-header-flash">Copied!</span>
         </div>
         <div class="panel">
-          <h2>Matches &amp; capture groups</h2>
-          <div id="regex-matches-empty" class="surface is-empty" style="min-height:80px;">Run a test to see matches here.</div>
-          <ul class="match-list" id="regex-matches" hidden></ul>
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Payload</h2>
+            <div class="btn-row"><button type="button" id="jwt-copy-payload" class="icon-btn">Copy</button></div>
+          </div>
+          <div class="surface"><pre id="jwt-payload-output" class="code-area" tabindex="0"></pre></div>
+          <div class="result-grid" id="jwt-claims" style="margin-top:12px;"></div>
+          <span class="copy-flash" id="jwt-copy-payload-flash">Copied!</span>
         </div>
       </div>
     </div>
   </section>
 
   <section class="container-narrow" style="padding-top:40px;">
-    <h2 style="margin-top:0;">About this regex tester</h2>
-    <p>Type a pattern, toggle the flags you need, and hit <strong>Test</strong> to see every match highlighted in your test string along with each match's index and capture groups. Invalid patterns are reported instead of failing silently, and named groups are shown when you use them. Everything runs locally in your browser using the native JavaScript regex engine — nothing you paste is uploaded. For anchors, quantifiers, and how to avoid catastrophic backtracking, read the <a href="/articles/regex-cheat-sheet.html">regex cheat sheet</a>.</p>
+    <h2 style="margin-top:0;">About this JWT decoder</h2>
+    <p>Paste any JSON Web Token and this tool splits it on its two dots, base64url-decodes the header and payload, and pretty-prints both as JSON. If the payload has <code>iat</code>, <code>nbf</code>, or <code>exp</code> claims, their Unix-timestamp values are also shown as human-readable dates, along with whether the token is currently expired. This is a decoder, not a verifier — the signature segment is displayed as-is so you can see it exists, but it is never checked against a key, so a decoded token here tells you nothing about whether the JWT is authentic. Nothing is uploaded; decoding happens entirely in your browser, which also means you can safely inspect tokens containing sensitive claims without them leaving your machine.</p>
 
     <h2>More developer tools</h2>
     <ul>
@@ -129,9 +121,9 @@
       <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
       <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
       <li><a href="/unix-timestamp-converter">Unix Timestamp Converter</a></li>
+      <li><a href="/regex-tester">Regex Tester</a></li>
       <li><a href="/uuid-generator">UUID Generator</a></li>
       <li><a href="/hash-generator">Hash Generator (MD5 / SHA)</a></li>
-      <li><a href="/jwt-decoder">JWT Decoder</a></li>
       <li><a href="/password-generator">Password Generator</a></li>
       <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
       <li><a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a></li>

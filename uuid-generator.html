@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Regex Tester — Free Online Tool — devboxkit.com</title>
-<meta name="description" content="Free online regex tester. Test regular expressions with live match highlighting, capture groups, and all JavaScript flags. Runs entirely in your browser — nothing is uploaded.">
-<link rel="canonical" href="https://devboxkit.com/regex-tester">
+<title>UUID Generator — Free Online Tool — devboxkit.com</title>
+<meta name="description" content="Generate random v4 UUIDs or time-ordered v1-style UUIDs, one at a time or in bulk, with one-click copy. Runs entirely in your browser — nothing is uploaded.">
+<link rel="canonical" href="https://devboxkit.com/uuid-generator">
 <meta name="theme-color" content="#0b0e14">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Regex Tester — Free Online Tool">
-<meta property="og:description" content="Test regular expressions with live match highlighting, capture groups, and all JavaScript flags. Runs entirely client-side.">
-<meta property="og:url" content="https://devboxkit.com/regex-tester">
+<meta property="og:title" content="UUID Generator — Free Online Tool">
+<meta property="og:description" content="Generate v4 (random) or v1-style (time-ordered) UUIDs, one at a time or in bulk. Runs entirely client-side.">
+<meta property="og:url" content="https://devboxkit.com/uuid-generator">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Regex Tester — Free Online Tool">
-<meta name="twitter:description" content="Test regular expressions with live match highlighting, capture groups, and all JavaScript flags. Runs entirely client-side.">
+<meta name="twitter:title" content="UUID Generator — Free Online Tool">
+<meta name="twitter:description" content="Generate v4 (random) or v1-style (time-ordered) UUIDs, one at a time or in bulk. Runs entirely client-side.">
 
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/styles.css">
@@ -23,12 +23,12 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Regex Tester — DevBox Kit",
-  "url": "https://devboxkit.com/regex-tester",
+  "name": "UUID Generator — DevBox Kit",
+  "url": "https://devboxkit.com/uuid-generator",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "description": "Free browser-based regex tester with live match highlighting, capture groups, and all JavaScript flags."
+  "description": "Free browser-based UUID generator: cryptographically random v4 UUIDs or time-ordered v1-style UUIDs, single or bulk."
 }
 </script>
 
@@ -51,8 +51,8 @@
 
 <main id="main">
   <div class="hero">
-    <h1>Regex Tester</h1>
-    <p>Test regular expressions with live match highlighting, capture groups, and every JavaScript flag.</p>
+    <h1>UUID Generator</h1>
+    <p>Generate random v4 UUIDs or time-ordered v1-style UUIDs — one at a time or in bulk.</p>
     <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
   </div>
 
@@ -61,8 +61,8 @@
     <a role="tab" id="tab-base64" href="/base64-encode-decode" aria-controls="panel-base64" aria-selected="false" class="tab-btn">Base64</a>
     <a role="tab" id="tab-url" href="/url-encoder-decoder" aria-controls="panel-url" aria-selected="false" class="tab-btn">URL Encode/Decode</a>
     <a role="tab" id="tab-timestamp" href="/unix-timestamp-converter" aria-controls="panel-timestamp" aria-selected="false" class="tab-btn">Timestamp</a>
-    <a role="tab" id="tab-regex" href="/regex-tester" aria-controls="panel-regex" aria-selected="true" aria-current="page" class="tab-btn active">Regex Tester</a>
-    <a role="tab" id="tab-uuid" href="/uuid-generator" aria-controls="panel-uuid" aria-selected="false" class="tab-btn">UUID Generator</a>
+    <a role="tab" id="tab-regex" href="/regex-tester" aria-controls="panel-regex" aria-selected="false" class="tab-btn">Regex Tester</a>
+    <a role="tab" id="tab-uuid" href="/uuid-generator" aria-controls="panel-uuid" aria-selected="true" aria-current="page" class="tab-btn active">UUID Generator</a>
     <a role="tab" id="tab-hash" href="/hash-generator" aria-controls="panel-hash" aria-selected="false" class="tab-btn">Hash Generator</a>
     <a role="tab" id="tab-jwt" href="/jwt-decoder" aria-controls="panel-jwt" aria-selected="false" class="tab-btn">JWT Decoder</a>
     <a role="tab" id="tab-password" href="/password-generator" aria-controls="panel-password" aria-selected="false" class="tab-btn">Password Generator</a>
@@ -70,58 +70,50 @@
     <a role="tab" id="tab-entity" href="/html-entity-encoder" aria-controls="panel-entity" aria-selected="false" class="tab-btn">HTML Entities</a>
   </div>
 
-  <!-- ===================== REGEX TESTER ===================== -->
-  <section aria-label="Regex Tester tool">
+  <!-- ===================== UUID GENERATOR ===================== -->
+  <section aria-label="UUID Generator tool">
     <div class="tool-grid split">
       <div class="controls-col">
         <div class="panel">
-          <h2>Pattern</h2>
+          <h2>Options</h2>
           <div class="field">
-            <label for="regex-pattern">Regular expression</label>
-            <input type="text" id="regex-pattern" class="code-area" spellcheck="false" placeholder="e.g. (\w+)@(\w+\.\w+)" value="\w+@\w+\.\w+">
-          </div>
-          <div class="field">
-            <label>Flags</label>
-            <div class="checkbox-row">
-              <label><input type="checkbox" id="regex-flag-g" checked> g <span class="visually-hidden">global</span></label>
-              <label><input type="checkbox" id="regex-flag-i"> i <span class="visually-hidden">ignore case</span></label>
-              <label><input type="checkbox" id="regex-flag-m"> m <span class="visually-hidden">multiline</span></label>
-              <label><input type="checkbox" id="regex-flag-s"> s <span class="visually-hidden">dot all</span></label>
-              <label><input type="checkbox" id="regex-flag-u"> u <span class="visually-hidden">unicode</span></label>
-              <label><input type="checkbox" id="regex-flag-y"> y <span class="visually-hidden">sticky</span></label>
+            <label>UUID version</label>
+            <div class="segmented" id="uuid-version" role="group" aria-label="UUID version">
+              <button type="button" id="uuid-version-v4" aria-pressed="true">v4 (random)</button>
+              <button type="button" id="uuid-version-v1" aria-pressed="false">v1-style (time-based)</button>
             </div>
           </div>
           <div class="field">
-            <label for="regex-test">Test string</label>
-            <textarea id="regex-test" class="code-area" rows="10" spellcheck="false" placeholder="Paste text to test against the pattern...">Contact us at hello@devboxkit.com or support@example.org for help.</textarea>
+            <label for="uuid-count">How many</label>
+            <input type="number" id="uuid-count" inputmode="numeric" min="1" max="1000" value="1">
           </div>
           <div class="btn-row">
-            <button type="button" id="regex-run" class="primary">Test</button>
-            <button type="button" id="regex-clear">Clear</button>
+            <button type="button" id="uuid-generate" class="primary">Generate</button>
+            <button type="button" id="uuid-clear">Clear</button>
           </div>
-          <div class="error-banner" id="regex-error" role="alert"></div>
         </div>
       </div>
 
       <div class="output-col">
         <div class="panel">
-          <h2>Highlighted matches</h2>
-          <div class="surface" id="regex-highlight-wrap">
-            <pre id="regex-highlight" class="code-area"></pre>
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Output</h2>
+            <div class="btn-row">
+              <button type="button" id="uuid-copy" class="icon-btn">Copy</button>
+            </div>
           </div>
-        </div>
-        <div class="panel">
-          <h2>Matches &amp; capture groups</h2>
-          <div id="regex-matches-empty" class="surface is-empty" style="min-height:80px;">Run a test to see matches here.</div>
-          <ul class="match-list" id="regex-matches" hidden></ul>
+          <div class="surface" id="uuid-output-wrap">
+            <pre id="uuid-output" class="code-area" tabindex="0"></pre>
+          </div>
+          <span class="copy-flash" id="uuid-copy-flash">Copied!</span>
         </div>
       </div>
     </div>
   </section>
 
   <section class="container-narrow" style="padding-top:40px;">
-    <h2 style="margin-top:0;">About this regex tester</h2>
-    <p>Type a pattern, toggle the flags you need, and hit <strong>Test</strong> to see every match highlighted in your test string along with each match's index and capture groups. Invalid patterns are reported instead of failing silently, and named groups are shown when you use them. Everything runs locally in your browser using the native JavaScript regex engine — nothing you paste is uploaded. For anchors, quantifiers, and how to avoid catastrophic backtracking, read the <a href="/articles/regex-cheat-sheet.html">regex cheat sheet</a>.</p>
+    <h2 style="margin-top:0;">About this UUID generator</h2>
+    <p>Hit Generate to get a cryptographically random version 4 UUID (RFC 4122), built with <code>crypto.getRandomValues</code> under the hood — the same randomness source used for cryptographic keys, not <code>Math.random()</code>. Set the count to more than one to generate a batch at once, one UUID per line, ready to copy. The v1-style option produces a time-ordered UUID that packs the current timestamp into the same fields a real RFC 4122 v1 UUID uses — but since browsers don't expose a real MAC address, it fills the node ID with random bytes instead of genuine hardware identifiers, so treat it as roughly time-sortable rather than a byte-for-byte spec-faithful v1 UUID. Everything runs locally in your browser — no UUID generated here is ever sent anywhere.</p>
 
     <h2>More developer tools</h2>
     <ul>
@@ -129,7 +121,7 @@
       <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
       <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
       <li><a href="/unix-timestamp-converter">Unix Timestamp Converter</a></li>
-      <li><a href="/uuid-generator">UUID Generator</a></li>
+      <li><a href="/regex-tester">Regex Tester</a></li>
       <li><a href="/hash-generator">Hash Generator (MD5 / SHA)</a></li>
       <li><a href="/jwt-decoder">JWT Decoder</a></li>
       <li><a href="/password-generator">Password Generator</a></li>

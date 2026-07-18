@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Regex Tester — Free Online Tool — devboxkit.com</title>
-<meta name="description" content="Free online regex tester. Test regular expressions with live match highlighting, capture groups, and all JavaScript flags. Runs entirely in your browser — nothing is uploaded.">
-<link rel="canonical" href="https://devboxkit.com/regex-tester">
+<title>JSON ⇄ CSV Converter — Free Online Tool — devboxkit.com</title>
+<meta name="description" content="Convert a JSON array of objects to CSV, or CSV with a header row back to JSON — both directions, with copy and download. Runs entirely in your browser.">
+<link rel="canonical" href="https://devboxkit.com/json-csv-converter">
 <meta name="theme-color" content="#0b0e14">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Regex Tester — Free Online Tool">
-<meta property="og:description" content="Test regular expressions with live match highlighting, capture groups, and all JavaScript flags. Runs entirely client-side.">
-<meta property="og:url" content="https://devboxkit.com/regex-tester">
+<meta property="og:title" content="JSON ⇄ CSV Converter — Free Online Tool">
+<meta property="og:description" content="Convert JSON arrays of objects to CSV and back, with download. Runs entirely client-side.">
+<meta property="og:url" content="https://devboxkit.com/json-csv-converter">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Regex Tester — Free Online Tool">
-<meta name="twitter:description" content="Test regular expressions with live match highlighting, capture groups, and all JavaScript flags. Runs entirely client-side.">
+<meta name="twitter:title" content="JSON ⇄ CSV Converter — Free Online Tool">
+<meta name="twitter:description" content="Convert JSON arrays of objects to CSV and back, with download. Runs entirely client-side.">
 
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/styles.css">
@@ -23,12 +23,12 @@
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Regex Tester — DevBox Kit",
-  "url": "https://devboxkit.com/regex-tester",
+  "name": "JSON to CSV / CSV to JSON Converter — DevBox Kit",
+  "url": "https://devboxkit.com/json-csv-converter",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "description": "Free browser-based regex tester with live match highlighting, capture groups, and all JavaScript flags."
+  "description": "Free browser-based JSON-to-CSV and CSV-to-JSON converter with quoted-field handling, copy, and download."
 }
 </script>
 
@@ -51,8 +51,8 @@
 
 <main id="main">
   <div class="hero">
-    <h1>Regex Tester</h1>
-    <p>Test regular expressions with live match highlighting, capture groups, and every JavaScript flag.</p>
+    <h1>JSON ⇄ CSV Converter</h1>
+    <p>Convert a JSON array of objects to CSV, or CSV back to JSON — either direction, with download.</p>
     <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
   </div>
 
@@ -61,67 +61,58 @@
     <a role="tab" id="tab-base64" href="/base64-encode-decode" aria-controls="panel-base64" aria-selected="false" class="tab-btn">Base64</a>
     <a role="tab" id="tab-url" href="/url-encoder-decoder" aria-controls="panel-url" aria-selected="false" class="tab-btn">URL Encode/Decode</a>
     <a role="tab" id="tab-timestamp" href="/unix-timestamp-converter" aria-controls="panel-timestamp" aria-selected="false" class="tab-btn">Timestamp</a>
-    <a role="tab" id="tab-regex" href="/regex-tester" aria-controls="panel-regex" aria-selected="true" aria-current="page" class="tab-btn active">Regex Tester</a>
+    <a role="tab" id="tab-regex" href="/regex-tester" aria-controls="panel-regex" aria-selected="false" class="tab-btn">Regex Tester</a>
     <a role="tab" id="tab-uuid" href="/uuid-generator" aria-controls="panel-uuid" aria-selected="false" class="tab-btn">UUID Generator</a>
     <a role="tab" id="tab-hash" href="/hash-generator" aria-controls="panel-hash" aria-selected="false" class="tab-btn">Hash Generator</a>
     <a role="tab" id="tab-jwt" href="/jwt-decoder" aria-controls="panel-jwt" aria-selected="false" class="tab-btn">JWT Decoder</a>
     <a role="tab" id="tab-password" href="/password-generator" aria-controls="panel-password" aria-selected="false" class="tab-btn">Password Generator</a>
-    <a role="tab" id="tab-csv" href="/json-csv-converter" aria-controls="panel-csv" aria-selected="false" class="tab-btn">JSON ⇄ CSV</a>
+    <a role="tab" id="tab-csv" href="/json-csv-converter" aria-controls="panel-csv" aria-selected="true" aria-current="page" class="tab-btn active">JSON ⇄ CSV</a>
     <a role="tab" id="tab-entity" href="/html-entity-encoder" aria-controls="panel-entity" aria-selected="false" class="tab-btn">HTML Entities</a>
   </div>
 
-  <!-- ===================== REGEX TESTER ===================== -->
-  <section aria-label="Regex Tester tool">
+  <!-- ===================== JSON <-> CSV CONVERTER ===================== -->
+  <section aria-label="JSON to CSV and CSV to JSON converter tool">
     <div class="tool-grid split">
       <div class="controls-col">
         <div class="panel">
-          <h2>Pattern</h2>
+          <h2>Input</h2>
           <div class="field">
-            <label for="regex-pattern">Regular expression</label>
-            <input type="text" id="regex-pattern" class="code-area" spellcheck="false" placeholder="e.g. (\w+)@(\w+\.\w+)" value="\w+@\w+\.\w+">
-          </div>
-          <div class="field">
-            <label>Flags</label>
-            <div class="checkbox-row">
-              <label><input type="checkbox" id="regex-flag-g" checked> g <span class="visually-hidden">global</span></label>
-              <label><input type="checkbox" id="regex-flag-i"> i <span class="visually-hidden">ignore case</span></label>
-              <label><input type="checkbox" id="regex-flag-m"> m <span class="visually-hidden">multiline</span></label>
-              <label><input type="checkbox" id="regex-flag-s"> s <span class="visually-hidden">dot all</span></label>
-              <label><input type="checkbox" id="regex-flag-u"> u <span class="visually-hidden">unicode</span></label>
-              <label><input type="checkbox" id="regex-flag-y"> y <span class="visually-hidden">sticky</span></label>
-            </div>
-          </div>
-          <div class="field">
-            <label for="regex-test">Test string</label>
-            <textarea id="regex-test" class="code-area" rows="10" spellcheck="false" placeholder="Paste text to test against the pattern...">Contact us at hello@devboxkit.com or support@example.org for help.</textarea>
+            <label for="csv-input" class="visually-hidden">JSON or CSV input</label>
+            <textarea id="csv-input" class="code-area" rows="16" spellcheck="false" placeholder="Paste a JSON array of objects, or CSV with a header row...">[
+  {"name": "Ada Lovelace", "role": "Mathematician", "year": 1843},
+  {"name": "Grace Hopper", "role": "Computer scientist", "year": 1944}
+]</textarea>
           </div>
           <div class="btn-row">
-            <button type="button" id="regex-run" class="primary">Test</button>
-            <button type="button" id="regex-clear">Clear</button>
+            <button type="button" id="csv-to-csv" class="primary">JSON → CSV</button>
+            <button type="button" id="csv-to-json">CSV → JSON</button>
+            <button type="button" id="csv-clear">Clear</button>
           </div>
-          <div class="error-banner" id="regex-error" role="alert"></div>
+          <div class="error-banner" id="csv-error" role="alert"></div>
         </div>
       </div>
 
       <div class="output-col">
         <div class="panel">
-          <h2>Highlighted matches</h2>
-          <div class="surface" id="regex-highlight-wrap">
-            <pre id="regex-highlight" class="code-area"></pre>
+          <div class="output-toolbar">
+            <h2 style="margin:0;">Output</h2>
+            <div class="btn-row">
+              <button type="button" id="csv-copy" class="icon-btn">Copy</button>
+              <button type="button" id="csv-download" class="icon-btn">Download</button>
+            </div>
           </div>
-        </div>
-        <div class="panel">
-          <h2>Matches &amp; capture groups</h2>
-          <div id="regex-matches-empty" class="surface is-empty" style="min-height:80px;">Run a test to see matches here.</div>
-          <ul class="match-list" id="regex-matches" hidden></ul>
+          <div class="surface" id="csv-output-wrap">
+            <pre id="csv-output" class="code-area" tabindex="0"></pre>
+          </div>
+          <span class="copy-flash" id="csv-copy-flash">Copied!</span>
         </div>
       </div>
     </div>
   </section>
 
   <section class="container-narrow" style="padding-top:40px;">
-    <h2 style="margin-top:0;">About this regex tester</h2>
-    <p>Type a pattern, toggle the flags you need, and hit <strong>Test</strong> to see every match highlighted in your test string along with each match's index and capture groups. Invalid patterns are reported instead of failing silently, and named groups are shown when you use them. Everything runs locally in your browser using the native JavaScript regex engine — nothing you paste is uploaded. For anchors, quantifiers, and how to avoid catastrophic backtracking, read the <a href="/articles/regex-cheat-sheet.html">regex cheat sheet</a>.</p>
+    <h2 style="margin-top:0;">About this JSON ⇄ CSV converter</h2>
+    <p>Paste a JSON array of flat objects and hit JSON → CSV to get a comma-separated table with a header row built from the union of every object's keys — missing fields are left blank rather than causing an error. Going the other way, paste CSV with a header row and hit CSV → JSON to get back an array of objects, one per data row. The CSV parser and writer both handle quoted fields, embedded commas, embedded newlines, and doubled-quote escaping per common CSV conventions (RFC 4180-ish). Use Copy to grab the result or Download to save it as a <code>.csv</code> or <code>.json</code> file. Everything runs locally — nothing you paste is uploaded.</p>
 
     <h2>More developer tools</h2>
     <ul>
@@ -129,11 +120,11 @@
       <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
       <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
       <li><a href="/unix-timestamp-converter">Unix Timestamp Converter</a></li>
+      <li><a href="/regex-tester">Regex Tester</a></li>
       <li><a href="/uuid-generator">UUID Generator</a></li>
       <li><a href="/hash-generator">Hash Generator (MD5 / SHA)</a></li>
       <li><a href="/jwt-decoder">JWT Decoder</a></li>
       <li><a href="/password-generator">Password Generator</a></li>
-      <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
       <li><a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a></li>
       <li><a href="/">All tools on one page (home)</a></li>
     </ul>
