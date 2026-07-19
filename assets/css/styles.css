@@ -1,21 +1,26 @@
 /* devboxkit.com — design system
-   Slate-graphite dev-tool aesthetic, warm amber accent, system monospace stack
-   (zero external font requests). */
+   Terminal / IDE aesthetic: near-black canvas, phosphor-green primary with a
+   cyan companion, faint editor grid, blinking-caret motif. System monospace
+   stack only (zero external font requests). */
 
 :root {
-  --bg: #0b0e14;
-  --bg-raised: #131822;
-  --bg-inset: #080a10;
-  --border: #232a38;
-  --border-soft: #1b212c;
-  --text: #e8ecf1;
-  --text-dim: #98a2b3;
-  --text-faint: #5c6577;
-  --accent: #ffb454;
-  --accent-dim: #cf8f3a;
-  --accent-contrast: #1a1000;
+  --bg: #090c11;
+  --bg-raised: #10151d;
+  --bg-inset: #06080c;
+  --border: #212b38;
+  --border-soft: #18202b;
+  --text: #e6edf3;
+  --text-dim: #93a1b0;
+  --text-faint: #5a6675;
+  --accent: #3ce688;          /* phosphor green */
+  --accent-dim: #23b567;
+  --accent-contrast: #05130b;
+  --accent-2: #38bdf8;        /* terminal cyan */
+  --accent-2-dim: #1f8fc9;
   --danger: #ff6b6b;
-  --focus: #7cc6ff;
+  --focus: #6ee0ff;
+  --glow: 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent),
+          0 6px 22px -8px color-mix(in srgb, var(--accent) 55%, transparent);
   --radius: 6px;
   --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Menlo", "Consolas",
     "Liberation Mono", monospace;
@@ -23,33 +28,37 @@
 }
 
 :root[data-theme="light"] {
-  --bg: #f7f7f5;
+  --bg: #f4f7f4;
   --bg-raised: #ffffff;
-  --bg-inset: #eef0ec;
-  --border: #dcdfd8;
-  --border-soft: #e7e9e3;
-  --text: #14181a;
-  --text-dim: #4b5560;
-  --text-faint: #8a939c;
-  --accent: #a15c12;
-  --accent-dim: #7d480d;
-  --accent-contrast: #fff8ef;
+  --bg-inset: #e9efe9;
+  --border: #d3ddd3;
+  --border-soft: #e2e9e2;
+  --text: #101613;
+  --text-dim: #46554c;
+  --text-faint: #7c8a80;
+  --accent: #0f8a4d;
+  --accent-dim: #0b6f3d;
+  --accent-contrast: #f2fff7;
+  --accent-2: #0a6cbf;
+  --accent-2-dim: #075494;
   --focus: #0a6cbf;
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
-    --bg: #f7f7f5;
+    --bg: #f4f7f4;
     --bg-raised: #ffffff;
-    --bg-inset: #eef0ec;
-    --border: #dcdfd8;
-    --border-soft: #e7e9e3;
-    --text: #14181a;
-    --text-dim: #4b5560;
-    --text-faint: #8a939c;
-    --accent: #a15c12;
-    --accent-dim: #7d480d;
-    --accent-contrast: #fff8ef;
+    --bg-inset: #e9efe9;
+    --border: #d3ddd3;
+    --border-soft: #e2e9e2;
+    --text: #101613;
+    --text-dim: #46554c;
+    --text-faint: #7c8a80;
+    --accent: #0f8a4d;
+    --accent-dim: #0b6f3d;
+    --accent-contrast: #f2fff7;
+    --accent-2: #0a6cbf;
+    --accent-2-dim: #075494;
     --focus: #0a6cbf;
   }
 }
@@ -60,6 +69,11 @@ html { color-scheme: dark light; }
 body {
   margin: 0;
   background: var(--bg);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--accent) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--accent-2) 4%, transparent) 1px, transparent 1px);
+  background-size: 44px 44px, 44px 44px;
+  background-position: -1px -1px;
   color: var(--text);
   font-family: var(--mono);
   font-size: 15px;
@@ -102,12 +116,12 @@ button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible
   outline-offset: 2px;
 }
 button.primary {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, var(--accent-2)));
+  border-color: transparent;
   color: var(--accent-contrast);
-  font-weight: 600;
+  font-weight: 700;
 }
-button.primary:hover { color: var(--accent-contrast); filter: brightness(1.08); }
+button.primary:hover { color: var(--accent-contrast); filter: brightness(1.06); box-shadow: var(--glow); }
 button:disabled { opacity: .45; cursor: not-allowed; }
 button.icon-btn { padding: 6px 10px; font-size: 13px; }
 
@@ -155,7 +169,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   font-size: 18px;
   letter-spacing: -0.02em;
 }
-.brand-mark .bracket { color: var(--accent); }
+.brand-mark .bracket { color: var(--accent); text-shadow: 0 0 12px color-mix(in srgb, var(--accent) 60%, transparent); }
 .brand-tag { color: var(--text-faint); font-size: 12px; display: none; }
 @media (min-width: 640px) { .brand-tag { display: inline; } }
 
@@ -172,12 +186,53 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 24px 20px 60px; }
 .faq-item h3 { font-size: 15px; margin: 0 0 6px; }
 .faq-item p { margin: 0; color: var(--text-dim); }
 
-/* ---------- hero ---------- */
-.hero { text-align: center; padding: 20px 0 28px; }
+/* ---------- hero (terminal window) ---------- */
+.hero {
+  position: relative;
+  margin: 8px 0 22px;
+  padding: 40px 22px 22px;
+  background:
+    radial-gradient(120% 80% at 15% -10%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 60%),
+    var(--bg-raised);
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  overflow: hidden;
+}
+/* title bar with traffic-light dots + path label */
+.hero::before {
+  content: "~/devbox — zsh";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 30px;
+  padding-left: 66px;
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-faint);
+  letter-spacing: .02em;
+  background-color: var(--bg-inset);
+  background-image:
+    radial-gradient(circle at 18px 15px, #ff5f57 4px, transparent 4.5px),
+    radial-gradient(circle at 34px 15px, #febc2e 4px, transparent 4.5px),
+    radial-gradient(circle at 50px 15px, #28c840 4px, transparent 4.5px);
+  background-repeat: no-repeat;
+  border-bottom: 1px solid var(--border-soft);
+}
 .hero h1 {
-  font-size: clamp(22px, 4vw, 34px);
+  font-size: clamp(21px, 3.6vw, 32px);
   margin: 0 0 8px;
   letter-spacing: -0.01em;
+}
+.hero h1::before { content: "$ "; color: var(--accent); }
+.hero h1::after {
+  content: "";
+  display: inline-block;
+  width: .58em; height: 1.05em;
+  margin-left: .12em;
+  vertical-align: -0.18em;
+  background: var(--accent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 70%, transparent);
+  animation: caret-blink 1.1s steps(1) infinite;
 }
 .hero p { color: var(--text-dim); margin: 0; font-size: 14.5px; }
 .hero .trust-line {
@@ -185,7 +240,15 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 24px 20px 60px; }
   font-size: 12.5px;
   color: var(--text-faint);
 }
-.hero .trust-line .dot { color: var(--accent); margin: 0 6px; }
+.hero .trust-line .dot { color: var(--accent-2); margin: 0 6px; }
+
+@keyframes caret-blink {
+  0%, 50% { opacity: 1; }
+  50.01%, 100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero h1::after { animation: none; }
+}
 
 /* ---------- tabs ---------- */
 .tabbar {
@@ -212,7 +275,11 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 24px 20px 60px; }
 .tab-btn:hover { color: var(--text); border-color: var(--border); }
 .tab-btn[aria-selected="true"],
 .tab-btn[aria-current="page"],
-.tab-btn.active { color: var(--accent); border-color: var(--accent); }
+.tab-btn.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 8px 14px -12px color-mix(in srgb, var(--accent) 90%, transparent);
+}
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
@@ -454,5 +521,5 @@ mark.regex-match {
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
 
-.erabbit-mark { display: block; width: 10px; margin: 0 0 0 auto; line-height: 0; }
+.erabbit-mark { display: block; width: 10px; margin: 0 0 0 auto; line-height: 0; cursor: default; }
 .erabbit-mark img { display: block; width: 10px; height: 10px; }
