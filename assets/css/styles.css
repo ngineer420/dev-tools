@@ -250,14 +250,35 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 24px 20px 60px; }
   .hero h1::after { animation: none; }
 }
 
-/* ---------- tabs ---------- */
+/* ---------- tabs ----------
+   Twelve tools wrapping to six rows put 284px of navigation above the fold on a
+   390px screen — the whole first screen was the menu. One row that scrolls
+   sideways instead: the strip is a single tab tall at every width, and app.js
+   scrolls the current tool into view on load. The fade marks the edge there is
+   more to scroll towards; it is driven by the can-scroll-* classes, so with no
+   JS nothing is dimmed and the strip is still a plain scrollable row. */
 .tabbar {
   display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
+  gap: 0;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: 22px; /* focus-scrolling shouldn't jam a tab to the edge */
+  scrollbar-width: none;
   border-bottom: 1px solid var(--border-soft);
   margin-bottom: 20px;
+  --fade-start: 0px;
+  --fade-end: 0px;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-start),
+    #000 calc(100% - var(--fade-end)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-start),
+    #000 calc(100% - var(--fade-end)), transparent 100%);
 }
+.tabbar::-webkit-scrollbar { display: none; } /* the fade is the affordance */
+.tabbar.can-scroll-start { --fade-start: 28px; }
+.tabbar.can-scroll-end { --fade-end: 28px; }
 .tab-btn {
   background: transparent;
   border: none;
@@ -271,6 +292,8 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 24px 20px 60px; }
   text-decoration: none;
   cursor: pointer;
   display: inline-block;
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 .tab-btn:hover { color: var(--text); border-color: var(--border); }
 .tab-btn[aria-selected="true"],
