@@ -523,3 +523,84 @@ mark.regex-match {
 
 .erabbit-mark { display: block; width: 10px; margin: 0 0 0 auto; line-height: 0; cursor: default; }
 .erabbit-mark img { display: block; width: 10px; height: 10px; }
+
+/* ---------- file drop zone (hash generator) ---------- */
+.drop-zone {
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: var(--bg-inset);
+  padding: 18px 14px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+  transition: border-color .12s ease, background .12s ease, color .12s ease;
+}
+.drop-zone.is-over {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-inset));
+}
+.drop-zone input[type="file"] {
+  /* The visible affordance is the styled label; the input itself is only
+     needed so a click can open the picker and keyboard users can reach it. */
+  width: auto;
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--text-dim);
+}
+.source-note { font-size: 12.5px; color: var(--text-faint); margin: 10px 0 0; }
+
+/* ---------- hash compare verdict ---------- */
+.compare-result {
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-inset);
+  color: var(--text-dim);
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-top: 12px;
+}
+.compare-result.is-match {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-inset));
+  color: var(--accent);
+  font-weight: 600;
+}
+.compare-result.is-mismatch {
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+  background: color-mix(in srgb, var(--danger) 10%, var(--bg-inset));
+  color: var(--danger);
+}
+
+/* ---------- cron explainer ---------- */
+.cron-description {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--accent);
+  background: var(--bg-inset);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+.run-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.run-list li {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+.example-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.example-row button { font-family: var(--mono); font-size: 12.5px; padding: 6px 10px; }
+.cron-legend {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--text-faint);
+  background: var(--bg-inset);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  white-space: pre;
+}

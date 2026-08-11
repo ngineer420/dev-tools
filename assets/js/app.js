@@ -296,41 +296,105 @@ function uuidV1Like() {
   ].join("-");
 }
 
+// RFC 9562 version 7: a 48-bit big-endian Unix timestamp in milliseconds
+// followed by random bits, so lexicographic order matches creation order. That
+// is the property v4 lacks and the reason v7 is worth having — a v7 primary key
+// clusters in a B-tree index instead of scattering across it.
+//
+// Layout:
+//   bytes 0-5   unix_ts_ms, big-endian
+//   byte  6     version nibble (0111) + 4 random bits (rand_a high)
+//   byte  7     rand_a low
+//   byte  8     variant bits (10) + 6 random bits
+//   bytes 9-15  rand_b
+//
+// The 12 bits of rand_a are used as a per-millisecond counter (RFC 9562 §6.2,
+// "fixed-length dedicated counter"). Without it, a bulk generation of 1000 ids
+// all lands in the same millisecond and comes out in random order — which
+// throws away the one property v7 exists to provide. The counter is seeded
+// from the low half of its range so there is always headroom to count up, and
+// on overflow it borrows the next millisecond rather than repeating a value.
+let v7LastMs = 0;
+let v7Counter = 0;
+
+function uuidV7() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+
+  let ms = Date.now();
+  if (ms > v7LastMs) {
+    v7LastMs = ms;
+    v7Counter = ((bytes[6] << 8) | bytes[7]) & 0x07ff;
+  } else {
+    // Same millisecond, or the wall clock stepped backwards: keep the sequence
+    // moving forwards regardless, so sort order never breaks.
+    ms = v7LastMs;
+    v7Counter += 1;
+    if (v7Counter > 0x0fff) {
+      v7LastMs += 1;
+      ms = v7LastMs;
+      v7Counter = ((bytes[6] << 8) | bytes[7]) & 0x07ff;
+    }
+  }
+
+  const t = BigInt(ms);
+  for (let i = 0; i < 6; i++) {
+    // Byte 0 is the most significant, so shift the furthest for the lowest index.
+    bytes[i] = Number((t >> BigInt(8 * (5 - i))) & 0xffn);
+  }
+
+  bytes[6] = 0x70 | ((v7Counter >> 8) & 0x0f); // version 7 + counter high nibble
+  bytes[7] = v7Counter & 0xff;                 // counter low byte
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;         // variant 10xx
+  return bytesToUuid(bytes);
+}
+
+const UUID_GENERATORS = { v4: uuidV4, v7: uuidV7, v1: uuidV1Like };
+
 function generateUuids(count, version) {
   const n = Math.max(1, Math.min(1000, Math.floor(Number(count) || 1)));
+  const make = UUID_GENERATORS[version] || uuidV4;
   const out = [];
-  for (let i = 0; i < n; i++) out.push(version === "v1" ? uuidV1Like() : uuidV4());
+  for (let i = 0; i < n; i++) out.push(make());
   return out;
 }
 
 /* ============================= Hash generator tool ============================= */
 
-// Self-contained MD5 (RFC 1321). SubtleCrypto has no MD5, so this is the one
-// algorithm implemented by hand here; SHA-1/256/512 use crypto.subtle below.
-function md5(message) {
-  function rotl(x, n) { return (x << n) | (x >>> (32 - n)); }
-  function toBytesUtf8(str) {
-    const bytes = [];
-    for (let i = 0; i < str.length; i++) {
-      let code = str.codePointAt(i);
-      if (code > 0xffff) i++; // consumed a surrogate pair
-      if (code < 0x80) {
-        bytes.push(code);
-      } else if (code < 0x800) {
-        bytes.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f));
-      } else if (code < 0x10000) {
-        bytes.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
-      } else {
-        bytes.push(
-          0xf0 | (code >> 18),
-          0x80 | ((code >> 12) & 0x3f),
-          0x80 | ((code >> 6) & 0x3f),
-          0x80 | (code & 0x3f)
-        );
-      }
+function utf8Bytes(str) {
+  const bytes = [];
+  for (let i = 0; i < str.length; i++) {
+    let code = str.codePointAt(i);
+    if (code > 0xffff) i++; // consumed a surrogate pair
+    if (code < 0x80) {
+      bytes.push(code);
+    } else if (code < 0x800) {
+      bytes.push(0xc0 | (code >> 6), 0x80 | (code & 0x3f));
+    } else if (code < 0x10000) {
+      bytes.push(0xe0 | (code >> 12), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+    } else {
+      bytes.push(
+        0xf0 | (code >> 18),
+        0x80 | ((code >> 12) & 0x3f),
+        0x80 | ((code >> 6) & 0x3f),
+        0x80 | (code & 0x3f)
+      );
     }
-    return bytes;
   }
+  return bytes;
+}
+
+// Self-contained MD5 (RFC 1321). SubtleCrypto has no MD5, so this is the one
+// algorithm implemented by hand here; the SHA family uses crypto.subtle below.
+function md5(message) {
+  return md5Bytes(utf8Bytes(message === undefined || message === null ? "" : String(message)));
+}
+
+// The digest over raw bytes. A dropped file must be hashed as bytes: decoding
+// it as UTF-8 first would corrupt every non-text file, and the whole point of
+// "md5 of this download" is that it matches what the publisher computed.
+function md5Bytes(input) {
+  function rotl(x, n) { return (x << n) | (x >>> (32 - n)); }
 
   const K = new Array(64);
   for (let i = 0; i < 64; i++) K[i] = Math.floor(Math.abs(Math.sin(i + 1)) * 4294967296) >>> 0;
@@ -342,7 +406,7 @@ function md5(message) {
     6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
   ];
 
-  const bytes = toBytesUtf8(message === undefined || message === null ? "" : String(message));
+  const bytes = Array.from(input || []);
   const bitLenLo = (bytes.length * 8) >>> 0;
   const bitLenHi = Math.floor(bytes.length / 0x20000000);
 
@@ -400,20 +464,89 @@ function md5(message) {
   return toHexLE(a0) + toHexLE(b0) + toHexLE(c0) + toHexLE(d0);
 }
 
+const SHA_ALGORITHMS = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"];
+
+function toHex(buffer) {
+  return Array.from(new Uint8Array(buffer), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 // Requires a secure context (crypto.subtle) — https:// or localhost.
 async function subtleDigestHex(algorithm, text) {
   const bytes = new TextEncoder().encode(text === undefined || text === null ? "" : String(text));
-  const buf = await crypto.subtle.digest(algorithm, bytes);
-  return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
+  return toHex(await crypto.subtle.digest(algorithm, bytes));
+}
+
+async function subtleDigestBytesHex(algorithm, bytes) {
+  return toHex(await crypto.subtle.digest(algorithm, bytes));
 }
 
 async function hashText(text) {
-  const [sha1, sha256, sha512] = await Promise.all([
-    subtleDigestHex("SHA-1", text),
-    subtleDigestHex("SHA-256", text),
-    subtleDigestHex("SHA-512", text),
-  ]);
-  return { md5: md5(text), sha1, sha256, sha512 };
+  const [sha1, sha256, sha384, sha512] = await Promise.all(
+    SHA_ALGORITHMS.map((a) => subtleDigestHex(a, text))
+  );
+  return { md5: md5(text), sha1, sha256, sha384, sha512 };
+}
+
+/**
+ * Every digest over raw bytes — used for a dropped or picked file, where the
+ * content must not be run through a text decoder first.
+ */
+async function hashBytes(bytes) {
+  const view = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  const [sha1, sha256, sha384, sha512] = await Promise.all(
+    SHA_ALGORITHMS.map((a) => subtleDigestBytesHex(a, view))
+  );
+  return { md5: md5Bytes(view), sha1, sha256, sha384, sha512 };
+}
+
+/**
+ * HMAC over text with a text key. Note this is the one place MD5 is absent:
+ * crypto.subtle has no HMAC-MD5 and hand-rolling one here would be a worse
+ * trade than saying so in the UI.
+ */
+async function hmacHex(algorithm, key, message) {
+  const enc = new TextEncoder();
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(key === undefined || key === null ? "" : String(key)),
+    { name: "HMAC", hash: algorithm },
+    false,
+    ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", cryptoKey, enc.encode(message == null ? "" : String(message)));
+  return toHex(sig);
+}
+
+/**
+ * Compare two hex digests the way a human pasting them wants: whitespace and
+ * case are noise, and a length mismatch usually means two different algorithms
+ * rather than a corrupted file, which is worth saying out loud.
+ */
+function compareHashes(a, b) {
+  const norm = (s) => String(s == null ? "" : s).trim().toLowerCase().replace(/\s+/g, "");
+  const x = norm(a);
+  const y = norm(b);
+  if (!x || !y) return { ok: false, status: "empty", message: "Paste two hashes to compare." };
+  const nonHex = /[^0-9a-f]/.test(x) || /[^0-9a-f]/.test(y);
+  if (x === y) {
+    return { ok: true, status: "match", message: "The two hashes match." };
+  }
+  if (x.length !== y.length) {
+    return {
+      ok: false,
+      status: "length",
+      message:
+        "No match — and the lengths differ (" + x.length + " vs " + y.length +
+        " characters), so these are probably digests from two different algorithms.",
+    };
+  }
+  return {
+    ok: false,
+    status: nonHex ? "invalid" : "differ",
+    message: nonHex
+      ? "No match — and at least one value contains characters that are not hexadecimal."
+      : "No match — the two hashes are different.",
+  };
 }
 
 /* ============================= JWT decoder tool ============================= */
@@ -629,6 +762,291 @@ function htmlEntityDecode(str) {
   });
 }
 
+/* ============================= Cron expression tool ============================= */
+
+const CRON_MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+const CRON_DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+const CRON_MONTH_ALIASES = {
+  jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6,
+  jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12,
+};
+const CRON_DAY_ALIASES = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+
+// The @-shorthands every cron implementation accepts, expanded to their
+// equivalent five-field form so there is only one code path below.
+const CRON_MACROS = {
+  "@yearly": "0 0 1 1 *",
+  "@annually": "0 0 1 1 *",
+  "@monthly": "0 0 1 * *",
+  "@weekly": "0 0 * * 0",
+  "@daily": "0 0 * * *",
+  "@midnight": "0 0 * * *",
+  "@hourly": "0 * * * *",
+};
+
+const CRON_FIELDS = [
+  { name: "minute", min: 0, max: 59 },
+  { name: "hour", min: 0, max: 23 },
+  { name: "dom", min: 1, max: 31, label: "day of month" },
+  { name: "month", min: 1, max: 12, label: "month", aliases: CRON_MONTH_ALIASES },
+  { name: "dow", min: 0, max: 7, label: "day of week", aliases: CRON_DAY_ALIASES },
+];
+
+/**
+ * Expand one cron field into the sorted list of values it matches.
+ * Handles `*`, `a`, `a-b`, `a-b/n`, `*` + `/n`, comma-separated lists of any of
+ * those, and the three-letter month/day names.
+ * @returns {{ok: true, values: number[]}|{ok: false, message: string}}
+ */
+function parseCronField(spec, field) {
+  const raw = String(spec == null ? "" : spec).trim();
+  // Quartz writes "?" for "no specific value"; treat it as the wildcard it is.
+  if (raw === "") return { ok: false, message: "The " + (field.label || field.name) + " field is empty." };
+
+  const values = new Set();
+  const alias = (token) => {
+    const key = token.toLowerCase();
+    if (field.aliases && Object.prototype.hasOwnProperty.call(field.aliases, key)) return field.aliases[key];
+    if (!/^\d+$/.test(token)) return NaN;
+    return Number(token);
+  };
+
+  for (const part of raw.split(",")) {
+    const chunk = part.trim();
+    if (!chunk) return { ok: false, message: 'Empty entry in the ' + (field.label || field.name) + ' field ("' + raw + '").' };
+
+    const slash = chunk.split("/");
+    if (slash.length > 2) {
+      return { ok: false, message: 'Too many "/" in "' + chunk + '".' };
+    }
+    let step = 1;
+    if (slash.length === 2) {
+      if (!/^\d+$/.test(slash[1]) || Number(slash[1]) === 0) {
+        return { ok: false, message: 'Step must be a positive whole number in "' + chunk + '".' };
+      }
+      step = Number(slash[1]);
+    }
+
+    const base = slash[0].trim();
+    let lo;
+    let hi;
+    if (base === "*" || base === "?") {
+      lo = field.min;
+      hi = field.max;
+    } else if (base.includes("-")) {
+      const [a, b] = base.split("-");
+      lo = alias(a.trim());
+      hi = alias(b.trim());
+      if (!Number.isFinite(lo) || !Number.isFinite(hi)) {
+        return { ok: false, message: 'Could not read the range "' + base + '" in the ' + (field.label || field.name) + " field." };
+      }
+    } else {
+      lo = alias(base);
+      if (!Number.isFinite(lo)) {
+        return { ok: false, message: '"' + base + '" is not a valid ' + (field.label || field.name) + " value." };
+      }
+      // A bare value with a step means "from here to the end of the range",
+      // which is the Vixie cron reading of "5/10".
+      hi = slash.length === 2 ? field.max : lo;
+    }
+
+    if (lo < field.min || hi > field.max || lo > hi) {
+      return {
+        ok: false,
+        message:
+          "The " + (field.label || field.name) + " field accepts " + field.min + "–" + field.max +
+          ', but got "' + chunk + '".',
+      };
+    }
+    for (let v = lo; v <= hi; v += step) values.add(v);
+  }
+
+  return { ok: true, values: Array.from(values).sort((a, b) => a - b) };
+}
+
+/**
+ * Parse a standard five-field cron expression (or an @macro).
+ * @returns {{ok: true, ...}|{ok: false, message: string}}
+ */
+function parseCron(expression) {
+  let expr = String(expression == null ? "" : expression).trim();
+  if (!expr) return { ok: false, message: "Enter a cron expression." };
+
+  const macro = CRON_MACROS[expr.toLowerCase()];
+  if (expr.toLowerCase() === "@reboot") {
+    return { ok: false, message: "@reboot runs once when the machine starts, so it has no schedule to predict." };
+  }
+  if (macro) expr = macro;
+
+  const parts = expr.split(/\s+/);
+  if (parts.length === 6 || parts.length === 7) {
+    return {
+      ok: false,
+      message:
+        "This looks like a " + parts.length + "-field expression (Quartz or a seconds field). " +
+        "This tool reads the standard five-field crontab format: minute hour day-of-month month day-of-week.",
+    };
+  }
+  if (parts.length !== 5) {
+    return {
+      ok: false,
+      message: "A cron expression has 5 fields (minute hour day-of-month month day-of-week); found " + parts.length + ".",
+    };
+  }
+
+  const raw = {};
+  const values = {};
+  for (let i = 0; i < CRON_FIELDS.length; i++) {
+    const field = CRON_FIELDS[i];
+    const result = parseCronField(parts[i], field);
+    if (!result.ok) return result;
+    raw[field.name] = parts[i];
+    values[field.name] = result.values;
+  }
+
+  // Both 0 and 7 mean Sunday; normalise so day matching is a simple lookup.
+  values.dow = Array.from(new Set(values.dow.map((d) => (d === 7 ? 0 : d)))).sort((a, b) => a - b);
+
+  return { ok: true, expression: expr, raw, values };
+}
+
+const isWildcard = (spec) => spec === "*" || spec === "?";
+
+function cronFormatList(items) {
+  if (items.length === 0) return "";
+  if (items.length === 1) return String(items[0]);
+  return items.slice(0, -1).join(", ") + " and " + items[items.length - 1];
+}
+
+const pad2 = (n) => String(n).padStart(2, "0");
+
+// The step of a wildcard-with-step field such as "*<slash>5", or null when the
+// field is not a plain step. (Written without the literal slash sequence so it
+// cannot terminate a comment.)
+function cronStep(spec) {
+  const m = /^(\*|\?)\/(\d+)$/.exec(String(spec).trim());
+  return m ? Number(m[2]) : null;
+}
+
+/**
+ * Render a parsed expression as a plain-English sentence.
+ */
+function describeCron(parsed) {
+  if (!parsed || !parsed.ok) return "";
+  const { raw, values } = parsed;
+  const minuteAll = isWildcard(raw.minute);
+  const hourAll = isWildcard(raw.hour);
+  const minuteStep = cronStep(raw.minute);
+  const hourStep = cronStep(raw.hour);
+
+  let time;
+  if (minuteAll && hourAll) {
+    time = "Every minute";
+  } else if (hourAll) {
+    if (minuteStep) time = "Every " + minuteStep + " minutes";
+    else if (values.minute.length === 1) time = "Every hour at minute " + values.minute[0];
+    else time = "Every hour at minutes " + cronFormatList(values.minute);
+  } else if (minuteAll) {
+    if (hourStep) time = "Every minute, every " + hourStep + " hours";
+    else time = "Every minute during " + cronFormatList(values.hour.map((h) => pad2(h) + ":00")) ;
+  } else if (minuteStep) {
+    time = "Every " + minuteStep + " minutes during " + cronFormatList(values.hour.map((h) => pad2(h) + ":00"));
+  } else {
+    // Enumerate the actual HH:MM times, unless there are too many to read.
+    const times = [];
+    for (const h of values.hour) for (const m of values.minute) times.push(pad2(h) + ":" + pad2(m));
+    time = times.length <= 8
+      ? "At " + cronFormatList(times)
+      : "At minutes " + cronFormatList(values.minute) + " past hours " + cronFormatList(values.hour);
+  }
+
+  const clauses = [time];
+
+  const domAll = isWildcard(raw.dom);
+  const dowAll = isWildcard(raw.dow);
+
+  if (!domAll && !dowAll) {
+    // Vixie cron ORs the two day fields when both are restricted. This trips
+    // people up constantly, so the sentence says it rather than implying "and".
+    clauses.push(
+      "on day-of-month " + cronFormatList(values.dom) +
+      " or on " + cronFormatList(values.dow.map((d) => CRON_DAY_NAMES[d])) +
+      " (cron matches either when both day fields are set)"
+    );
+  } else if (!domAll) {
+    clauses.push("on day-of-month " + cronFormatList(values.dom));
+  } else if (!dowAll) {
+    clauses.push("only on " + cronFormatList(values.dow.map((d) => CRON_DAY_NAMES[d])));
+  }
+
+  if (!isWildcard(raw.month)) {
+    clauses.push("in " + cronFormatList(values.month.map((m) => CRON_MONTH_NAMES[m - 1])));
+  }
+
+  return clauses.join(", ") + ".";
+}
+
+/** Does this calendar day satisfy the month + day-of-month/day-of-week rules? */
+function cronDayMatches(date, parsed) {
+  const { raw, values } = parsed;
+  if (!values.month.includes(date.getMonth() + 1)) return false;
+
+  const domRestricted = !isWildcard(raw.dom);
+  const dowRestricted = !isWildcard(raw.dow);
+  const domOk = values.dom.includes(date.getDate());
+  const dowOk = values.dow.includes(date.getDay());
+
+  if (domRestricted && dowRestricted) return domOk || dowOk;
+  if (domRestricted) return domOk;
+  if (dowRestricted) return dowOk;
+  return true;
+}
+
+/**
+ * The next `count` times this expression fires, at or after `from`.
+ *
+ * Walks day by day and only then over the matching hours and minutes, rather
+ * than testing every minute — otherwise a rare schedule such as "1st of
+ * February" would mean millions of iterations to find one run.
+ */
+function nextCronRuns(parsed, from, count) {
+  if (!parsed || !parsed.ok) return [];
+  const wanted = Math.max(1, Math.min(50, Math.floor(count || 5)));
+  const start = from instanceof Date ? new Date(from.getTime()) : new Date();
+  // Cron has minute resolution; begin at the start of the next minute.
+  start.setSeconds(0, 0);
+  start.setMinutes(start.getMinutes() + 1);
+
+  const out = [];
+  const day = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  // Twenty years is enough to return five runs even for the rarest realistic
+  // schedule (29 February, which fires once every four years), while still
+  // terminating on an expression that can never match at all, such as
+  // "30 February". It is only ~7300 day-tests, so the bound costs nothing.
+  const limit = new Date(day.getTime());
+  limit.setFullYear(limit.getFullYear() + 20);
+
+  while (day <= limit && out.length < wanted) {
+    if (cronDayMatches(day, parsed)) {
+      for (const h of parsed.values.hour) {
+        if (out.length >= wanted) break;
+        for (const m of parsed.values.minute) {
+          const when = new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m, 0, 0);
+          if (when < start) continue;
+          out.push(when);
+          if (out.length >= wanted) break;
+        }
+      }
+    }
+    day.setDate(day.getDate() + 1);
+  }
+  return out;
+}
+
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     escapeHtml,
@@ -651,10 +1069,19 @@ if (typeof module !== "undefined" && module.exports) {
     bytesToUuid,
     uuidV4,
     uuidV1Like,
+    uuidV7,
     generateUuids,
+    utf8Bytes,
     md5,
+    md5Bytes,
+    toHex,
     subtleDigestHex,
+    subtleDigestBytesHex,
     hashText,
+    hashBytes,
+    hmacHex,
+    compareHashes,
+    SHA_ALGORITHMS,
     base64UrlDecode,
     decodeJwt,
     buildPasswordCharset,
@@ -666,6 +1093,12 @@ if (typeof module !== "undefined" && module.exports) {
     csvToJson,
     htmlEntityEncode,
     htmlEntityDecode,
+    parseCronField,
+    parseCron,
+    describeCron,
+    cronDayMatches,
+    nextCronRuns,
+    cronFormatList,
   };
 }
 
@@ -707,6 +1140,16 @@ if (typeof document !== "undefined") {
       el.classList.remove("show");
     }
 
+    // Keeps live-as-you-type tools from rehashing or reparsing on every
+    // keystroke, which matters most for the hash tool's four digests.
+    function debounce(fn, ms) {
+      let t;
+      return (...args) => {
+        clearTimeout(t);
+        t = setTimeout(() => fn(...args), ms);
+      };
+    }
+
     /* ---- theme toggle ---- */
     (function initTheme() {
       const stored = localStorage.getItem("dbk-theme");
@@ -728,6 +1171,7 @@ if (typeof document !== "undefined") {
       const tabIds = [
         "tab-json", "tab-base64", "tab-url", "tab-timestamp", "tab-regex",
         "tab-uuid", "tab-hash", "tab-jwt", "tab-password", "tab-csv", "tab-entity",
+        "tab-cron",
       ];
       const tabs = tabIds.map((id) => document.getElementById(id)).filter(Boolean);
       // No tool menu on this page; nothing to wire up.
@@ -740,7 +1184,7 @@ if (typeof document !== "undefined") {
         panels[t.id] = p;
         if (!p) allPanels = false;
       });
-      // Only the homepage keeps all five tool panels in the DOM. On a standalone
+      // Only the homepage keeps all the tool panels in the DOM. On a standalone
       // tool page the menu links are plain navigation — do not intercept them.
       if (!allPanels) return;
 
@@ -757,6 +1201,7 @@ if (typeof document !== "undefined") {
         "/password-generator": "tab-password",
         "/json-csv-converter": "tab-csv",
         "/html-entity-encoder": "tab-entity",
+        "/cron-expression-parser": "tab-cron",
       };
 
       function tabIdForPath(pathname) {
@@ -1065,18 +1510,30 @@ if (typeof document !== "undefined") {
       const copyFlash = document.getElementById("uuid-copy-flash");
       const versionBtns = {
         v4: document.getElementById("uuid-version-v4"),
+        v7: document.getElementById("uuid-version-v7"),
         v1: document.getElementById("uuid-version-v1"),
       };
+      const note = document.getElementById("uuid-note");
       if (!countInput || !output || !versionBtns.v4) return;
+
+      const NOTES = {
+        v4: "122 random bits from crypto.getRandomValues. No ordering — use v7 if these become database keys.",
+        v7: "A 48-bit millisecond timestamp followed by random bits, so sorting these strings sorts them by creation time.",
+        v1: "Time-ordered, but not a spec-faithful v1: the node ID is random rather than a MAC address.",
+      };
 
       let version = "v4";
       function setVersion(v) {
         version = v;
-        versionBtns.v4.setAttribute("aria-pressed", String(v === "v4"));
-        versionBtns.v1.setAttribute("aria-pressed", String(v === "v1"));
+        Object.keys(versionBtns).forEach((k) => {
+          if (versionBtns[k]) versionBtns[k].setAttribute("aria-pressed", String(k === v));
+        });
+        if (note) note.textContent = NOTES[v] || "";
       }
-      versionBtns.v4.addEventListener("click", () => setVersion("v4"));
-      versionBtns.v1.addEventListener("click", () => setVersion("v1"));
+      Object.keys(versionBtns).forEach((k) => {
+        if (versionBtns[k]) versionBtns[k].addEventListener("click", () => { setVersion(k); render(); });
+      });
+      setVersion("v4");
 
       function render() {
         output.textContent = generateUuids(countInput.value, version).join("\n");
@@ -1102,9 +1559,46 @@ if (typeof document !== "undefined") {
         md5: document.getElementById("hash-out-md5"),
         sha1: document.getElementById("hash-out-sha1"),
         sha256: document.getElementById("hash-out-sha256"),
+        sha384: document.getElementById("hash-out-sha384"),
         sha512: document.getElementById("hash-out-sha512"),
       };
       if (!input || !outputs.md5) return;
+
+      const sourceLabel = document.getElementById("hash-source");
+      const dropZone = document.getElementById("hash-drop");
+      const fileInput = document.getElementById("hash-file");
+      const hmacKey = document.getElementById("hash-hmac-key");
+      const hmacAlgo = document.getElementById("hash-hmac-algo");
+      const hmacOut = document.getElementById("hash-out-hmac");
+      const hmacRow = document.getElementById("hash-hmac-row");
+
+      // Holds the bytes of a dropped file. Null means "hash the textarea".
+      let fileBytes = null;
+      let fileName = "";
+
+      function setOutputs(result) {
+        Object.keys(outputs).forEach((k) => {
+          if (outputs[k]) outputs[k].textContent = result ? result[k] : "—";
+        });
+      }
+
+      async function runHmac() {
+        if (!hmacOut) return;
+        // HMAC is keyed, so it only makes sense over the text input, and only
+        // once a key exists. crypto.subtle has no HMAC-MD5, hence the SHA list.
+        if (!hmacKey || !hmacKey.value) {
+          hmacOut.textContent = "—";
+          if (hmacRow) hmacRow.classList.toggle("is-idle", true);
+          return;
+        }
+        if (hmacRow) hmacRow.classList.toggle("is-idle", false);
+        try {
+          hmacOut.textContent = await hmacHex(hmacAlgo.value, hmacKey.value, input.value);
+        } catch (e) {
+          hmacOut.textContent = "—";
+          showError(errorEl, "Could not compute HMAC: " + e.message);
+        }
+      }
 
       async function run() {
         if (!window.crypto || !crypto.subtle) {
@@ -1112,23 +1606,79 @@ if (typeof document !== "undefined") {
           return;
         }
         try {
-          const result = await hashText(input.value);
+          const result = fileBytes ? await hashBytes(fileBytes) : await hashText(input.value);
           hideError(errorEl);
-          outputs.md5.textContent = result.md5;
-          outputs.sha1.textContent = result.sha1;
-          outputs.sha256.textContent = result.sha256;
-          outputs.sha512.textContent = result.sha512;
+          setOutputs(result);
+          await runHmac();
         } catch (e) {
           showError(errorEl, "Could not compute hashes: " + e.message);
         }
       }
 
+      function useText() {
+        fileBytes = null;
+        fileName = "";
+        if (sourceLabel) sourceLabel.textContent = "Hashing the text above.";
+        input.disabled = false;
+        run();
+      }
+
+      async function useFile(file) {
+        if (!file) return;
+        try {
+          // Read as bytes, never as text — decoding a binary file as UTF-8
+          // would change the content and therefore the digest.
+          fileBytes = new Uint8Array(await file.arrayBuffer());
+          fileName = file.name;
+          if (sourceLabel) {
+            sourceLabel.textContent =
+              'Hashing the file "' + fileName + '" (' + fileBytes.length.toLocaleString() + " bytes). " +
+              "Clear to go back to text.";
+          }
+          await run();
+        } catch (e) {
+          showError(errorEl, "Could not read that file: " + e.message);
+        }
+      }
+
+      if (dropZone) {
+        ["dragenter", "dragover"].forEach((ev) =>
+          dropZone.addEventListener(ev, (e) => {
+            e.preventDefault();
+            dropZone.classList.add("is-over");
+          })
+        );
+        ["dragleave", "drop"].forEach((ev) =>
+          dropZone.addEventListener(ev, (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("is-over");
+          })
+        );
+        dropZone.addEventListener("drop", (e) => {
+          const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+          if (file) useFile(file);
+        });
+      }
+      if (fileInput) {
+        fileInput.addEventListener("change", () => {
+          if (fileInput.files && fileInput.files[0]) useFile(fileInput.files[0]);
+        });
+      }
+
       document.getElementById("hash-run").addEventListener("click", run);
       document.getElementById("hash-clear").addEventListener("click", () => {
         input.value = "";
-        Object.values(outputs).forEach((el) => { el.textContent = "—"; });
+        if (fileInput) fileInput.value = "";
+        setOutputs(null);
+        if (hmacOut) hmacOut.textContent = "—";
         hideError(errorEl);
+        useText();
         input.focus();
+      });
+      input.addEventListener("input", debounce(() => { if (!fileBytes) run(); }, 250));
+      [hmacKey, hmacAlgo].forEach((el) => {
+        if (el) el.addEventListener("input", debounce(runHmac, 200));
+        if (el) el.addEventListener("change", runHmac);
       });
       document.querySelectorAll(".hash-copy-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
@@ -1138,6 +1688,103 @@ if (typeof document !== "undefined") {
       });
 
       run();
+    })();
+
+    /* ---- hash compare tool ---- */
+
+    (function hashCompareTool() {
+      const a = document.getElementById("hash-cmp-a");
+      const b = document.getElementById("hash-cmp-b");
+      const result = document.getElementById("hash-cmp-result");
+      if (!a || !b || !result) return;
+
+      function render() {
+        const r = compareHashes(a.value, b.value);
+        result.textContent = r.message;
+        result.classList.toggle("is-match", r.status === "match");
+        result.classList.toggle("is-mismatch", r.status !== "match" && r.status !== "empty");
+      }
+
+      [a, b].forEach((el) => el.addEventListener("input", debounce(render, 120)));
+      render();
+    })();
+
+    /* ---- cron expression tool ---- */
+
+    (function cronTool() {
+      const input = document.getElementById("cron-input");
+      if (!input) return;
+      const description = document.getElementById("cron-description");
+      const runsList = document.getElementById("cron-runs");
+      const errorEl = document.getElementById("cron-error");
+      const fieldsEl = document.getElementById("cron-fields");
+      const tzEl = document.getElementById("cron-timezone");
+      const examples = Array.from(document.querySelectorAll("[data-cron-example]"));
+
+      const FIELD_LABELS = [
+        ["minute", "Minute"],
+        ["hour", "Hour"],
+        ["dom", "Day of month"],
+        ["month", "Month"],
+        ["dow", "Day of week"],
+      ];
+
+      if (tzEl) {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        tzEl.textContent = tz ? "Times shown in your local time zone (" + tz + ")." : "Times shown in your local time zone.";
+      }
+
+      function render() {
+        const parsed = parseCron(input.value);
+        runsList.innerHTML = "";
+        fieldsEl.innerHTML = "";
+
+        if (!parsed.ok) {
+          showError(errorEl, parsed.message);
+          description.textContent = "—";
+          return;
+        }
+        hideError(errorEl);
+        description.textContent = describeCron(parsed);
+
+        FIELD_LABELS.forEach(([key, label]) => {
+          const row = document.createElement("div");
+          row.className = "result-item";
+          const values = parsed.values[key];
+          // Listing 60 minutes helps nobody; summarise the wide ones.
+          const summary =
+            values.length > 12 ? values.length + " values (" + values[0] + "–" + values[values.length - 1] + ")" : values.join(", ");
+          row.innerHTML =
+            '<div class="result-label">' + label + " <code>" + escapeHtml(parsed.raw[key]) + "</code></div>" +
+            '<div class="result-value">' + escapeHtml(summary) + "</div>";
+          fieldsEl.appendChild(row);
+        });
+
+        const runs = nextCronRuns(parsed, new Date(), 5);
+        if (!runs.length) {
+          const li = document.createElement("li");
+          li.textContent = "This expression never matches a real date.";
+          runsList.appendChild(li);
+          return;
+        }
+        runs.forEach((when) => {
+          const li = document.createElement("li");
+          li.textContent = when.toLocaleString(undefined, {
+            weekday: "short", year: "numeric", month: "short", day: "numeric",
+            hour: "2-digit", minute: "2-digit",
+          });
+          runsList.appendChild(li);
+        });
+      }
+
+      examples.forEach((btn) =>
+        btn.addEventListener("click", () => {
+          input.value = btn.dataset.cronExample;
+          render();
+        })
+      );
+      input.addEventListener("input", debounce(render, 150));
+      render();
     })();
 
     /* ---- JWT decoder tool ---- */

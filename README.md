@@ -1,18 +1,19 @@
 # devboxkit.com
 
-A free, ad-supported developer toolkit with eleven tools in one page:
+A free, ad-supported developer toolkit with twelve tools in one page:
 
 - **JSON Formatter/Validator**: beautify or minify JSON, with syntax-error messages that include the line/column (or character position) of the problem, plus lightweight syntax highlighting of the output.
 - **Base64 Encode/Decode**: two-way text ↔ Base64 conversion, with graceful error handling for invalid Base64 input.
 - **URL Encode/Decode**: two-way text/URL ↔ percent-encoding conversion (`encodeURIComponent`/`decodeURIComponent` semantics), with graceful error handling for malformed input.
 - **Timestamp Converter**: two-way Unix epoch (seconds or milliseconds, auto-detected or chosen explicitly) ↔ human-readable date, showing both local and UTC time, with a "Now" button.
 - **Regex Tester**: pattern + flags (g/i/m/s/u/y) + test string, with all matches highlighted inline and listed below with their capture groups.
-- **UUID Generator**: cryptographically random v4 UUIDs, or time-ordered v1-style UUIDs, single or in bulk (up to 1000), with copy.
-- **Hash Generator**: MD5 (hand-rolled, since SubtleCrypto has no MD5), SHA-1, SHA-256, and SHA-512 digests of any text, computed side by side.
+- **UUID Generator**: cryptographically random v4 UUIDs, time-sortable RFC 9562 v7 UUIDs (with a per-millisecond counter so a bulk batch stays ordered), or v1-style UUIDs, single or in bulk (up to 1000), with copy-all.
+- **Hash Generator**: MD5 (hand-rolled, since SubtleCrypto has no MD5), SHA-1, SHA-256, SHA-384 and SHA-512 digests of text *or a dropped file* (hashed as raw bytes), plus keyed HMAC and a two-hash compare mode.
 - **JWT Decoder**: base64url-decodes and pretty-prints a JWT's header and payload, with `iat`/`exp`/`nbf` shown as human-readable dates. Decoding only — no signature verification.
 - **Password Generator**: length slider, character-set toggles, an exclude-ambiguous-characters option, and an entropy-based strength meter, built on `crypto.getRandomValues`.
 - **JSON ⇄ CSV Converter**: JSON array of objects → CSV and CSV (with a header row) → JSON, both directions, with quoted-field handling, copy, and download.
 - **HTML Entity Encoder/Decoder**: encode text to named/numeric HTML entities and decode entities back to plain text.
+- **Cron Expression Explainer**: translates a standard five-field crontab expression into plain English and lists the next five times it will run. Handles steps (`*/5`), ranges, lists, month/day names and the `@daily`-style shorthands — and says out loud that cron ORs the two day fields when both are restricted.
 
 Everything runs client-side — no backend, no build step, nothing is ever uploaded. Deployed as static files on GitHub Pages.
 
@@ -31,7 +32,7 @@ Then open `http://localhost:8000`.
 ## Structure
 
 ```
-index.html            Main app (all eleven tools, tabbed)
+index.html            Main app (all twelve tools, tabbed)
 uuid-generator.html, hash-generator.html, jwt-decoder.html,
 password-generator.html, json-csv-converter.html,
 html-entity-encoder.html
@@ -70,10 +71,16 @@ Then enable Pages in the repo's Settings → Pages, and enter `devboxkit.com` as
 
 ## Sanity-checking the core logic
 
-The pure functions in `assets/js/app.js` (JSON parsing/formatting/error-position extraction, Base64/URL/HTML-entity encode/decode, timestamp conversion, regex match extraction, UUID generation, MD5/SHA hashing, JWT decoding, password generation, JSON↔CSV conversion) can be exercised directly from Node since they're exported via `module.exports`:
+The pure functions in `assets/js/app.js` (JSON parsing/formatting/error-position extraction, Base64/URL/HTML-entity encode/decode, timestamp conversion, regex match extraction, UUID generation, MD5/SHA/HMAC hashing, JWT decoding, password generation, JSON↔CSV conversion, cron parsing) are exported via `module.exports`, and `assets/js/app.test.js` exercises them against published known-answer vectors — RFC 1321 for MD5, FIPS 180-4 for the SHA family, RFC 4231 for HMAC.
+
+```
+node assets/js/app.test.js
+```
+
+They can also be poked at directly:
 
 ```js
 const app = require("./assets/js/app.js");
 app.formatJson('{"a":1}');
-app.base64Decode("not-valid-base64!!!");
+app.describeCron(app.parseCron("0 0 * * 1")); // "At 00:00, only on Monday."
 ```
