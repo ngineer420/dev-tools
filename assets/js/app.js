@@ -1261,6 +1261,40 @@ if (typeof document !== "undefined") {
       activate(initial, { push: false, focus: false });
     })();
 
+    /* ---- tab strip ----
+       The tool menu is one sideways-scrolling row (see .tabbar in styles.css).
+       Two jobs here: bring the current tool into view, since on a phone it is
+       usually off the right-hand end, and mark the edge that still has tabs
+       behind it. Runs on every page that carries the menu, including the
+       standalone tool pages that initTabs deliberately leaves alone — and
+       after it, so the tab it marked current is the one we scroll to. */
+    (function initTabStrip() {
+      const bar = document.querySelector(".tabbar");
+      if (!bar) return;
+
+      function updateFades() {
+        const max = bar.scrollWidth - bar.clientWidth;
+        bar.classList.toggle("can-scroll-start", bar.scrollLeft > 1);
+        bar.classList.toggle("can-scroll-end", bar.scrollLeft < max - 1);
+      }
+
+      // Centre the active tab in the strip. Assigning scrollLeft rather than
+      // calling scrollIntoView, which would also scroll the document — on a
+      // narrow screen that drops the visitor below the header on arrival.
+      function revealActive() {
+        const active = bar.querySelector('[aria-current="page"]');
+        if (active) {
+          const centred = active.offsetLeft - (bar.clientWidth - active.offsetWidth) / 2;
+          bar.scrollLeft = Math.max(0, centred);
+        }
+        updateFades();
+      }
+
+      bar.addEventListener("scroll", updateFades, { passive: true });
+      window.addEventListener("resize", updateFades);
+      revealActive();
+    })();
+
     const yearEl = document.getElementById("year");
     if (yearEl) yearEl.textContent = new Date().getFullYear();
 
