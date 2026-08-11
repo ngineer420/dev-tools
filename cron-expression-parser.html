@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cron Expression Explainer — Free Online Tool — devboxkit.com</title>
+<meta name="description" content="Paste a cron expression to see what it means in plain English and the next five times it will run. Handles steps, ranges, lists and day names. Runs entirely in your browser.">
+<link rel="canonical" href="https://devboxkit.com/cron-expression-parser">
+<meta name="theme-color" content="#090c11">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Cron Expression Explainer — Free Online Tool">
+<meta property="og:description" content="Translate a cron expression into plain English and see the next five run times. Free, instant, entirely client-side.">
+<meta property="og:url" content="https://devboxkit.com/cron-expression-parser">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Cron Expression Explainer — Free Online Tool">
+<meta name="twitter:description" content="Translate a cron expression into plain English and see the next five run times. Free, instant, entirely client-side.">
+
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Cron Expression Explainer — DevBox Kit",
+  "url": "https://devboxkit.com/cron-expression-parser",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Free browser-based cron expression explainer: plain-English descriptions and the next five run times for any standard five-field crontab expression."
+}
+</script>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7560786263587509" crossorigin="anonymous"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+      <span class="brand-tag">JSON, hashes, JWTs, passwords &amp; more — one page</span>
+    </a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark/light theme" title="Toggle theme">◐</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="hero">
+    <h1>Cron Expression Explainer</h1>
+    <p>Paste a cron expression to see what it actually means, and exactly when it runs next.</p>
+    <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
+  </div>
+
+  <nav class="tabbar" aria-label="Developer tools">
+    <a href="/json-formatter" class="tab-btn">JSON Formatter</a>
+    <a href="/base64-encode-decode" class="tab-btn">Base64</a>
+    <a href="/url-encoder-decoder" class="tab-btn">URL Encode/Decode</a>
+    <a href="/unix-timestamp-converter" class="tab-btn">Timestamp</a>
+    <a href="/regex-tester" class="tab-btn">Regex Tester</a>
+    <a href="/uuid-generator" class="tab-btn">UUID Generator</a>
+    <a href="/hash-generator" class="tab-btn">Hash Generator</a>
+    <a href="/jwt-decoder" class="tab-btn">JWT Decoder</a>
+    <a href="/password-generator" class="tab-btn">Password Generator</a>
+    <a href="/json-csv-converter" class="tab-btn">JSON ⇄ CSV</a>
+    <a href="/html-entity-encoder" class="tab-btn">HTML Entities</a>
+    <a href="/cron-expression-parser" aria-current="page" class="tab-btn active">Cron Explainer</a>
+  </nav>
+
+  <!-- ===================== CRON EXPLAINER ===================== -->
+  <section aria-label="Cron Expression Explainer tool">
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Expression</h2>
+          <div class="field">
+            <label for="cron-input" class="visually-hidden">Cron expression</label>
+            <input type="text" id="cron-input" class="code-area" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="*/5 * * * *" value="0 0 * * 1">
+          </div>
+          <p class="cron-legend">┌── minute (0–59)
+│ ┌── hour (0–23)
+│ │ ┌── day of month (1–31)
+│ │ │ ┌── month (1–12 or JAN–DEC)
+│ │ │ │ ┌── day of week (0–7 or SUN–SAT)
+* * * * *</p>
+          <div class="error-banner" id="cron-error" role="alert"></div>
+        </div>
+
+        <div class="panel" style="margin-top:16px;">
+          <h2>Examples</h2>
+          <div class="example-row">
+            <button type="button" data-cron-example="*/5 * * * *">*/5 * * * *</button>
+            <button type="button" data-cron-example="0 0 * * 1">0 0 * * 1</button>
+            <button type="button" data-cron-example="0 9 * * MON-FRI">0 9 * * MON-FRI</button>
+            <button type="button" data-cron-example="30 2 1 * *">30 2 1 * *</button>
+            <button type="button" data-cron-example="0 */6 * * *">0 */6 * * *</button>
+            <button type="button" data-cron-example="@daily">@daily</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <h2>In plain English</h2>
+          <p class="cron-description" id="cron-description" role="status">—</p>
+        </div>
+
+        <div class="panel" style="margin-top:16px;">
+          <h2>Next five runs</h2>
+          <ul class="run-list" id="cron-runs"></ul>
+          <p class="source-note" id="cron-timezone"></p>
+        </div>
+
+        <div class="panel" style="margin-top:16px;">
+          <h2>Field by field</h2>
+          <div class="result-grid" id="cron-fields"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container-narrow" style="padding-top:40px;">
+    <h2 style="margin-top:0;">About this cron explainer</h2>
+    <p>A <strong>cron expression</strong> is five space-separated fields — minute, hour, day of month, month, day of week — and the reason it is worth a tool is that reading one back is genuinely error-prone. This explainer turns the expression into a sentence and, more usefully, lists <strong>the next five times it will actually fire</strong>, which is the fastest way to catch a mistake. Each field accepts a wildcard (<code>*</code>), a single value, a list (<code>1,15</code>), a range (<code>MON-FRI</code>) and a step (<code>*/5</code>), plus the three-letter month and day names and the <code>@daily</code>-style shorthands.</p>
+    <p>One behaviour catches people out often enough to be worth stating plainly: when <em>both</em> the day-of-month and day-of-week fields are restricted, cron runs the job when <strong>either</strong> matches, not both. So <code>0 0 1 * MON</code> fires on the 1st of the month <em>and</em> on every Monday. This tool says so in the description rather than quietly implying "and".</p>
+    <p>Everything is computed in your browser, and run times are shown in your own time zone — remember that the machine running the job uses <em>its</em> clock and time zone, which is frequently UTC.</p>
+  </section>
+
+  <nav class="container-narrow" aria-label="Other developer tools" style="padding-top:24px;">
+    <h2>More developer tools</h2>
+    <ul>
+      <li><a href="/json-formatter">JSON Formatter</a></li>
+      <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
+      <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
+      <li><a href="/unix-timestamp-converter">Unix Timestamp Converter</a></li>
+      <li><a href="/regex-tester">Regex Tester</a></li>
+      <li><a href="/uuid-generator">UUID Generator (v4 / v7)</a></li>
+      <li><a href="/hash-generator">Hash Generator (MD5 / SHA / HMAC)</a></li>
+      <li><a href="/jwt-decoder">JWT Decoder</a></li>
+      <li><a href="/password-generator">Password Generator</a></li>
+      <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+      <li><a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a></li>
+      <li><a href="/">All tools on one page (home)</a></li>
+    </ul>
+  </nav>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/app.js"></script>
+<a href="https://erabb.it" class="erabbit-mark" aria-label="erabb.it"><img src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐇</text></svg>" width="10" height="10" alt=""></a>
+</body>
+</html>

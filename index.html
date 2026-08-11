@@ -4,17 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DevBox Kit — Free JSON, Base64, Hash, JWT, UUID &amp; Password Tools</title>
-<meta name="description" content="Format &amp; validate JSON, encode/decode Base64/URL/HTML entities, generate UUIDs/hashes/passwords, decode JWTs, convert timestamps and JSON⇄CSV, and test regex — eleven free developer tools in one page. Runs entirely in your browser, nothing is uploaded.">
+<meta name="description" content="Format &amp; validate JSON, encode/decode Base64/URL/HTML entities, generate UUIDs/hashes/passwords, decode JWTs, convert timestamps and JSON⇄CSV, test regex and explain cron expressions — twelve free developer tools in one page. Runs entirely in your browser, nothing is uploaded.">
 <link rel="canonical" href="https://devboxkit.com/">
 <meta name="theme-color" content="#090c11">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="DevBox Kit — Free JSON, Base64, Hash, JWT, UUID &amp; Password Tools">
-<meta property="og:description" content="Eleven free developer tools in one page: JSON, Base64, URL, and HTML-entity conversion, UUID/hash/password generators, a JWT decoder, JSON⇄CSV, a timestamp converter, and a regex tester. Runs entirely client-side.">
+<meta property="og:description" content="Twelve free developer tools in one page: JSON, Base64, URL, and HTML-entity conversion, UUID/hash/password generators, a JWT decoder, JSON⇄CSV, a timestamp converter, a regex tester and a cron explainer. Runs entirely client-side.">
 <meta property="og:url" content="https://devboxkit.com/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="DevBox Kit — Free JSON, Base64, Hash, JWT, UUID &amp; Password Tools">
-<meta name="twitter:description" content="Eleven free developer tools in one page: JSON, Base64, URL, and HTML-entity conversion, UUID/hash/password generators, a JWT decoder, JSON⇄CSV, a timestamp converter, and a regex tester. Runs entirely client-side.">
+<meta name="twitter:description" content="Twelve free developer tools in one page: JSON, Base64, URL, and HTML-entity conversion, UUID/hash/password generators, a JWT decoder, JSON⇄CSV, a timestamp converter, a regex tester and a cron explainer. Runs entirely client-side.">
 
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/styles.css">
@@ -52,7 +52,7 @@
 <main id="main">
   <div class="hero">
     <h1>Free Developer Formatting &amp; Conversion Tools</h1>
-    <p>JSON, Base64, URL &amp; HTML-entity conversion, UUID/hash/password generators, JWT decoding, JSON⇄CSV, timestamps, and regex — eleven tools, one page, no sign-up.</p>
+    <p>JSON, Base64, URL &amp; HTML-entity conversion, UUID/hash/password generators, JWT decoding, JSON⇄CSV, timestamps, regex and cron — twelve tools, one page, no sign-up.</p>
     <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
   </div>
 
@@ -68,6 +68,7 @@
     <a role="tab" id="tab-password" href="/password-generator" aria-controls="panel-password" aria-selected="false" tabindex="-1" class="tab-btn">Password Generator</a>
     <a role="tab" id="tab-csv" href="/json-csv-converter" aria-controls="panel-csv" aria-selected="false" tabindex="-1" class="tab-btn">JSON ⇄ CSV</a>
     <a role="tab" id="tab-entity" href="/html-entity-encoder" aria-controls="panel-entity" aria-selected="false" tabindex="-1" class="tab-btn">HTML Entities</a>
+    <a role="tab" id="tab-cron" href="/cron-expression-parser" aria-controls="panel-cron" aria-selected="false" tabindex="-1" class="tab-btn">Cron Explainer</a>
   </div>
 
   <!-- ===================== JSON FORMATTER ===================== -->
@@ -292,8 +293,10 @@
             <label>UUID version</label>
             <div class="segmented" id="uuid-version" role="group" aria-label="UUID version">
               <button type="button" id="uuid-version-v4" aria-pressed="true">v4 (random)</button>
-              <button type="button" id="uuid-version-v1" aria-pressed="false">v1-style (time-based)</button>
+              <button type="button" id="uuid-version-v7" aria-pressed="false">v7 (time-sortable)</button>
+              <button type="button" id="uuid-version-v1" aria-pressed="false">v1-style</button>
             </div>
+            <p class="source-note" id="uuid-note"></p>
           </div>
           <div class="field">
             <label for="uuid-count">How many</label>
@@ -331,13 +334,36 @@
           <h2>Input</h2>
           <div class="field">
             <label for="hash-input" class="visually-hidden">Text to hash</label>
-            <textarea id="hash-input" class="code-area" rows="12" spellcheck="false" placeholder="Type or paste text to hash...">The quick brown fox jumps over the lazy dog</textarea>
+            <textarea id="hash-input" class="code-area" rows="8" spellcheck="false" placeholder="Type or paste text to hash...">The quick brown fox jumps over the lazy dog</textarea>
           </div>
+          <div class="drop-zone" id="hash-drop">
+            Drop a file here to hash its bytes
+            <input type="file" id="hash-file" aria-label="Choose a file to hash">
+          </div>
+          <p class="source-note" id="hash-source">Hashing the text above.</p>
           <div class="btn-row">
             <button type="button" id="hash-run" class="primary">Hash</button>
             <button type="button" id="hash-clear">Clear</button>
           </div>
           <div class="error-banner" id="hash-error" role="alert"></div>
+        </div>
+
+        <div class="panel" style="margin-top:16px;">
+          <h2>HMAC</h2>
+          <div class="field">
+            <label for="hash-hmac-key">Secret key</label>
+            <input type="text" id="hash-hmac-key" spellcheck="false" placeholder="Enter a key to compute an HMAC">
+          </div>
+          <div class="field">
+            <label for="hash-hmac-algo">Algorithm</label>
+            <select id="hash-hmac-algo">
+              <option value="SHA-256">HMAC-SHA-256</option>
+              <option value="SHA-1">HMAC-SHA-1</option>
+              <option value="SHA-384">HMAC-SHA-384</option>
+              <option value="SHA-512">HMAC-SHA-512</option>
+            </select>
+          </div>
+          <p class="source-note">HMAC covers the text input only, and there is no HMAC-MD5 — <code>crypto.subtle</code> does not implement it.</p>
         </div>
       </div>
 
@@ -358,11 +384,32 @@
               <div class="hash-row"><div class="result-value" id="hash-out-sha256">—</div><button type="button" class="icon-btn hash-copy-btn" data-target="hash-out-sha256">Copy</button></div>
             </div>
             <div class="result-item">
+              <div class="result-label">SHA-384</div>
+              <div class="hash-row"><div class="result-value" id="hash-out-sha384">—</div><button type="button" class="icon-btn hash-copy-btn" data-target="hash-out-sha384">Copy</button></div>
+            </div>
+            <div class="result-item">
               <div class="result-label">SHA-512</div>
               <div class="hash-row"><div class="result-value" id="hash-out-sha512">—</div><button type="button" class="icon-btn hash-copy-btn" data-target="hash-out-sha512">Copy</button></div>
             </div>
+            <div class="result-item" id="hash-hmac-row">
+              <div class="result-label">HMAC</div>
+              <div class="hash-row"><div class="result-value" id="hash-out-hmac">—</div><button type="button" class="icon-btn hash-copy-btn" data-target="hash-out-hmac">Copy</button></div>
+            </div>
           </div>
           <span class="copy-flash" id="hash-copy-flash">Copied!</span>
+        </div>
+
+        <div class="panel" style="margin-top:16px;">
+          <h2>Compare two hashes</h2>
+          <div class="field">
+            <label for="hash-cmp-a">Hash A</label>
+            <input type="text" id="hash-cmp-a" spellcheck="false" placeholder="Paste the expected checksum">
+          </div>
+          <div class="field">
+            <label for="hash-cmp-b">Hash B</label>
+            <input type="text" id="hash-cmp-b" spellcheck="false" placeholder="Paste the checksum you computed">
+          </div>
+          <p class="compare-result" id="hash-cmp-result" role="status"></p>
         </div>
       </div>
     </div>
@@ -532,9 +579,61 @@
     </div>
   </section>
 
+  <!-- ===================== CRON EXPLAINER ===================== -->
+  <section role="tabpanel" id="panel-cron" aria-labelledby="tab-cron" class="tab-panel" hidden>
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Expression</h2>
+          <div class="field">
+            <label for="cron-input" class="visually-hidden">Cron expression</label>
+            <input type="text" id="cron-input" class="code-area" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="*/5 * * * *" value="0 0 * * 1">
+          </div>
+          <p class="cron-legend">┌── minute (0–59)
+│ ┌── hour (0–23)
+│ │ ┌── day of month (1–31)
+│ │ │ ┌── month (1–12 or JAN–DEC)
+│ │ │ │ ┌── day of week (0–7 or SUN–SAT)
+* * * * *</p>
+          <div class="error-banner" id="cron-error" role="alert"></div>
+        </div>
+
+        <div class="panel" style="margin-top:16px;">
+          <h2>Examples</h2>
+          <div class="example-row">
+            <button type="button" data-cron-example="*/5 * * * *">*/5 * * * *</button>
+            <button type="button" data-cron-example="0 0 * * 1">0 0 * * 1</button>
+            <button type="button" data-cron-example="0 9 * * MON-FRI">0 9 * * MON-FRI</button>
+            <button type="button" data-cron-example="30 2 1 * *">30 2 1 * *</button>
+            <button type="button" data-cron-example="0 */6 * * *">0 */6 * * *</button>
+            <button type="button" data-cron-example="@daily">@daily</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <h2>In plain English</h2>
+          <p class="cron-description" id="cron-description" role="status">—</p>
+        </div>
+
+        <div class="panel" style="margin-top:16px;">
+          <h2>Next five runs</h2>
+          <ul class="run-list" id="cron-runs"></ul>
+          <p class="source-note" id="cron-timezone"></p>
+        </div>
+
+        <div class="panel" style="margin-top:16px;">
+          <h2>Field by field</h2>
+          <div class="result-grid" id="cron-fields"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="container-narrow" style="padding-top:0;">
     <h2>About DevBox Kit</h2>
-    <p>DevBox Kit bundles eleven everyday developer utilities into a single page: a <strong>JSON formatter and validator</strong> with precise syntax-error locations, two-way <strong>Base64</strong>, <strong>URL</strong>, and <strong>HTML entity</strong> encoders/decoders, a <strong>UUID generator</strong> (v4 random or v1-style time-ordered, single or bulk), a <strong>hash generator</strong> (MD5, SHA-1, SHA-256, SHA-512), a <strong>JWT decoder</strong> that pretty-prints the header/payload and spells out expiry claims, a <strong>password generator</strong> with a strength meter, a two-way <strong>JSON ⇄ CSV converter</strong>, a <strong>Unix timestamp converter</strong> that shows both local and UTC time, and a <strong>regex tester</strong> with live match highlighting and capture groups.</p>
+    <p>DevBox Kit bundles twelve everyday developer utilities into a single page: a <strong>JSON formatter and validator</strong> with precise syntax-error locations, two-way <strong>Base64</strong>, <strong>URL</strong>, and <strong>HTML entity</strong> encoders/decoders, a <strong>UUID generator</strong> (v4 random, v7 time-sortable, or v1-style, single or bulk), a <strong>hash generator</strong> (MD5, SHA-1, SHA-256, SHA-384, SHA-512 and HMAC, over text or a dropped file, with a compare mode), a <strong>JWT decoder</strong> that pretty-prints the header/payload and spells out expiry claims, a <strong>password generator</strong> with a strength meter, a two-way <strong>JSON ⇄ CSV converter</strong>, a <strong>Unix timestamp converter</strong> that shows both local and UTC time, a <strong>regex tester</strong> with live match highlighting and capture groups, and a <strong>cron expression explainer</strong> that translates a schedule into plain English and lists its next five run times.</p>
     <p>Everything runs entirely client-side in your browser — nothing you paste in is ever uploaded to a server, so there's no wait and nothing to worry about privacy-wise. Use it for debugging API responses, decoding tokens, generating throwaway IDs and passwords, checksumming files, converting between JSON and CSV, sanity-checking query strings, converting timestamps from logs, or testing a regular expression before you commit to it.</p>
     <p>Prefer a dedicated page for a single tool? Each one also lives on its own: <a href="/json-formatter">JSON Formatter</a>, <a href="/base64-encode-decode">Base64 Encode / Decode</a>, <a href="/url-encoder-decoder">URL Encoder / Decoder</a>, <a href="/unix-timestamp-converter">Unix Timestamp Converter</a>, <a href="/regex-tester">Regex Tester</a>, <a href="/uuid-generator">UUID Generator</a>, <a href="/hash-generator">Hash Generator</a>, <a href="/jwt-decoder">JWT Decoder</a>, <a href="/password-generator">Password Generator</a>, <a href="/json-csv-converter">JSON ⇄ CSV Converter</a>, and <a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a>.</p>
   </section>

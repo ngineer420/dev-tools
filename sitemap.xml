@@ -61,6 +61,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://devboxkit.com/cron-expression-parser</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://devboxkit.com/articles/json-formatting-guide.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
