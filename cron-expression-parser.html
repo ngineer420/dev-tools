@@ -111,6 +111,10 @@
 
         <div class="panel" style="margin-top:16px;">
           <h2>Next five runs</h2>
+          <div class="field-row cron-tz-row">
+            <label for="cron-timezone-select">Show times in</label>
+            <select id="cron-timezone-select"></select>
+          </div>
           <ul class="run-list" id="cron-runs"></ul>
           <p class="source-note" id="cron-timezone"></p>
         </div>
@@ -127,7 +131,7 @@
     <h2 style="margin-top:0;">About this cron explainer</h2>
     <p>A <strong>cron expression</strong> is five space-separated fields — minute, hour, day of month, month, day of week — and the reason it is worth a tool is that reading one back is genuinely error-prone. This explainer turns the expression into a sentence and, more usefully, lists <strong>the next five times it will actually fire</strong>, which is the fastest way to catch a mistake. Each field accepts a wildcard (<code>*</code>), a single value, a list (<code>1,15</code>), a range (<code>MON-FRI</code>) and a step (<code>*/5</code>), plus the three-letter month and day names and the <code>@daily</code>-style shorthands.</p>
     <p>One behaviour catches people out often enough to be worth stating plainly: when <em>both</em> the day-of-month and day-of-week fields are restricted, cron runs the job when <strong>either</strong> matches, not both. So <code>0 0 1 * MON</code> fires on the 1st of the month <em>and</em> on every Monday. This tool says so in the description rather than quietly implying "and".</p>
-    <p>Everything is computed in your browser, and run times are shown in your own time zone — remember that the machine running the job uses <em>its</em> clock and time zone, which is frequently UTC.</p>
+    <p>Run times are worked out <strong>in UTC</strong>, because a crontab is almost always a server's crontab and servers are almost always on UTC. That matters more than it sounds: read <code>0 3 * * *</code> against a Denver clock instead and you are told 3am when the job really fires at 8pm the day before — a seven-hour error in the single number you came here for, and it looks perfectly correct. So each run is listed in UTC with your own local time printed beside it, and the <em>Show times in</em> selector will re-render the whole list into any IANA zone if the box you care about keeps a different clock. Everything is still computed in your browser; nothing is uploaded.</p>
   </section>
 
   <nav class="container-narrow" aria-label="Other developer tools" style="padding-top:24px;">

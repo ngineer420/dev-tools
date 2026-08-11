@@ -990,15 +990,20 @@ function describeCron(parsed) {
   return clauses.join(", ") + ".";
 }
 
-/** Does this calendar day satisfy the month + day-of-month/day-of-week rules? */
+/**
+ * Does this calendar day satisfy the month + day-of-month/day-of-week rules?
+ *
+ * Read in UTC, because that is the clock the schedule is interpreted against
+ * (see `nextCronRuns`). Pass a Date built with `Date.UTC`.
+ */
 function cronDayMatches(date, parsed) {
   const { raw, values } = parsed;
-  if (!values.month.includes(date.getMonth() + 1)) return false;
+  if (!values.month.includes(date.getUTCMonth() + 1)) return false;
 
   const domRestricted = !isWildcard(raw.dom);
   const dowRestricted = !isWildcard(raw.dow);
-  const domOk = values.dom.includes(date.getDate());
-  const dowOk = values.dow.includes(date.getDay());
+  const domOk = values.dom.includes(date.getUTCDate());
+  const dowOk = values.dow.includes(date.getUTCDay());
 
   if (domRestricted && dowRestricted) return domOk || dowOk;
   if (domRestricted) return domOk;
@@ -1009,6 +1014,14 @@ function cronDayMatches(date, parsed) {
 /**
  * The next `count` times this expression fires, at or after `from`.
  *
+ * The fields are read as **UTC** wall-clock values, because a crontab is
+ * overwhelmingly a server's crontab and servers are overwhelmingly on UTC.
+ * Reading them against the visitor's own clock instead would silently answer a
+ * different question: someone in Denver asking about `0 3 * * *` would be told
+ * 03:00 their time when the job actually fires at 20:00 the previous day for
+ * them. The returned values are absolute instants; `formatCronRun` renders one
+ * into whichever zone the reader wants to see it in.
+ *
  * Walks day by day and only then over the matching hours and minutes, rather
  * than testing every minute — otherwise a rare schedule such as "1st of
  * February" would mean millions of iterations to find one run.
@@ -1016,35 +1029,124 @@ function cronDayMatches(date, parsed) {
 function nextCronRuns(parsed, from, count) {
   if (!parsed || !parsed.ok) return [];
   const wanted = Math.max(1, Math.min(50, Math.floor(count || 5)));
-  const start = from instanceof Date ? new Date(from.getTime()) : new Date();
+  const at = from instanceof Date ? from.getTime() : Date.now();
   // Cron has minute resolution; begin at the start of the next minute.
-  start.setSeconds(0, 0);
-  start.setMinutes(start.getMinutes() + 1);
+  const start = new Date(Math.floor(at / 60000) * 60000 + 60000);
 
   const out = [];
-  const day = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  const day = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()));
   // Twenty years is enough to return five runs even for the rarest realistic
   // schedule (29 February, which fires once every four years), while still
   // terminating on an expression that can never match at all, such as
   // "30 February". It is only ~7300 day-tests, so the bound costs nothing.
   const limit = new Date(day.getTime());
-  limit.setFullYear(limit.getFullYear() + 20);
+  limit.setUTCFullYear(limit.getUTCFullYear() + 20);
 
   while (day <= limit && out.length < wanted) {
     if (cronDayMatches(day, parsed)) {
       for (const h of parsed.values.hour) {
         if (out.length >= wanted) break;
         for (const m of parsed.values.minute) {
-          const when = new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m, 0, 0);
+          const when = new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), day.getUTCDate(), h, m, 0, 0));
           if (when < start) continue;
           out.push(when);
           if (out.length >= wanted) break;
         }
       }
     }
-    day.setDate(day.getDate() + 1);
+    day.setUTCDate(day.getUTCDate() + 1);
   }
   return out;
+}
+
+/* ---- rendering a run instant into a zone ---- */
+
+/** The IANA zone the browser (or Node) thinks it is in, e.g. "America/Denver". */
+function localTimeZone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch (e) {
+    return "UTC";
+  }
+}
+
+/**
+ * The full IANA zone list, straight from the platform, so no data file has to
+ * be shipped or kept up to date. Older engines without `supportedValuesOf`
+ * fall back to just the two zones the tool cares about most.
+ */
+function cronTimeZoneList() {
+  try {
+    if (typeof Intl.supportedValuesOf === "function") {
+      const zones = Intl.supportedValuesOf("timeZone");
+      if (Array.isArray(zones) && zones.length) return zones;
+    }
+  } catch (e) { /* fall through */ }
+  const local = localTimeZone();
+  return local === "UTC" ? ["UTC"] : ["UTC", local];
+}
+
+/** The `timeZoneName: "short"` string a given locale gives this zone. */
+function zoneNameIn(locale, date, zone) {
+  const part = new Intl.DateTimeFormat(locale, { timeZone: zone, timeZoneName: "short" })
+    .formatToParts(date)
+    .find((p) => p.type === "timeZoneName");
+  return part ? part.value : "";
+}
+
+/**
+ * The short zone name to print beside a run — "MDT", "BST", or a bare offset.
+ *
+ * No single locale knows every abbreviation: en-US has the American ones and
+ * calls Paris "GMT+2", en-GB has the European ones and calls Denver "GMT-6".
+ * Ask both and take whichever produced letters, because "MDT" tells a reader
+ * which side of a DST change they are on and "GMT-6" does not. Zones with no
+ * abbreviation in either (most of Asia and Oceania) keep the offset, which is
+ * unambiguous anyway.
+ */
+function cronZoneAbbr(date, zone) {
+  const us = zoneNameIn("en-US", date, zone);
+  if (us && !/^(GMT|UTC)/.test(us)) return us;
+  const gb = zoneNameIn("en-GB", date, zone);
+  if (gb && !/^(GMT|UTC)/.test(gb)) return gb;
+  return us || gb || zone;
+}
+
+/**
+ * Render one run instant for display in `timeZone`.
+ *
+ * Returns the pieces separately rather than one string so the caller can lay
+ * the date, the time and the zone abbreviation out however it likes, and so it
+ * can tell whether two zones land on different calendar days.
+ */
+function formatCronRun(date, timeZone) {
+  const zone = timeZone || "UTC";
+  const parts = {};
+  let abbr = zone;
+  try {
+    const fmt = new Intl.DateTimeFormat("en-GB", {
+      timeZone: zone,
+      weekday: "short", year: "numeric", month: "short", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", hour12: false,
+    });
+    fmt.formatToParts(date).forEach((p) => { parts[p.type] = p.value; });
+    abbr = cronZoneAbbr(date, zone);
+  } catch (e) {
+    // An unknown zone name would otherwise throw and blank the whole list.
+    return formatCronRun(date, "UTC");
+  }
+  // en-GB renders midnight as "24:00" on some engines; cron never means that.
+  const hour = parts.hour === "24" ? "00" : parts.hour;
+  return {
+    zone: zone,
+    // "GMT" is what en-GB calls UTC; the tool says UTC everywhere else, and
+    // switching names mid-page is exactly the ambiguity this issue is about.
+    abbr: zone === "UTC" ? "UTC" : abbr,
+    day: parts.weekday + ", " + parts.day + " " + parts.month + " " + parts.year,
+    time: hour + ":" + parts.minute,
+    // Used only to compare whether two zones land on the same calendar day.
+    dateKey: parts.year + "-" + parts.month + "-" + parts.day,
+  };
 }
 
 if (typeof module !== "undefined" && module.exports) {
@@ -1099,6 +1201,9 @@ if (typeof module !== "undefined" && module.exports) {
     cronDayMatches,
     nextCronRuns,
     cronFormatList,
+    formatCronRun,
+    cronTimeZoneList,
+    localTimeZone,
   };
 }
 
@@ -1753,6 +1858,7 @@ if (typeof document !== "undefined") {
       const errorEl = document.getElementById("cron-error");
       const fieldsEl = document.getElementById("cron-fields");
       const tzEl = document.getElementById("cron-timezone");
+      const tzSelect = document.getElementById("cron-timezone-select");
       const examples = Array.from(document.querySelectorAll("[data-cron-example]"));
 
       const FIELD_LABELS = [
@@ -1763,9 +1869,66 @@ if (typeof document !== "undefined") {
         ["dow", "Day of week"],
       ];
 
+      const localZone = localTimeZone();
+
+      // The zone the reader wants the runs *shown* in. The schedule itself is
+      // always read as UTC — see nextCronRuns — so this only changes rendering.
+      let displayZone = "UTC";
+
+      if (tzSelect) {
+        const utcOpt = document.createElement("option");
+        utcOpt.value = "UTC";
+        utcOpt.textContent = "UTC (what most servers use)";
+        tzSelect.appendChild(utcOpt);
+
+        if (localZone && localZone !== "UTC") {
+          const localOpt = document.createElement("option");
+          localOpt.value = localZone;
+          // Naming the resolved zone means "your local time" is never a guess.
+          localOpt.textContent = "Your local time — " + localZone;
+          tzSelect.appendChild(localOpt);
+        }
+
+        const group = document.createElement("optgroup");
+        group.label = "All time zones";
+        cronTimeZoneList().forEach((zone) => {
+          const opt = document.createElement("option");
+          opt.value = zone;
+          opt.textContent = zone;
+          group.appendChild(opt);
+        });
+        tzSelect.appendChild(group);
+        tzSelect.value = "UTC";
+
+        tzSelect.addEventListener("change", () => {
+          displayZone = tzSelect.value || "UTC";
+          render();
+        });
+      }
+
       if (tzEl) {
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        tzEl.textContent = tz ? "Times shown in your local time zone (" + tz + ")." : "Times shown in your local time zone.";
+        tzEl.textContent =
+          "Cron fields are read as UTC, because that is the clock the server almost certainly keeps. " +
+          (localZone && localZone !== "UTC"
+            ? "Your own zone (" + localZone + ") is shown beside each run so the two can never be confused."
+            : "Your own clock is already on UTC.");
+      }
+
+      /** One run, rendered as "<date> <time> <abbr>" for a given zone. */
+      function runLine(when, zone, className) {
+        const f = formatCronRun(when, zone);
+        const span = document.createElement("span");
+        span.className = className;
+        // The literal spaces between the spans are load-bearing: flex drops
+        // them from the layout (the gap does that job) but keeps them in the
+        // text, so copying a row out still gives "17 Aug 2026 00:00 UTC"
+        // rather than one run-together string. The same goes for a screen
+        // reader reading the line.
+        span.innerHTML =
+          '<span class="run-date">' + escapeHtml(f.day) + "</span> " +
+          '<span class="run-time">' + escapeHtml(f.time) + "</span> " +
+          '<span class="run-zone">' + escapeHtml(f.abbr) + "</span>";
+        return { el: span, parts: f };
       }
 
       function render() {
@@ -1801,12 +1964,36 @@ if (typeof document !== "undefined") {
           runsList.appendChild(li);
           return;
         }
+        // Every run carries a second zone beside it. A dropdown alone would
+        // only move the seven-hour mistake somewhere else; showing both at
+        // once is what actually removes it. The companion is the reader's own
+        // clock, unless they are already looking at their own clock, in which
+        // case it is UTC — so the pair is never two copies of one answer.
+        const companionZone = displayZone === localZone ? "UTC" : localZone;
+        // "UTC UTC" would be the abbreviation saying it twice; the note only
+        // earns its place when it adds the thing the abbreviation cannot.
+        const companionLabel = companionZone === localZone ? "your time" : "";
+
         runs.forEach((when) => {
           const li = document.createElement("li");
-          li.textContent = when.toLocaleString(undefined, {
-            weekday: "short", year: "numeric", month: "short", day: "numeric",
-            hour: "2-digit", minute: "2-digit",
-          });
+          const primary = runLine(when, displayZone, "run-primary");
+          li.appendChild(primary.el);
+
+          const companion = formatCronRun(when, companionZone);
+          if (companion.time !== primary.parts.time || companion.dateKey !== primary.parts.dateKey) {
+            const alt = document.createElement("span");
+            alt.className = "run-secondary";
+            // The date only earns its space when the two zones disagree on it,
+            // which is exactly the case people get wrong.
+            const sameDay = companion.dateKey === primary.parts.dateKey;
+            alt.innerHTML =
+              '<span class="run-sep" aria-hidden="true">·</span> ' +
+              (sameDay ? "" : '<span class="run-date">' + escapeHtml(companion.day) + "</span> ") +
+              '<span class="run-time">' + escapeHtml(companion.time) + "</span> " +
+              '<span class="run-zone">' + escapeHtml(companion.abbr) + "</span>" +
+              (companionLabel ? ' <span class="run-note">' + escapeHtml(companionLabel) + "</span>" : "");
+            li.appendChild(alt);
+          }
           runsList.appendChild(li);
         });
       }
