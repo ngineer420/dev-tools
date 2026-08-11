@@ -43,6 +43,8 @@ const {
   cronDayMatches,
   nextCronRuns,
   cronFormatList,
+  formatCronRun,
+  cronTimeZoneList,
 } = require("./app.js");
 
 /* ------------------------------- existing tools --------------------------- */
@@ -295,10 +297,13 @@ test("decodeJwt rejects malformed tokens", () => {
 
 /* ------------------------------------ cron --------------------------------- */
 
-const at = (y, m, d, hh, mm) => new Date(y, m - 1, d, hh, mm, 0, 0);
+// Cron fields are read as UTC wall-clock, so the fixtures and the readback are
+// both in UTC. That also makes these assertions independent of the machine's
+// own zone, which the local-time versions were not.
+const at = (y, m, d, hh, mm) => new Date(Date.UTC(y, m - 1, d, hh, mm, 0, 0));
 const fmt = (dt) =>
-  `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")} ` +
-  `${String(dt.getHours()).padStart(2, "0")}:${String(dt.getMinutes()).padStart(2, "0")}`;
+  `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-${String(dt.getUTCDate()).padStart(2, "0")} ` +
+  `${String(dt.getUTCHours()).padStart(2, "0")}:${String(dt.getUTCMinutes()).padStart(2, "0")}`;
 
 test("parseCronField expands wildcards, lists, ranges and steps", () => {
   const minute = { name: "minute", min: 0, max: 59 };
@@ -394,7 +399,7 @@ test("nextCronRuns lists midnight every Monday", () => {
     "2026-09-07 00:00",
     "2026-09-14 00:00",
   ]);
-  runs.forEach((r) => assert.equal(r.getDay(), 1, "every run is a Monday"));
+  runs.forEach((r) => assert.equal(r.getUTCDay(), 1, "every run is a Monday"));
 });
 
 test("nextCronRuns lists every five minutes", () => {
@@ -439,11 +444,64 @@ test("nextCronRuns starts strictly after the given moment", () => {
 test("cronDayMatches ORs the two day fields when both are restricted", () => {
   const p = parseCron("0 0 1 * MON");
   // 2026-09-01 is a Tuesday but is the 1st -> matches on day-of-month.
-  assert.equal(cronDayMatches(new Date(2026, 8, 1), p), true);
+  assert.equal(cronDayMatches(at(2026, 9, 1, 0, 0), p), true);
   // 2026-09-07 is a Monday but not the 1st -> matches on day-of-week.
-  assert.equal(cronDayMatches(new Date(2026, 8, 7), p), true);
+  assert.equal(cronDayMatches(at(2026, 9, 7, 0, 0), p), true);
   // 2026-09-08 is a Tuesday and not the 1st -> no match.
-  assert.equal(cronDayMatches(new Date(2026, 8, 8), p), false);
+  assert.equal(cronDayMatches(at(2026, 9, 8, 0, 0), p), false);
+});
+
+test("nextCronRuns reads the fields as UTC, not as the local clock", () => {
+  // The motivating bug: `0 3 * * *` on a UTC server fires at 03:00 UTC, which
+  // is 21:00 the previous day in Denver (MDT, UTC-6) — not 03:00 in Denver.
+  const runs = nextCronRuns(parseCron("0 3 * * *"), at(2026, 8, 11, 9, 17), 1);
+  assert.equal(runs[0].toISOString(), "2026-08-12T03:00:00.000Z");
+});
+
+test("formatCronRun renders one instant into whichever zone is asked for", () => {
+  const when = new Date("2026-08-12T03:00:00.000Z");
+
+  const utc = formatCronRun(when, "UTC");
+  assert.equal(utc.time, "03:00");
+  assert.equal(utc.abbr, "UTC", "UTC is never relabelled GMT");
+  assert.equal(utc.day, "Wed, 12 Aug 2026");
+
+  // Denver is UTC-6 in August, so 03:00 UTC is 21:00 on the *previous* day.
+  const denver = formatCronRun(when, "America/Denver");
+  assert.equal(denver.time, "21:00");
+  assert.equal(denver.day, "Tue, 11 Aug 2026");
+  assert.equal(denver.abbr, "MDT", "August is daylight time in Denver");
+  assert.notEqual(denver.dateKey, utc.dateKey, "the two zones land on different days");
+
+  // London's abbreviation only exists in en-GB, Denver's only in en-US, so
+  // this proves both locales are being consulted.
+  assert.equal(formatCronRun(when, "Europe/London").abbr, "BST");
+  // No CLDR abbreviation exists for Tokyo; the offset is the honest fallback.
+  assert.equal(formatCronRun(when, "Asia/Tokyo").abbr, "GMT+9");
+
+  // Tokyo is UTC+9, so the same instant is noon the same day.
+  assert.equal(formatCronRun(when, "Asia/Tokyo").time, "12:00");
+  // Kolkata's half-hour offset is a good check that minutes convert too.
+  assert.equal(formatCronRun(when, "Asia/Kolkata").time, "08:30");
+});
+
+test("formatCronRun renders midnight as 00:00, not 24:00", () => {
+  const midnight = new Date("2026-08-17T00:00:00.000Z");
+  assert.equal(formatCronRun(midnight, "UTC").time, "00:00");
+  assert.equal(formatCronRun(midnight, "UTC").day, "Mon, 17 Aug 2026");
+});
+
+test("formatCronRun falls back to UTC rather than throwing on a bad zone", () => {
+  const when = new Date("2026-08-12T03:00:00.000Z");
+  assert.equal(formatCronRun(when, "Not/AZone").time, "03:00");
+  assert.equal(formatCronRun(when, "Not/AZone").zone, "UTC");
+});
+
+test("cronTimeZoneList offers the real IANA zones", () => {
+  const zones = cronTimeZoneList();
+  assert.ok(zones.length > 100, "expected the full IANA list, got " + zones.length);
+  assert.ok(zones.includes("America/Denver"));
+  assert.ok(zones.includes("Europe/London"));
 });
 
 /* ------------------------------ CSV + entities ----------------------------- */
