@@ -49,27 +49,62 @@
   </div>
 </header>
 
+<!-- nav:start -->
+<nav class="toolbar" aria-label="Tools">
+  <details class="tb-menu">
+    <summary class="tb-trigger" aria-label="All 12 tools">
+      <span class="tb-glyph" aria-hidden="true">&#9636;</span>
+      <span class="tb-label">All 12<span class="tb-label-long"> tools</span></span>
+    </summary>
+    <div class="tb-sheet">
+      <div class="tb-sheet-cols">
+        <p class="tb-grouplabel" id="tb-g1">Format &amp; validate</p>
+        <ul aria-labelledby="tb-g1">
+          <li><a href="/json-formatter">JSON Formatter</a></li>
+          <li><a href="/regex-tester">Regex Tester</a></li>
+          <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g2">Encode &amp; decode</p>
+        <ul aria-labelledby="tb-g2">
+          <li><a href="/base64-encode-decode">Base64 Encode/Decode</a></li>
+          <li><a href="/url-encoder-decoder">URL Encode/Decode</a></li>
+          <li><a href="/html-entity-encoder">HTML Entity Encoder</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g3">Generate</p>
+        <ul aria-labelledby="tb-g3">
+          <li><a href="/uuid-generator">UUID Generator</a></li>
+          <li><a href="/hash-generator" aria-current="page">Hash Generator</a></li>
+          <li><a href="/password-generator">Password Generator</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g4">Inspect</p>
+        <ul aria-labelledby="tb-g4">
+          <li><a href="/unix-timestamp-converter">Timestamp Converter</a></li>
+          <li><a href="/jwt-decoder">JWT Decoder</a></li>
+          <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+        </ul>
+      </div>
+    </div>
+  </details>
+  <div class="tb-scrim"></div>
+  <ul class="tb-rail">
+    <li><a href="/json-formatter">JSON</a></li>
+    <li><a href="/base64-encode-decode">Base64</a></li>
+    <li><a href="/url-encoder-decoder">URL</a></li>
+    <li><a href="/unix-timestamp-converter">Timestamp</a></li>
+    <li><a href="/regex-tester">Regex</a></li>
+    <li><a href="/uuid-generator">UUID</a></li>
+    <li><a href="/hash-generator" aria-current="page">Hash</a></li>
+    <li><a href="/jwt-decoder">JWT</a></li>
+  </ul>
+</nav>
+<!-- nav:end -->
+
 <main id="main">
   <div class="hero">
     <h1>Hash Generator</h1>
     <p>Compute MD5, SHA-1, SHA-256, SHA-384, SHA-512 and HMAC digests of text or a dropped file, all at once.</p>
     <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
   </div>
-
-  <nav class="tabbar" aria-label="Developer tools">
-    <a href="/json-formatter" class="tab-btn">JSON Formatter</a>
-    <a href="/base64-encode-decode" class="tab-btn">Base64</a>
-    <a href="/url-encoder-decoder" class="tab-btn">URL Encode/Decode</a>
-    <a href="/unix-timestamp-converter" class="tab-btn">Timestamp</a>
-    <a href="/regex-tester" class="tab-btn">Regex Tester</a>
-    <a href="/uuid-generator" class="tab-btn">UUID Generator</a>
-    <a href="/hash-generator" aria-current="page" class="tab-btn active">Hash Generator</a>
-    <a href="/jwt-decoder" class="tab-btn">JWT Decoder</a>
-    <a href="/password-generator" class="tab-btn">Password Generator</a>
-    <a href="/json-csv-converter" class="tab-btn">JSON ⇄ CSV</a>
-    <a href="/html-entity-encoder" class="tab-btn">HTML Entities</a>
-    <a href="/cron-expression-parser" class="tab-btn">Cron Explainer</a>
-  </nav>
 
   <!-- ===================== HASH GENERATOR ===================== -->
   <section aria-label="Hash Generator tool">

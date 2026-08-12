@@ -19,6 +19,24 @@ Everything runs client-side — no backend, no build step, nothing is ever uploa
 
 There's also an `articles/` directory with four original written guides (JSON formatting, Base64/URL encoding, Unix timestamps, regex) linked from the homepage's "Learn more" section and from `sitemap.xml` — content-depth pages for AdSense review, not part of the tool functionality itself.
 
+## Navigation
+
+Every page carries one `<nav class="toolbar">` — a menu trigger plus a single
+non-wrapping row of tool chips — rendered between `<!-- nav:start -->` and
+`<!-- nav:end -->`.
+
+**Do not hand-edit that region.** It is written into all 19 files from
+`tools/nav_data.py`:
+
+```
+python3 tools/sync_nav.py           # rewrite every marked region
+python3 tools/sync_nav.py --check   # exit 1 if any page has drifted
+```
+
+Adding a tool means an entry in `TOOLS`, a re-run of `sync_nav.py`, a panel on
+the homepage whose id matches `PANEL_FOR` in `assets/js/app.js`, and a sitemap
+entry.
+
 ## Local development
 
 No build tooling required. Serve the folder with any static file server, e.g.:
