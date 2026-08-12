@@ -1271,133 +1271,147 @@ if (typeof document !== "undefined") {
       });
     })();
 
-    /* ---- tabs / tool menu ---- */
-    (function initTabs() {
-      const tabIds = [
-        "tab-json", "tab-base64", "tab-url", "tab-timestamp", "tab-regex",
-        "tab-uuid", "tab-hash", "tab-jwt", "tab-password", "tab-csv", "tab-entity",
-        "tab-cron",
-      ];
-      const tabs = tabIds.map((id) => document.getElementById(id)).filter(Boolean);
-      // No tool menu on this page; nothing to wire up.
-      if (!tabs.length) return;
+    /* ================================================================== *
+     * toolbar v1 — the portfolio navigation pattern.                      *
+     * Spec: github.com/ngineer420/ngineer420.github.io/issues/13          *
+     *                                                                     *
+     * Copy this block verbatim into any site in the portfolio. It is pure *
+     * enhancement: with JS off, <details>/<summary> still discloses the   *
+     * sheet, the rail is still a native scroll container of real links,   *
+     * the edge fades are still CSS and the scrim is still CSS. Only the   *
+     * active-chip centring, Escape and click-outside are lost.            *
+     * ================================================================== */
+    (function toolbar() {
+      const bar = document.querySelector(".toolbar");
+      if (!bar) return;
+      const rail = bar.querySelector(".tb-rail");
+      const menu = bar.querySelector("details.tb-menu");
 
-      const panels = {};
-      let allPanels = true;
-      tabs.forEach((t) => {
-        const p = document.getElementById(t.getAttribute("aria-controls"));
-        panels[t.id] = p;
-        if (!p) allPanels = false;
-      });
-      // Only the homepage keeps all the tool panels in the DOM. On a standalone
-      // tool page the menu links are plain navigation — do not intercept them.
-      if (!allPanels) return;
-
-      // Clean-path <-> tab id mapping for pushState / popstate.
-      const pathToId = {
-        "/json-formatter": "tab-json",
-        "/base64-encode-decode": "tab-base64",
-        "/url-encoder-decoder": "tab-url",
-        "/unix-timestamp-converter": "tab-timestamp",
-        "/regex-tester": "tab-regex",
-        "/uuid-generator": "tab-uuid",
-        "/hash-generator": "tab-hash",
-        "/jwt-decoder": "tab-jwt",
-        "/password-generator": "tab-password",
-        "/json-csv-converter": "tab-csv",
-        "/html-entity-encoder": "tab-entity",
-        "/cron-expression-parser": "tab-cron",
-      };
-
-      function tabIdForPath(pathname) {
-        const clean = pathname.replace(/\.html$/, "").replace(/\/+$/, "");
-        return pathToId[clean] || "tab-json"; // "/" (home) defaults to JSON Formatter
-      }
-
-      function activate(tab, opts) {
-        const options = opts || {};
-        tabs.forEach((t) => {
-          const active = t === tab;
-          t.setAttribute("aria-selected", String(active));
-          t.tabIndex = active ? 0 : -1;
-          t.classList.toggle("active", active);
-          if (active) t.setAttribute("aria-current", "page");
-          else t.removeAttribute("aria-current");
-          panels[t.id].hidden = !active;
-          panels[t.id].classList.toggle("active", active);
-        });
-        if (options.focus) tab.focus();
-        if (options.push) {
-          history.pushState({ tool: tab.id }, "", tab.getAttribute("href"));
+      if (rail) {
+        // js-on hands the right-hand fade over to measurement. Until then the
+        // CSS keeps it on, so a JS-disabled visitor never gets a chip clipped
+        // mid-word with nothing to say there is more of the row.
+        rail.classList.add("js-on");
+        const fades = () => {
+          const max = rail.scrollWidth - rail.clientWidth;
+          rail.classList.toggle("can-l", rail.scrollLeft > 1);
+          rail.classList.toggle("can-r", rail.scrollLeft < max - 1);
+        };
+        // Assigning scrollLeft, never scrollIntoView: that also scrolls every
+        // ancestor and the document, which on a phone drops the visitor below
+        // the header on arrival.
+        const current = rail.querySelector("[aria-current]");
+        if (current) {
+          rail.scrollLeft = Math.max(
+            0,
+            current.offsetLeft - (rail.clientWidth - current.offsetWidth) / 2
+          );
         }
+        rail.addEventListener("scroll", fades, { passive: true });
+        window.addEventListener("resize", fades);
+        fades();
       }
 
-      tabs.forEach((tab, i) => {
-        tab.addEventListener("click", (e) => {
-          // Real anchors: middle-click / modified click still open the standalone
-          // page. Only intercept plain left-clicks for instant in-page switching.
-          if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-          e.preventDefault();
-          activate(tab, { push: true, focus: true });
+      if (menu) {
+        // A disclosure, not a modal: focus is deliberately not trapped, Tab
+        // walks the links and straight out the other side.
+        window.addEventListener("keydown", (e) => {
+          if (e.key !== "Escape" || !menu.open) return;
+          menu.open = false;
+          const summary = menu.querySelector("summary");
+          if (summary) summary.focus();
         });
-        tab.addEventListener("keydown", (e) => {
-          let target;
-          if (e.key === "ArrowRight") target = tabs[(i + 1) % tabs.length];
-          else if (e.key === "ArrowLeft") target = tabs[(i - 1 + tabs.length) % tabs.length];
-          else if (e.key === "Home") target = tabs[0];
-          else if (e.key === "End") target = tabs[tabs.length - 1];
-          if (target) {
-            e.preventDefault();
-            activate(target, { push: true, focus: true });
-          }
+        document.addEventListener("click", (e) => {
+          if (menu.open && !menu.contains(e.target)) menu.open = false;
         });
-      });
-
-      // Browser back/forward restores the correct panel without pushing new state.
-      window.addEventListener("popstate", (e) => {
-        const id = (e.state && e.state.tool) || tabIdForPath(location.pathname);
-        const tab = document.getElementById(id);
-        if (tab) activate(tab, { push: false, focus: false });
-      });
-
-      // Normalize initial state. Default active on load = JSON Formatter; if the
-      // page was loaded directly at a clean tool path, reflect that instead.
-      const initial = document.getElementById(tabIdForPath(location.pathname)) || tabs[0];
-      activate(initial, { push: false, focus: false });
+      }
     })();
 
-    /* ---- tab strip ----
-       The tool menu is one sideways-scrolling row (see .tabbar in styles.css).
-       Two jobs here: bring the current tool into view, since on a phone it is
-       usually off the right-hand end, and mark the edge that still has tabs
-       behind it. Runs on every page that carries the menu, including the
-       standalone tool pages that initTabs deliberately leaves alone — and
-       after it, so the tab it marked current is the one we scroll to. */
-    (function initTabStrip() {
-      const bar = document.querySelector(".tabbar");
+    /* ---- homepage instant tool switch ----
+       The toolbar's links are real navigation on every page. The homepage is
+       the one page that mounts all twelve panels, so there a plain left-click
+       swaps the panel in place and pushes the tool's clean URL instead. Both
+       the rail and the sheet are wired, so the two routes to a tool behave
+       identically. This is no longer a tablist: the roving tabindex that came
+       with that pattern was shipping eleven of the twelve links with
+       tabindex="-1", i.e. out of tab order entirely. */
+    (function initToolPanels() {
+      const bar = document.querySelector(".toolbar");
       if (!bar) return;
 
-      function updateFades() {
-        const max = bar.scrollWidth - bar.clientWidth;
-        bar.classList.toggle("can-scroll-start", bar.scrollLeft > 1);
-        bar.classList.toggle("can-scroll-end", bar.scrollLeft < max - 1);
+      const PANEL_FOR = {
+        "/json-formatter": "panel-json",
+        "/base64-encode-decode": "panel-base64",
+        "/url-encoder-decoder": "panel-url",
+        "/unix-timestamp-converter": "panel-timestamp",
+        "/regex-tester": "panel-regex",
+        "/uuid-generator": "panel-uuid",
+        "/hash-generator": "panel-hash",
+        "/jwt-decoder": "panel-jwt",
+        "/password-generator": "panel-password",
+        "/json-csv-converter": "panel-csv",
+        "/html-entity-encoder": "panel-entity",
+        "/cron-expression-parser": "panel-cron",
+      };
+      const DEFAULT_HREF = "/json-formatter";
+
+      const panels = {};
+      let complete = true;
+      Object.keys(PANEL_FOR).forEach((href) => {
+        const el = document.getElementById(PANEL_FOR[href]);
+        panels[PANEL_FOR[href]] = el;
+        if (!el) complete = false;
+      });
+      // A standalone tool page mounts one panel — its links are plain
+      // navigation and there is nothing here to do.
+      if (!complete) return;
+
+      function cleanPath(pathname) {
+        const p = pathname.replace(/\/index\.html$/, "/").replace(/\.html$/, "").replace(/\/+$/, "");
+        return p || "/";
+      }
+      function hrefForPath(pathname) {
+        const clean = cleanPath(pathname);
+        return PANEL_FOR[clean] ? clean : DEFAULT_HREF;
       }
 
-      // Centre the active tab in the strip. Assigning scrollLeft rather than
-      // calling scrollIntoView, which would also scroll the document — on a
-      // narrow screen that drops the visitor below the header on arrival.
-      function revealActive() {
-        const active = bar.querySelector('[aria-current="page"]');
-        if (active) {
-          const centred = active.offsetLeft - (bar.clientWidth - active.offsetWidth) / 2;
-          bar.scrollLeft = Math.max(0, centred);
-        }
-        updateFades();
+      const links = [...bar.querySelectorAll("a[href]")].filter(
+        (a) => PANEL_FOR[cleanPath(a.getAttribute("href"))]
+      );
+
+      function activate(href, opts) {
+        const options = opts || {};
+        const wanted = PANEL_FOR[href];
+        Object.keys(panels).forEach((id) => {
+          const on = id === wanted;
+          panels[id].hidden = !on;
+          panels[id].classList.toggle("active", on);
+        });
+        links.forEach((a) => {
+          const on = cleanPath(a.getAttribute("href")) === href;
+          if (on) a.setAttribute("aria-current", "page");
+          else a.removeAttribute("aria-current");
+        });
+        if (options.push) history.pushState({ href }, "", href);
       }
 
-      bar.addEventListener("scroll", updateFades, { passive: true });
-      window.addEventListener("resize", updateFades);
-      revealActive();
+      links.forEach((a) => {
+        a.addEventListener("click", (e) => {
+          // Real anchors: middle-click / modified click still open the
+          // standalone page. Only plain left-clicks switch in place.
+          if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          e.preventDefault();
+          const menu = bar.querySelector("details.tb-menu");
+          if (menu) menu.open = false;
+          activate(cleanPath(a.getAttribute("href")), { push: true });
+        });
+      });
+
+      window.addEventListener("popstate", (e) => {
+        activate((e.state && e.state.href) || hrefForPath(location.pathname), { push: false });
+      });
+
+      activate(hrefForPath(location.pathname), { push: false });
     })();
 
     const yearEl = document.getElementById("year");

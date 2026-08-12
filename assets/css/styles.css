@@ -146,18 +146,18 @@ label { display: block; font-size: 12.5px; color: var(--text-dim); margin-bottom
 input[type="range"] { width: 100%; accent-color: var(--accent); }
 
 /* ---------- layout shell ---------- */
+/* Deliberately not sticky, and neither is the toolbar below it: nothing in the
+   chrome may overlay an AdSense anchor unit or an Auto-ads in-content slot. */
 .site-header {
   border-bottom: 1px solid var(--border-soft);
-  position: sticky;
-  top: 0;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(8px);
-  z-index: 20;
+  background: var(--bg);
 }
+/* 10px of padding around a 33px row is a 54px header, so header + the 45px
+   toolbar is 99px of chrome on every page. */
 .header-inner {
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 14px 20px;
+  padding: 10px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -250,59 +250,199 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 24px 20px 60px; }
   .hero h1::after { animation: none; }
 }
 
-/* ---------- tabs ----------
-   Twelve tools wrapping to six rows put 284px of navigation above the fold on a
-   390px screen — the whole first screen was the menu. One row that scrolls
-   sideways instead: the strip is a single tab tall at every width, and app.js
-   scrolls the current tool into view on load. The fade marks the edge there is
-   more to scroll towards; it is driven by the can-scroll-* classes, so with no
-   JS nothing is dimmed and the strip is still a plain scrollable row. */
-.tabbar {
-  display: flex;
-  gap: 0;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  overflow-y: hidden;
+/* The chrome above is 99px and the toolbar now sits in it rather than below the
+   hero. Desktop hero padding on a phone would spend most of what that bought
+   before the visitor reaches the tool. */
+@media (max-width: 640px) {
+  main { padding-top: 14px; }
+  .hero { margin: 4px 0 14px; padding: 36px 14px 14px; }
+  .hero .trust-line { margin-top: 6px; }
+}
+
+/* ==========================================================================
+   toolbar v1 — the portfolio navigation pattern.
+   Spec: github.com/ngineer420/ngineer420.github.io/issues/13
+
+   Copy this block verbatim into any site in the portfolio. Everything
+   site-specific is the eight custom properties declared on `.toolbar` below;
+   remap those to the host site's tokens and nothing else needs touching. The
+   silhouette is shared, the palette and type are not.
+
+   ========================================================================== */
+
+.toolbar {
+  /* ---- the only site-owned values in this block ---- */
+  --tb-bg: var(--bg);
+  --tb-bg-elev: var(--bg-raised);
+  --tb-border: var(--border);
+  --tb-border-soft: var(--border-soft);
+  --tb-text: var(--text);
+  --tb-text-dim: var(--text-dim);
+  --tb-accent: var(--accent);
+  --tb-focus: var(--focus);
+
+  /* A stacking context, so the sheet lands above the tool's own positioned
+     bits without a z-index arms race inside it. */
+  position: relative; z-index: 40;
+  display: flex; align-items: stretch;
+  /* 44px of content plus the 1px rule. box-sizing is border-box, so a flat
+     44px here leaves the rail a 43px content box, the 44px chips overflow it
+     by a pixel and the 2px active underline gets clipped to 1px. */
+  height: 45px;
+  background: var(--tb-bg);
+  border-bottom: 1px solid var(--tb-border-soft);
+}
+/* The bar is full-bleed so its rule spans the window, but its contents belong
+   in the same column as the header and <main>. Full-bleed is kept below 720px,
+   where the padding would come straight out of the rail's scrollable width and
+   the fades already handle the edges. */
+@media (min-width: 720px) {
+  .toolbar { padding-inline: max(20px, calc((100% - var(--maxw)) / 2 + 20px)); }
+}
+
+/* ---- the trigger: labelled, counted, and never collapses to an icon ---- */
+.tb-menu { position: relative; flex: 0 0 auto; }
+.tb-trigger {
+  display: flex; align-items: center; gap: 8px;
+  min-height: 44px; padding: 0 14px;
+  white-space: nowrap; cursor: pointer; list-style: none;
+  font-size: 14.5px; font-weight: 700; color: var(--tb-text);
+  border-right: 1px solid var(--tb-border-soft);
+}
+.tb-trigger::-webkit-details-marker { display: none; } /* Safari */
+.tb-trigger::marker { content: ""; }
+.tb-trigger:hover { color: var(--tb-accent); }
+.tb-glyph { color: var(--tb-accent); font-size: 15px; line-height: 1; }
+
+/* ---- the rail: one row, always. Wrapping is what produced every ragged
+   multi-row header in the audit; nowrap makes those faults impossible. ---- */
+.tb-rail {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; flex-wrap: nowrap; gap: 0;
+  margin: 0; padding: 0; list-style: none;
+  overflow-x: auto; overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  scroll-padding-inline: 22px; /* focus-scrolling shouldn't jam a tab to the edge */
+  overscroll-behavior-x: contain;  /* a swipe past the end is not a back-nav */
+  scroll-padding-inline: 24px;     /* Tab must not park a chip under the fade */
   scrollbar-width: none;
-  border-bottom: 1px solid var(--border-soft);
-  margin-bottom: 20px;
-  --fade-start: 0px;
-  --fade-end: 0px;
-  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-start),
-    #000 calc(100% - var(--fade-end)), transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-start),
-    #000 calc(100% - var(--fade-end)), transparent 100%);
+  /* The right fade is ON by default and JS turns it off once it can prove the
+     rail is scrolled to its end. Defaulting it off would mean a JS-disabled
+     visitor gets a label hard-clipped mid-word, which is the one thing this
+     pattern exists to stop. */
+  --f0: 0px; --f1: 24px;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--f0),
+    #000 calc(100% - var(--f1)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--f0),
+    #000 calc(100% - var(--f1)), transparent 100%);
 }
-.tabbar::-webkit-scrollbar { display: none; } /* the fade is the affordance */
-.tabbar.can-scroll-start { --fade-start: 28px; }
-.tabbar.can-scroll-end { --fade-end: 28px; }
-.tab-btn {
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  padding: 10px 4px;
-  margin-right: 22px;
-  color: var(--text-dim);
-  font-size: 14.5px;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-  display: inline-block;
-  flex: 0 0 auto;
-  white-space: nowrap;
+.tb-rail::-webkit-scrollbar { display: none; } /* the fade is the affordance */
+.tb-rail.can-l { --f0: 24px; }
+.tb-rail.js-on:not(.can-r) { --f1: 0px; }
+.tb-rail > li { flex: 0 0 auto; }
+.tb-rail a {
+  display: flex; align-items: center; min-height: 44px; padding: 0 12px;
+  white-space: nowrap; text-decoration: none;
+  font-size: 14.5px; font-weight: 600; color: var(--tb-text-dim);
+  box-shadow: inset 0 -2px 0 transparent;
 }
-.tab-btn:hover { color: var(--text); border-color: var(--border); }
-.tab-btn[aria-selected="true"],
-.tab-btn[aria-current="page"],
-.tab-btn.active {
-  color: var(--accent);
-  border-color: var(--accent);
-  box-shadow: 0 8px 14px -12px color-mix(in srgb, var(--accent) 90%, transparent);
+/* Hover changes colour only, so the scroller never reflows under the cursor. */
+.tb-rail a:hover { color: var(--tb-text); text-decoration: none; }
+.tb-rail a[aria-current] {
+  color: var(--tb-text); font-weight: 800;
+  box-shadow: inset 0 -2px 0 var(--tb-accent);
 }
+
+/* outline-offset is negative so the ring is not clipped by the scroller. */
+.tb-trigger:focus-visible,
+.tb-rail a:focus-visible,
+.tb-sheet a:focus-visible {
+  outline: 2px solid var(--tb-focus); outline-offset: -2px;
+}
+
+/* ---- the sheet: a disclosure, not a modal. Focus is never trapped. ---- */
+.tb-sheet {
+  position: absolute; top: 100%; left: 0; z-index: 2;
+  width: min(680px, 92vw); max-height: min(70vh, 520px);
+  overflow-y: auto; overscroll-behavior: contain;
+  background: var(--tb-bg-elev);
+  border: 1px solid var(--tb-border);
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 18px 40px -20px rgba(0, 0, 0, .6);
+  padding: 14px 4px;
+}
+/* The columns go on the inner wrapper, never on the scrolling .tb-sheet: a
+   multi-column box with a capped block-size does not scroll, it fragments
+   sideways into further columns. With `columns` on .tb-sheet itself, links of a tall
+   sheet's links can lay out past its right edge behind a silent horizontal
+   drag. The wrapper has no height cap, so the columns balance at their natural
+   height and the sheet scrolls down past them. */
+.tb-sheet-cols { columns: 2; column-gap: 24px; }
+/* At <= 8 destinations the sheet renders one flat list and the columns move
+   onto it; group headings are noise at that size. */
+.tb-sheet.is-flat .tb-sheet-cols { columns: 1; }
+.tb-sheet.is-flat .tb-sheet-cols ul { columns: 2; column-gap: 24px; }
+.tb-sheet ul { margin: 0 0 12px; padding: 0; list-style: none; break-inside: avoid; }
+.tb-sheet li { break-inside: avoid; }
+.tb-sheet a {
+  display: flex; align-items: center; min-height: 36px; padding: 0 14px;
+  font-size: 14.5px; text-decoration: none; color: var(--tb-text-dim);
+  border-left: 3px solid transparent; /* reserved, so the current item never shifts */
+}
+.tb-sheet a:hover { color: var(--tb-text); text-decoration: none; }
+.tb-sheet a[aria-current] {
+  color: var(--tb-text); font-weight: 800; border-left-color: var(--tb-accent);
+}
+/* <p>, not <h2>: chrome headings would pollute the outline of an SEO page. */
+.tb-grouplabel {
+  margin: 0 0 4px; padding: 0 14px;
+  font-size: 12px; font-weight: 800; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--tb-text-dim);
+}
+/* A group label may double as a link to that category's hub page. */
+/* The anchor carries the tap target (36px here, 44px on mobile via .tb-sheet a),
+   so the <p> adds no padding of its own or the label floats off its own list. */
+.tb-grouplabel a {
+  display: flex; align-items: center; padding: 0; border-left: 0;
+  color: inherit; font: inherit; text-decoration: none;
+}
+.tb-grouplabel a:hover { color: var(--tb-accent); text-decoration: none; }
+/* The one route from the chrome to a tier-2 family. */
+.tb-hub {
+  column-span: all; break-inside: avoid;
+  margin: 2px 0 0; padding: 10px 14px 0;
+  border-top: 1px solid var(--tb-border-soft);
+}
+.tb-hub a {
+  padding: 0; border-left: 0; min-height: 36px;
+  color: var(--tb-accent); font-weight: 700;
+}
+
+/* ---- mobile: full-bleed sheet, scrim, short trigger label ---- */
+.tb-scrim { display: none; }
+@media (max-width: 719px) {
+  .tb-menu { position: static; }
+  .tb-sheet {
+    left: 0; right: 0; width: auto;
+    border-width: 1px 0; border-radius: 0;
+  }
+  .tb-sheet-cols,
+  .tb-sheet.is-flat .tb-sheet-cols,
+  .tb-sheet.is-flat .tb-sheet-cols ul { columns: auto; }
+  .tb-sheet a { min-height: 44px; padding: 0 16px; }
+  .tb-grouplabel { padding: 0 16px; } /* match the list links' inset */
+  /* Anchored to the bar rather than the viewport, so it cannot cover the
+     trigger — with JS off, tapping the trigger again is the way out and there
+     must be nothing on top of it. Pure CSS, so it works with JS off too. */
+  .tb-menu[open] ~ .tb-scrim {
+    display: block; position: absolute; top: 100%; left: 0; right: 0;
+    height: 100vh; z-index: 1; background: rgba(0, 0, 0, .42);
+  }
+}
+@media (max-width: 399px) {
+  .tb-label-long { display: none; } /* "All 12 tools" -> "All 12"; the
+                                       accessible name keeps the full string */
+}
+
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
