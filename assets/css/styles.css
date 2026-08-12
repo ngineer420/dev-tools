@@ -317,6 +317,13 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 24px 20px 60px; }
 /* ---- the rail: one row, always. Wrapping is what produced every ragged
    multi-row header in the audit; nowrap makes those faults impossible. ---- */
 .tb-rail {
+  /* The centre-on-current JS reads `current.offsetLeft` and treats it as an
+     offset inside this scroller. Without a position here the nearest
+     positioned ancestor is `.toolbar`, so that figure also carries the
+     trigger's width and the rail over-scrolls by it — the current chip lands
+     with its first letters under the left fade, which is the clipped label
+     this pattern exists to prevent. */
+  position: relative;
   flex: 1 1 auto; min-width: 0;
   display: flex; flex-wrap: nowrap; gap: 0;
   margin: 0; padding: 0; list-style: none;
@@ -366,8 +373,11 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 24px 20px 60px; }
   overflow-y: auto; overscroll-behavior: contain;
   background: var(--tb-bg-elev);
   border: 1px solid var(--tb-border);
-  border-radius: 0 0 12px 12px;
-  box-shadow: 0 18px 40px -20px rgba(0, 0, 0, .6);
+  /* Radius and shadow are site-owned: a hard-edged idiom reads wrong with a
+     soft drop shadow and a 12px corner. Structure stays identical portfolio-
+     wide; only these two tokens move. */
+  border-radius: var(--tb-sheet-radius, 0 0 12px 12px);
+  box-shadow: var(--tb-sheet-shadow, 0 18px 40px -20px rgba(0, 0, 0, .6));
   padding: 14px 4px;
 }
 /* The columns go on the inner wrapper, never on the scrolling .tb-sheet: a
