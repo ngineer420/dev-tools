@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Number Base Converter — Binary, Hex, Decimal, Any Base 2–36 — devboxkit.com</title>
+<meta name="description" content="Free online base converter. Any base from 2 to 36, with 8/16/32/64-bit widths and a two's-complement toggle. BigInt throughout, so 64-bit values and negatives are exact. Runs entirely in your browser.">
+<link rel="canonical" href="https://devboxkit.com/number-base-converter">
+<meta name="theme-color" content="#090c11">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Number Base Converter — Any Base, Any Width">
+<meta property="og:description" content="Convert between any bases from 2 to 36 with correct signed and unsigned readings at 8, 16, 32 and 64 bits. Exact past 2^53. Nothing is uploaded.">
+<meta property="og:url" content="https://devboxkit.com/number-base-converter">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Number Base Converter — Any Base, Any Width">
+<meta name="twitter:description" content="Convert between any bases from 2 to 36 with correct signed and unsigned readings at 8, 16, 32 and 64 bits. Exact past 2^53. Nothing is uploaded.">
+
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Number Base Converter — DevBox Kit",
+  "url": "https://devboxkit.com/number-base-converter",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "description": "Free online base converter. Any base from 2 to 36, with 8/16/32/64-bit widths and a two's-complement toggle. BigInt throughout, so 64-bit values and negatives are exact. Runs entirely in your browser."
+}
+</script>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7560786263587509" crossorigin="anonymous"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+      <span class="brand-tag">JSON, hashes, JWTs, passwords &amp; more — one page</span>
+    </a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark/light theme" title="Toggle theme">◐</button>
+    </div>
+  </div>
+</header>
+
+<!-- nav:start -->
+<nav class="toolbar" aria-label="Tools">
+  <details class="tb-menu">
+    <summary class="tb-trigger" aria-label="All 15 tools">
+      <span class="tb-glyph" aria-hidden="true">&#9636;</span>
+      <span class="tb-label">All 15<span class="tb-label-long"> tools</span></span>
+    </summary>
+    <div class="tb-sheet">
+      <div class="tb-sheet-cols">
+        <p class="tb-grouplabel" id="tb-g1">Format &amp; validate</p>
+        <ul aria-labelledby="tb-g1">
+          <li><a href="/json-formatter">JSON Formatter</a></li>
+          <li><a href="/regex-tester">Regex Tester</a></li>
+          <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g2">Encode &amp; decode</p>
+        <ul aria-labelledby="tb-g2">
+          <li><a href="/base64-encode-decode">Base64 Encode/Decode</a></li>
+          <li><a href="/url-encoder-decoder">URL Encode/Decode</a></li>
+          <li><a href="/html-entity-encoder">HTML Entity Encoder</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g3">Generate</p>
+        <ul aria-labelledby="tb-g3">
+          <li><a href="/uuid-generator">UUID Generator</a></li>
+          <li><a href="/hash-generator">Hash Generator</a></li>
+          <li><a href="/password-generator">Password Generator</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g4">Inspect</p>
+        <ul aria-labelledby="tb-g4">
+          <li><a href="/unix-timestamp-converter">Timestamp Converter</a></li>
+          <li><a href="/jwt-decoder">JWT Decoder</a></li>
+          <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g5">Color</p>
+        <ul aria-labelledby="tb-g5">
+          <li><a href="/color-converter">Color Converter</a></li>
+          <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g6">Convert</p>
+        <ul aria-labelledby="tb-g6">
+          <li><a href="/number-base-converter" aria-current="page">Number Base Converter</a></li>
+        </ul>
+      </div>
+    </div>
+  </details>
+  <div class="tb-scrim"></div>
+  <ul class="tb-rail">
+    <li><a href="/json-formatter">JSON</a></li>
+    <li><a href="/base64-encode-decode">Base64</a></li>
+    <li><a href="/url-encoder-decoder">URL</a></li>
+    <li><a href="/unix-timestamp-converter">Timestamp</a></li>
+    <li><a href="/regex-tester">Regex</a></li>
+    <li><a href="/uuid-generator">UUID</a></li>
+    <li><a href="/hash-generator">Hash</a></li>
+    <li><a href="/jwt-decoder">JWT</a></li>
+  </ul>
+</nav>
+<!-- nav:end -->
+
+<main id="main">
+  <div class="hero">
+    <h1>Number Base Converter</h1>
+    <p>Any base from 2 to 36, with real bit widths and a two&#8217;s-complement toggle &mdash; and exact past 2<sup>53</sup>, where converters built on floating point quietly stop being right.</p>
+    <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
+  </div>
+
+  <section aria-label="Number base converter tool">
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Input</h2>
+          <div class="field">
+            <label for="base-input">Number to convert</label>
+            <input type="text" id="base-input" class="code-area" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" placeholder="FFFFFFFF" value="FFFFFFFF">
+          </div>
+          <div class="field">
+            <label for="base-from">Read it as</label>
+            <select id="base-from">
+            <option value="2">Base 2 — binary</option>
+            <option value="3">Base 3</option>
+            <option value="4">Base 4</option>
+            <option value="5">Base 5</option>
+            <option value="6">Base 6</option>
+            <option value="7">Base 7</option>
+            <option value="8">Base 8 — octal</option>
+            <option value="9">Base 9</option>
+            <option value="10">Base 10 — decimal</option>
+            <option value="11">Base 11</option>
+            <option value="12">Base 12</option>
+            <option value="13">Base 13</option>
+            <option value="14">Base 14</option>
+            <option value="15">Base 15</option>
+            <option value="16" selected>Base 16 — hexadecimal</option>
+            <option value="17">Base 17</option>
+            <option value="18">Base 18</option>
+            <option value="19">Base 19</option>
+            <option value="20">Base 20</option>
+            <option value="21">Base 21</option>
+            <option value="22">Base 22</option>
+            <option value="23">Base 23</option>
+            <option value="24">Base 24</option>
+            <option value="25">Base 25</option>
+            <option value="26">Base 26</option>
+            <option value="27">Base 27</option>
+            <option value="28">Base 28</option>
+            <option value="29">Base 29</option>
+            <option value="30">Base 30</option>
+            <option value="31">Base 31</option>
+            <option value="32">Base 32</option>
+            <option value="33">Base 33</option>
+            <option value="34">Base 34</option>
+            <option value="35">Base 35</option>
+            <option value="36">Base 36</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="base-bits">Width</label>
+            <select id="base-bits">
+            <option value="any" selected>Arbitrary precision</option>
+            <option value="8">8-bit</option>
+            <option value="16">16-bit</option>
+            <option value="32">32-bit</option>
+            <option value="64">64-bit</option>
+            </select>
+          </div>
+          <div class="checkbox-row">
+            <label for="base-signed"><input type="checkbox" id="base-signed" disabled> Signed (two's complement)</label>
+          </div>
+          <div class="field" style="margin-top:14px;">
+            <label for="base-custom">Extra base to show</label>
+            <select id="base-custom">
+              <option value="2">Base 2</option>
+              <option value="3">Base 3</option>
+              <option value="4">Base 4</option>
+              <option value="5">Base 5</option>
+              <option value="6">Base 6</option>
+              <option value="7">Base 7</option>
+              <option value="8">Base 8</option>
+              <option value="9">Base 9</option>
+              <option value="10">Base 10</option>
+              <option value="11">Base 11</option>
+              <option value="12">Base 12</option>
+              <option value="13">Base 13</option>
+              <option value="14">Base 14</option>
+              <option value="15">Base 15</option>
+              <option value="16">Base 16</option>
+              <option value="17">Base 17</option>
+              <option value="18">Base 18</option>
+              <option value="19">Base 19</option>
+              <option value="20">Base 20</option>
+              <option value="21">Base 21</option>
+              <option value="22">Base 22</option>
+              <option value="23">Base 23</option>
+              <option value="24">Base 24</option>
+              <option value="25">Base 25</option>
+              <option value="26">Base 26</option>
+              <option value="27">Base 27</option>
+              <option value="28">Base 28</option>
+              <option value="29">Base 29</option>
+              <option value="30">Base 30</option>
+              <option value="31">Base 31</option>
+              <option value="32">Base 32</option>
+              <option value="33">Base 33</option>
+              <option value="34">Base 34</option>
+              <option value="35">Base 35</option>
+              <option value="36" selected>Base 36</option>
+            </select>
+          </div>
+          <div class="error-banner" id="base-error" role="alert"></div>
+          <p class="source-note">Digit separators are fine — <code>1_000_000</code>, <code>1111 0000</code> and <code>0xFF</code> all read correctly. A leading <code>-</code> is a negative value, not a digit.</p>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <h2>Every base at once</h2>
+          <div class="format-list">
+            <div class="format-row">
+              <label for="base-out-binary">BIN</label>
+              <input type="text" id="base-out-binary" class="code-area" readonly spellcheck="false">
+              <button type="button" class="icon-btn" data-base-copy="base-out-binary">Copy</button>
+            </div>
+            <div class="format-row">
+              <label for="base-out-octal">OCT</label>
+              <input type="text" id="base-out-octal" class="code-area" readonly spellcheck="false">
+              <button type="button" class="icon-btn" data-base-copy="base-out-octal">Copy</button>
+            </div>
+            <div class="format-row">
+              <label for="base-out-decimal">DEC</label>
+              <input type="text" id="base-out-decimal" class="code-area" readonly spellcheck="false">
+              <button type="button" class="icon-btn" data-base-copy="base-out-decimal">Copy</button>
+            </div>
+            <div class="format-row">
+              <label for="base-out-hex">HEX</label>
+              <input type="text" id="base-out-hex" class="code-area" readonly spellcheck="false">
+              <button type="button" class="icon-btn" data-base-copy="base-out-hex">Copy</button>
+            </div>
+            <div class="format-row">
+              <label for="base-out-unsigned">UNS</label>
+              <input type="text" id="base-out-unsigned" class="code-area" readonly spellcheck="false">
+              <button type="button" class="icon-btn" data-base-copy="base-out-unsigned">Copy</button>
+            </div>
+            <div class="format-row">
+              <label for="base-out-custom" id="base-custom-label">B36</label>
+              <input type="text" id="base-out-custom" class="code-area" readonly spellcheck="false">
+              <button type="button" class="icon-btn" data-base-copy="base-out-custom">Copy</button>
+            </div>
+            <span class="copy-flash" id="base-copy-flash">Copied!</span>
+          </div>
+          <p class="source-note" id="base-note"></p>
+        </div>
+        <!-- sizechips:start -->
+        <nav class="size-chips" aria-label="Directed conversions">
+          <span class="size-chips-label" id="size-chips-label">One direction</span>
+          <ul aria-labelledby="size-chips-label">
+            <li><a href="/hex-to-decimal" class="chip">Hex → Dec</a></li>
+            <li><a href="/decimal-to-hex" class="chip">Dec → Hex</a></li>
+            <li><a href="/binary-to-decimal" class="chip">Bin → Dec</a></li>
+            <li><a href="/decimal-to-binary" class="chip">Dec → Bin</a></li>
+            <li><a href="/hex-to-binary" class="chip">Hex → Bin</a></li>
+            <li><a href="/binary-to-hex" class="chip">Bin → Hex</a></li>
+            <li><a href="/text-to-binary" class="chip">Text → Bin</a></li>
+            <li><a href="/binary-to-text" class="chip">Bin → Text</a></li>
+            <li><a href="/text-to-hex" class="chip">Text → Hex</a></li>
+            <li><a href="/hex-to-text" class="chip">Hex → Text</a></li>
+          </ul>
+        </nav>
+        <!-- sizechips:end -->
+      </div>
+    </div>
+  </section>
+
+<section class="container-narrow" style="padding-top:40px;">
+    <h2>About this number base converter</h2>
+    <p>Type a number, say what base it is already in, and every other base comes back at once — binary, octal, decimal, hexadecimal, and any base from 2 to 36 you pick as a sixth row. Digit separators are accepted on the way in, so a value pasted out of source code as <code>1_000_000</code>, out of a register dump as <code>1111 0000</code>, or out of a config file as <code>0xFF</code> all read correctly without editing.</p>
+    <h2>Why this one is worth trusting</h2>
+    <p>Almost every converter on the web is built on JavaScript's <code>Number</code>, which is a 64-bit float. That is exact up to 9,007,199,254,740,991 and quietly wrong above it: ask one of those tools for the decimal value of <code>0x20000000000001</code> and you will usually get 9007199254740992, one short, with nothing to warn you. This page does the arithmetic in <code>BigInt</code> from end to end, so a 64-bit register value, a 128-bit UUID chunk or a 300-digit number all come back exact.</p>
+    <p>The second thing these tools get wrong is width. A number on its own has no width and no sign; a number in a register has both, and they change the answer. <code>FFFFFFFF</code> is 4,294,967,295 in a <code>uint32_t</code> and −1 in an <code>int32_t</code>, and both are correct — the bits are identical. Set a width here and you are told both readings, with the bit pattern shown as the register would hold it.</p>
+
+    <h2>Set a width and the answer changes — on purpose</h2>
+    <p>Leave the width on <strong>arbitrary precision</strong> and the converter behaves like mathematics: numbers are as big as you like, negatives keep their minus sign, nothing is masked. Choose 8, 16, 32 or 64 bits and it behaves like hardware instead. The value is written into a field that size, the binary, octal, hex and custom-base rows show the resulting bit pattern zero-padded to the full width, decimal shows the two's-complement reading if the signed box is ticked, and a separate unsigned row shows the same bits read the other way.</p>
+<div class="data-table">
+  <table>
+    <caption>All-ones at each width, read both ways</caption>
+    <thead><tr><th scope="col">Width</th><th scope="col">Bit pattern (hex)</th><th scope="col">Signed</th><th scope="col">Unsigned</th><th scope="col">Signed range</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">8-bit</th><td><code>FF</code></td><td>-1</td><td>255</td><td>-128 to 127</td></tr>
+      <tr><th scope="row">16-bit</th><td><code>FFFF</code></td><td>-1</td><td>65535</td><td>-32768 to 32767</td></tr>
+      <tr><th scope="row">32-bit</th><td><code>FFFFFFFF</code></td><td>-1</td><td>4294967295</td><td>-2147483648 to 2147483647</td></tr>
+      <tr><th scope="row">64-bit</th><td><code>FFFFFFFFFFFFFFFF</code></td><td>-1</td><td>18446744073709551615</td><td>-9223372036854775808 to 9223372036854775807</td></tr>
+    </tbody>
+  </table>
+</div>
+    <p>Two's complement is what makes that table work. Negating a number in two's complement is "flip every bit, then add one", which is why −1 is all ones at every width, why the negative range reaches one further from zero than the positive range, and why adding 1 to the largest positive value lands you on the most negative one instead of overflowing into an error. The converter tells you which of those happened: a pattern that fills the width, like <code>FFFFFFFF</code> in a signed 32-bit field, is a <em>reinterpretation</em> and nothing is lost, while a value that genuinely will not fit is called out as truncated.</p>
+    <h2>Exactness past 2<sup>53</sup></h2>
+    <p>Paste <code>9007199254740993</code> — one more than the largest integer a double can represent — and you get <code>20000000000001</code> back, not the even number one below it. That is the whole reason for the BigInt engine. Sixty-four-bit IDs, nanosecond timestamps, hashes and flag words all live above the float boundary, and they are exactly the values people paste into a base converter.</p>
+    <h2>Going one direction only?</h2>
+    <p>Each direction has its own page with its own reference table, because "hex to decimal" and "decimal to hex" are different jobs done by different people: <a href="/hex-to-decimal">hex to decimal</a>, <a href="/decimal-to-hex">decimal to hex</a>, <a href="/binary-to-decimal">binary to decimal</a>, <a href="/decimal-to-binary">decimal to binary</a>, <a href="/hex-to-binary">hex to binary</a>, <a href="/binary-to-hex">binary to hex</a>, <a href="/text-to-binary">text to binary</a>, <a href="/binary-to-text">binary to text</a>, <a href="/text-to-hex">text to hex</a> and <a href="/hex-to-text">hex to text</a>.</p>
+
+    <h2>More developer tools</h2>
+    <ul>
+      <li><a href="/json-formatter">JSON Formatter</a></li>
+      <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
+      <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
+      <li><a href="/unix-timestamp-converter">Unix Timestamp Converter</a></li>
+      <li><a href="/regex-tester">Regex Tester</a></li>
+      <li><a href="/uuid-generator">UUID Generator (v4 / v7)</a></li>
+      <li><a href="/hash-generator">Hash Generator (MD5 / SHA / HMAC)</a></li>
+      <li><a href="/jwt-decoder">JWT Decoder</a></li>
+      <li><a href="/password-generator">Password Generator</a></li>
+      <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+      <li><a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a></li>
+      <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+      <li><a href="/color-converter">Color Converter</a></li>
+      <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+      <li><a href="/">All tools on one page (home)</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/app.js"></script>
+<a href="https://erabb.it" class="erabbit-mark" aria-label="erabb.it"><img src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐇</text></svg>" width="10" height="10" alt=""></a>
+</body>
+</html>

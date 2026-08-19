@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text to Binary Converter — UTF-8, Eight Bits a Byte — devboxkit.com</title>
+<meta name="description" content="Convert text to binary in your browser. UTF-8 encoded, eight bits per byte with leading zeros kept, and multi-byte characters handled correctly.">
+<link rel="canonical" href="https://devboxkit.com/text-to-binary">
+<meta name="theme-color" content="#090c11">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Text to Binary Converter">
+<meta property="og:description" content="Text to binary via UTF-8, eight bits per byte, with accented characters and emoji handled correctly.">
+<meta property="og:url" content="https://devboxkit.com/text-to-binary">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Text to Binary Converter">
+<meta name="twitter:description" content="Text to binary via UTF-8, eight bits per byte, with accented characters and emoji handled correctly.">
+
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Text to Binary — DevBox Kit",
+  "url": "https://devboxkit.com/text-to-binary",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "description": "Convert text to binary in your browser. UTF-8 encoded, eight bits per byte with leading zeros kept, and multi-byte characters handled correctly."
+}
+</script>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7560786263587509" crossorigin="anonymous"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+      <span class="brand-tag">JSON, hashes, JWTs, passwords &amp; more — one page</span>
+    </a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark/light theme" title="Toggle theme">◐</button>
+    </div>
+  </div>
+</header>
+
+<!-- nav:start -->
+<nav class="toolbar" aria-label="Tools">
+  <details class="tb-menu">
+    <summary class="tb-trigger" aria-label="All 15 tools">
+      <span class="tb-glyph" aria-hidden="true">&#9636;</span>
+      <span class="tb-label">All 15<span class="tb-label-long"> tools</span></span>
+    </summary>
+    <div class="tb-sheet">
+      <div class="tb-sheet-cols">
+        <p class="tb-grouplabel" id="tb-g1">Format &amp; validate</p>
+        <ul aria-labelledby="tb-g1">
+          <li><a href="/json-formatter">JSON Formatter</a></li>
+          <li><a href="/regex-tester">Regex Tester</a></li>
+          <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g2">Encode &amp; decode</p>
+        <ul aria-labelledby="tb-g2">
+          <li><a href="/base64-encode-decode">Base64 Encode/Decode</a></li>
+          <li><a href="/url-encoder-decoder">URL Encode/Decode</a></li>
+          <li><a href="/html-entity-encoder">HTML Entity Encoder</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g3">Generate</p>
+        <ul aria-labelledby="tb-g3">
+          <li><a href="/uuid-generator">UUID Generator</a></li>
+          <li><a href="/hash-generator">Hash Generator</a></li>
+          <li><a href="/password-generator">Password Generator</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g4">Inspect</p>
+        <ul aria-labelledby="tb-g4">
+          <li><a href="/unix-timestamp-converter">Timestamp Converter</a></li>
+          <li><a href="/jwt-decoder">JWT Decoder</a></li>
+          <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g5">Color</p>
+        <ul aria-labelledby="tb-g5">
+          <li><a href="/color-converter">Color Converter</a></li>
+          <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g6">Convert</p>
+        <ul aria-labelledby="tb-g6">
+          <li><a href="/number-base-converter" aria-current="true">Number Base Converter</a></li>
+        </ul>
+      </div>
+    </div>
+  </details>
+  <div class="tb-scrim"></div>
+  <ul class="tb-rail">
+    <li><a href="/json-formatter">JSON</a></li>
+    <li><a href="/base64-encode-decode">Base64</a></li>
+    <li><a href="/url-encoder-decoder">URL</a></li>
+    <li><a href="/unix-timestamp-converter">Timestamp</a></li>
+    <li><a href="/regex-tester">Regex</a></li>
+    <li><a href="/uuid-generator">UUID</a></li>
+    <li><a href="/hash-generator">Hash</a></li>
+    <li><a href="/jwt-decoder">JWT</a></li>
+  </ul>
+</nav>
+<!-- nav:end -->
+
+<main id="main">
+  <div class="hero">
+    <h1>Text to Binary</h1>
+    <p>Type anything and get its bits &mdash; UTF-8 encoded, eight bits to a byte, with the multi-byte characters that break most converters handled properly.</p>
+    <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
+  </div>
+
+  <section aria-label="Text to Binary tool">
+    <div class="tool-grid split" data-base-pair data-from="text" data-to="2">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Text</h2>
+          <div class="field">
+            <label for="pair-input">Anything — accented characters and emoji included</label>
+            <textarea id="pair-input" class="code-area" rows="6" spellcheck="false" autocapitalize="off" autocorrect="off" data-pair-input>Hello</textarea>
+          </div>
+          <div class="error-banner" data-pair-error role="alert"></div>
+        </div>
+      </div>
+      <div class="output-col">
+        <div class="panel">
+          <h2>Binary</h2>
+          <div class="field">
+            <label for="pair-output" class="visually-hidden">Binary</label>
+            <textarea id="pair-output" class="code-area" rows="6" readonly spellcheck="false" data-pair-output></textarea>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="icon-btn" data-pair-copy>Copy</button>
+            <button type="button" class="icon-btn" data-pair-swap="/binary-to-text">Swap → binary to text</button>
+            <span class="copy-flash" data-pair-flash>Copied!</span>
+          </div>
+          <p class="source-note" data-pair-note></p>
+        </div>
+        <!-- sizechips:start -->
+        <nav class="size-chips" aria-label="Directed conversions">
+          <span class="size-chips-label" id="size-chips-label">One direction</span>
+          <ul aria-labelledby="size-chips-label">
+            <li><a href="/hex-to-decimal" class="chip">Hex → Dec</a></li>
+            <li><a href="/decimal-to-hex" class="chip">Dec → Hex</a></li>
+            <li><a href="/binary-to-decimal" class="chip">Bin → Dec</a></li>
+            <li><a href="/decimal-to-binary" class="chip">Dec → Bin</a></li>
+            <li><a href="/hex-to-binary" class="chip">Hex → Bin</a></li>
+            <li><a href="/binary-to-hex" class="chip">Bin → Hex</a></li>
+            <li><a href="/text-to-binary" class="chip" aria-current="page">Text → Bin</a></li>
+            <li><a href="/binary-to-text" class="chip">Bin → Text</a></li>
+            <li><a href="/text-to-hex" class="chip">Text → Hex</a></li>
+            <li><a href="/hex-to-text" class="chip">Hex → Text</a></li>
+          </ul>
+        </nav>
+        <!-- sizechips:end -->
+      </div>
+    </div>
+  </section>
+
+<section class="container-narrow" style="padding-top:40px;">
+    <h2>Text is not binary until you choose an encoding</h2>
+    <p>A character is an idea; a byte is a number. Turning one into the other requires a rule, and the rule this page uses is UTF-8, which is what essentially every file, database and web page has used for years. Under UTF-8 the characters you can type on a US keyboard are one byte each and identical to ASCII, so <code>H</code> is 72 is <code>01001000</code>. Anything outside that set costs two, three or four bytes.</p>
+    <p>Each byte is written as eight bits, most significant first, padded with leading zeros. That padding is not optional: <code>1001000</code> is only seven bits, and a decoder reading a stream eight bits at a time will fall out of step on the very next character.</p>
+    <h2>Characters outside ASCII</h2>
+    <p>Type an accented letter or an emoji above and watch the byte count go up. UTF-8 encodes a character's code point in one to four bytes, with the first byte declaring how many follow:</p>
+<div class="data-table">
+  <table>
+    <caption>One character, several bytes</caption>
+    <thead><tr><th scope="col">Character</th><th scope="col">What it is</th><th scope="col">Bytes</th><th scope="col">Binary</th></tr></thead>
+    <tbody>
+      <tr><th scope="row"><code>é</code></th><td>e with acute, U+00E9</td><td>2</td><td><code>11000011 10101001</code></td></tr>
+      <tr><th scope="row"><code>€</code></th><td>euro sign, U+20AC</td><td>3</td><td><code>11100010 10000010 10101100</code></td></tr>
+      <tr><th scope="row"><code>日</code></th><td>CJK for sun/day, U+65E5</td><td>3</td><td><code>11100110 10010111 10100101</code></td></tr>
+      <tr><th scope="row"><code>🐇</code></th><td>rabbit, U+1F407</td><td>4</td><td><code>11110000 10011111 10010000 10000111</code></td></tr>
+    </tbody>
+  </table>
+</div>
+    <p>This is why "how many bits is a character?" has no single answer, and why a text field that allows 100 characters is not a database column of 100 bytes. It is also why binary produced from text on one machine and read on another matches only if both agree on the encoding — a string encoded as UTF-16 or Latin-1 will produce completely different bits for the same visible characters.</p>
+    <h2>The ASCII table, in binary</h2>
+    <p>For the one-byte range, the mapping is fixed and worth having in front of you. Note the structure: digits start at <code>0011 0000</code>, uppercase at <code>0100 0001</code>, lowercase exactly 32 higher at <code>0110 0001</code> — which is why flipping bit 5 changes a letter's case.</p>
+<div class="data-table data-table--tall">
+  <table>
+    <caption>Every printable ASCII character as eight bits</caption>
+    <thead><tr><th scope="col">Character</th><th scope="col">Decimal</th><th scope="col">Binary</th></tr></thead>
+    <tbody>
+      <tr><th scope="row"><code>space</code></th><td>32</td><td><code>00100000</code></td></tr>
+      <tr><th scope="row"><code>!</code></th><td>33</td><td><code>00100001</code></td></tr>
+      <tr><th scope="row"><code>&quot;</code></th><td>34</td><td><code>00100010</code></td></tr>
+      <tr><th scope="row"><code>#</code></th><td>35</td><td><code>00100011</code></td></tr>
+      <tr><th scope="row"><code>$</code></th><td>36</td><td><code>00100100</code></td></tr>
+      <tr><th scope="row"><code>%</code></th><td>37</td><td><code>00100101</code></td></tr>
+      <tr><th scope="row"><code>&amp;</code></th><td>38</td><td><code>00100110</code></td></tr>
+      <tr><th scope="row"><code>'</code></th><td>39</td><td><code>00100111</code></td></tr>
+      <tr><th scope="row"><code>(</code></th><td>40</td><td><code>00101000</code></td></tr>
+      <tr><th scope="row"><code>)</code></th><td>41</td><td><code>00101001</code></td></tr>
+      <tr><th scope="row"><code>*</code></th><td>42</td><td><code>00101010</code></td></tr>
+      <tr><th scope="row"><code>+</code></th><td>43</td><td><code>00101011</code></td></tr>
+      <tr><th scope="row"><code>,</code></th><td>44</td><td><code>00101100</code></td></tr>
+      <tr><th scope="row"><code>-</code></th><td>45</td><td><code>00101101</code></td></tr>
+      <tr><th scope="row"><code>.</code></th><td>46</td><td><code>00101110</code></td></tr>
+      <tr><th scope="row"><code>/</code></th><td>47</td><td><code>00101111</code></td></tr>
+      <tr><th scope="row"><code>0</code></th><td>48</td><td><code>00110000</code></td></tr>
+      <tr><th scope="row"><code>1</code></th><td>49</td><td><code>00110001</code></td></tr>
+      <tr><th scope="row"><code>2</code></th><td>50</td><td><code>00110010</code></td></tr>
+      <tr><th scope="row"><code>3</code></th><td>51</td><td><code>00110011</code></td></tr>
+      <tr><th scope="row"><code>4</code></th><td>52</td><td><code>00110100</code></td></tr>
+      <tr><th scope="row"><code>5</code></th><td>53</td><td><code>00110101</code></td></tr>
+      <tr><th scope="row"><code>6</code></th><td>54</td><td><code>00110110</code></td></tr>
+      <tr><th scope="row"><code>7</code></th><td>55</td><td><code>00110111</code></td></tr>
+      <tr><th scope="row"><code>8</code></th><td>56</td><td><code>00111000</code></td></tr>
+      <tr><th scope="row"><code>9</code></th><td>57</td><td><code>00111001</code></td></tr>
+      <tr><th scope="row"><code>:</code></th><td>58</td><td><code>00111010</code></td></tr>
+      <tr><th scope="row"><code>;</code></th><td>59</td><td><code>00111011</code></td></tr>
+      <tr><th scope="row"><code>&lt;</code></th><td>60</td><td><code>00111100</code></td></tr>
+      <tr><th scope="row"><code>=</code></th><td>61</td><td><code>00111101</code></td></tr>
+      <tr><th scope="row"><code>&gt;</code></th><td>62</td><td><code>00111110</code></td></tr>
+      <tr><th scope="row"><code>?</code></th><td>63</td><td><code>00111111</code></td></tr>
+      <tr><th scope="row"><code>@</code></th><td>64</td><td><code>01000000</code></td></tr>
+      <tr><th scope="row"><code>A</code></th><td>65</td><td><code>01000001</code></td></tr>
+      <tr><th scope="row"><code>B</code></th><td>66</td><td><code>01000010</code></td></tr>
+      <tr><th scope="row"><code>C</code></th><td>67</td><td><code>01000011</code></td></tr>
+      <tr><th scope="row"><code>D</code></th><td>68</td><td><code>01000100</code></td></tr>
+      <tr><th scope="row"><code>E</code></th><td>69</td><td><code>01000101</code></td></tr>
+      <tr><th scope="row"><code>F</code></th><td>70</td><td><code>01000110</code></td></tr>
+      <tr><th scope="row"><code>G</code></th><td>71</td><td><code>01000111</code></td></tr>
+      <tr><th scope="row"><code>H</code></th><td>72</td><td><code>01001000</code></td></tr>
+      <tr><th scope="row"><code>I</code></th><td>73</td><td><code>01001001</code></td></tr>
+      <tr><th scope="row"><code>J</code></th><td>74</td><td><code>01001010</code></td></tr>
+      <tr><th scope="row"><code>K</code></th><td>75</td><td><code>01001011</code></td></tr>
+      <tr><th scope="row"><code>L</code></th><td>76</td><td><code>01001100</code></td></tr>
+      <tr><th scope="row"><code>M</code></th><td>77</td><td><code>01001101</code></td></tr>
+      <tr><th scope="row"><code>N</code></th><td>78</td><td><code>01001110</code></td></tr>
+      <tr><th scope="row"><code>O</code></th><td>79</td><td><code>01001111</code></td></tr>
+      <tr><th scope="row"><code>P</code></th><td>80</td><td><code>01010000</code></td></tr>
+      <tr><th scope="row"><code>Q</code></th><td>81</td><td><code>01010001</code></td></tr>
+      <tr><th scope="row"><code>R</code></th><td>82</td><td><code>01010010</code></td></tr>
+      <tr><th scope="row"><code>S</code></th><td>83</td><td><code>01010011</code></td></tr>
+      <tr><th scope="row"><code>T</code></th><td>84</td><td><code>01010100</code></td></tr>
+      <tr><th scope="row"><code>U</code></th><td>85</td><td><code>01010101</code></td></tr>
+      <tr><th scope="row"><code>V</code></th><td>86</td><td><code>01010110</code></td></tr>
+      <tr><th scope="row"><code>W</code></th><td>87</td><td><code>01010111</code></td></tr>
+      <tr><th scope="row"><code>X</code></th><td>88</td><td><code>01011000</code></td></tr>
+      <tr><th scope="row"><code>Y</code></th><td>89</td><td><code>01011001</code></td></tr>
+      <tr><th scope="row"><code>Z</code></th><td>90</td><td><code>01011010</code></td></tr>
+      <tr><th scope="row"><code>[</code></th><td>91</td><td><code>01011011</code></td></tr>
+      <tr><th scope="row"><code>\</code></th><td>92</td><td><code>01011100</code></td></tr>
+      <tr><th scope="row"><code>]</code></th><td>93</td><td><code>01011101</code></td></tr>
+      <tr><th scope="row"><code>^</code></th><td>94</td><td><code>01011110</code></td></tr>
+      <tr><th scope="row"><code>_</code></th><td>95</td><td><code>01011111</code></td></tr>
+      <tr><th scope="row"><code>`</code></th><td>96</td><td><code>01100000</code></td></tr>
+      <tr><th scope="row"><code>a</code></th><td>97</td><td><code>01100001</code></td></tr>
+      <tr><th scope="row"><code>b</code></th><td>98</td><td><code>01100010</code></td></tr>
+      <tr><th scope="row"><code>c</code></th><td>99</td><td><code>01100011</code></td></tr>
+      <tr><th scope="row"><code>d</code></th><td>100</td><td><code>01100100</code></td></tr>
+      <tr><th scope="row"><code>e</code></th><td>101</td><td><code>01100101</code></td></tr>
+      <tr><th scope="row"><code>f</code></th><td>102</td><td><code>01100110</code></td></tr>
+      <tr><th scope="row"><code>g</code></th><td>103</td><td><code>01100111</code></td></tr>
+      <tr><th scope="row"><code>h</code></th><td>104</td><td><code>01101000</code></td></tr>
+      <tr><th scope="row"><code>i</code></th><td>105</td><td><code>01101001</code></td></tr>
+      <tr><th scope="row"><code>j</code></th><td>106</td><td><code>01101010</code></td></tr>
+      <tr><th scope="row"><code>k</code></th><td>107</td><td><code>01101011</code></td></tr>
+      <tr><th scope="row"><code>l</code></th><td>108</td><td><code>01101100</code></td></tr>
+      <tr><th scope="row"><code>m</code></th><td>109</td><td><code>01101101</code></td></tr>
+      <tr><th scope="row"><code>n</code></th><td>110</td><td><code>01101110</code></td></tr>
+      <tr><th scope="row"><code>o</code></th><td>111</td><td><code>01101111</code></td></tr>
+      <tr><th scope="row"><code>p</code></th><td>112</td><td><code>01110000</code></td></tr>
+      <tr><th scope="row"><code>q</code></th><td>113</td><td><code>01110001</code></td></tr>
+      <tr><th scope="row"><code>r</code></th><td>114</td><td><code>01110010</code></td></tr>
+      <tr><th scope="row"><code>s</code></th><td>115</td><td><code>01110011</code></td></tr>
+      <tr><th scope="row"><code>t</code></th><td>116</td><td><code>01110100</code></td></tr>
+      <tr><th scope="row"><code>u</code></th><td>117</td><td><code>01110101</code></td></tr>
+      <tr><th scope="row"><code>v</code></th><td>118</td><td><code>01110110</code></td></tr>
+      <tr><th scope="row"><code>w</code></th><td>119</td><td><code>01110111</code></td></tr>
+      <tr><th scope="row"><code>x</code></th><td>120</td><td><code>01111000</code></td></tr>
+      <tr><th scope="row"><code>y</code></th><td>121</td><td><code>01111001</code></td></tr>
+      <tr><th scope="row"><code>z</code></th><td>122</td><td><code>01111010</code></td></tr>
+      <tr><th scope="row"><code>{</code></th><td>123</td><td><code>01111011</code></td></tr>
+      <tr><th scope="row"><code>|</code></th><td>124</td><td><code>01111100</code></td></tr>
+      <tr><th scope="row"><code>}</code></th><td>125</td><td><code>01111101</code></td></tr>
+      <tr><th scope="row"><code>~</code></th><td>126</td><td><code>01111110</code></td></tr>
+    </tbody>
+  </table>
+</div>
+    <p>Related: <a href="/binary-to-text">binary to text</a> for the return trip, <a href="/text-to-hex">text to hex</a> when the binary is too long to read, and the <a href="/number-base-converter">number base converter</a> for plain numbers rather than text.</p>
+
+    <h2>More developer tools</h2>
+    <ul>
+      <li><a href="/json-formatter">JSON Formatter</a></li>
+      <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
+      <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
+      <li><a href="/unix-timestamp-converter">Unix Timestamp Converter</a></li>
+      <li><a href="/regex-tester">Regex Tester</a></li>
+      <li><a href="/uuid-generator">UUID Generator (v4 / v7)</a></li>
+      <li><a href="/hash-generator">Hash Generator (MD5 / SHA / HMAC)</a></li>
+      <li><a href="/jwt-decoder">JWT Decoder</a></li>
+      <li><a href="/password-generator">Password Generator</a></li>
+      <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+      <li><a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a></li>
+      <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+      <li><a href="/color-converter">Color Converter</a></li>
+      <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+      <li><a href="/">All tools on one page (home)</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/app.js"></script>
+<a href="https://erabb.it" class="erabbit-mark" aria-label="erabb.it"><img src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐇</text></svg>" width="10" height="10" alt=""></a>
+</body>
+</html>

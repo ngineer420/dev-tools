@@ -4,17 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DevBox Kit — Free JSON, Base64, Hash, Color &amp; Contrast Tools</title>
-<meta name="description" content="Format &amp; validate JSON, encode/decode Base64/URL/HTML entities, generate UUIDs/hashes/passwords, decode JWTs, convert timestamps, colors and JSON⇄CSV, check WCAG contrast, test regex and explain cron expressions — fourteen free developer tools in one page. Runs entirely in your browser, nothing is uploaded.">
+<meta name="description" content="Format &amp; validate JSON, encode/decode Base64/URL/HTML entities, generate UUIDs/hashes/passwords, decode JWTs, convert timestamps, colors and JSON⇄CSV, check WCAG contrast, convert number bases, test regex and explain cron expressions — fifteen free developer tools in one page. Runs entirely in your browser, nothing is uploaded.">
 <link rel="canonical" href="https://devboxkit.com/">
 <meta name="theme-color" content="#090c11">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="DevBox Kit — Free JSON, Base64, Hash, Color &amp; Contrast Tools">
-<meta property="og:description" content="Fourteen free developer tools in one page: JSON, Base64, URL, HTML-entity and color conversion, a WCAG contrast checker, UUID/hash/password generators, a JWT decoder, JSON⇄CSV, a timestamp converter, a regex tester and a cron explainer. Runs entirely client-side.">
+<meta property="og:description" content="Fifteen free developer tools in one page: JSON, Base64, URL, HTML-entity, colour and number-base conversion, a WCAG contrast checker, UUID/hash/password generators, a JWT decoder, JSON⇄CSV, a timestamp converter, a regex tester and a cron explainer. Runs entirely client-side.">
 <meta property="og:url" content="https://devboxkit.com/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="DevBox Kit — Free JSON, Base64, Hash, Color &amp; Contrast Tools">
-<meta name="twitter:description" content="Fourteen free developer tools in one page: JSON, Base64, URL, HTML-entity and color conversion, a WCAG contrast checker, UUID/hash/password generators, a JWT decoder, JSON⇄CSV, a timestamp converter, a regex tester and a cron explainer. Runs entirely client-side.">
+<meta name="twitter:description" content="Fifteen free developer tools in one page: JSON, Base64, URL, HTML-entity, colour and number-base conversion, a WCAG contrast checker, UUID/hash/password generators, a JWT decoder, JSON⇄CSV, a timestamp converter, a regex tester and a cron explainer. Runs entirely client-side.">
 
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/styles.css">
@@ -52,9 +52,9 @@
 <!-- nav:start -->
 <nav class="toolbar" aria-label="Tools">
   <details class="tb-menu">
-    <summary class="tb-trigger" aria-label="All 14 tools">
+    <summary class="tb-trigger" aria-label="All 15 tools">
       <span class="tb-glyph" aria-hidden="true">&#9636;</span>
-      <span class="tb-label">All 14<span class="tb-label-long"> tools</span></span>
+      <span class="tb-label">All 15<span class="tb-label-long"> tools</span></span>
     </summary>
     <div class="tb-sheet">
       <div class="tb-sheet-cols">
@@ -87,6 +87,10 @@
           <li><a href="/color-converter">Color Converter</a></li>
           <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
         </ul>
+        <p class="tb-grouplabel" id="tb-g6">Convert</p>
+        <ul aria-labelledby="tb-g6">
+          <li><a href="/number-base-converter">Number Base Converter</a></li>
+        </ul>
       </div>
     </div>
   </details>
@@ -107,7 +111,7 @@
 <main id="main">
   <div class="hero">
     <h1>Free Developer Formatting &amp; Conversion Tools</h1>
-    <p>JSON, Base64, URL, HTML-entity &amp; color conversion, WCAG contrast, UUID/hash/password generators, JWT decoding, JSON⇄CSV, timestamps, regex and cron — fourteen tools, one page, no sign-up.</p>
+    <p>JSON, Base64, URL, HTML-entity, color &amp; number-base conversion, WCAG contrast, UUID/hash/password generators, JWT decoding, JSON⇄CSV, timestamps, regex and cron — fifteen tools, one page, no sign-up.</p>
     <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
   </div>
 
@@ -782,11 +786,178 @@
     </div>
   </section>
 
+  <!-- ===================== NUMBER BASE CONVERTER ===================== -->
+  <section role="tabpanel" id="panel-bases" aria-labelledby="tab-bases" class="tab-panel" hidden>
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Input</h2>
+          <div class="field">
+            <label for="base-input">Number to convert</label>
+            <input type="text" id="base-input" class="code-area" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" placeholder="FFFFFFFF" value="FFFFFFFF">
+          </div>
+          <div class="field">
+            <label for="base-from">Read it as</label>
+            <select id="base-from">
+            <option value="2">Base 2 — binary</option>
+            <option value="3">Base 3</option>
+            <option value="4">Base 4</option>
+            <option value="5">Base 5</option>
+            <option value="6">Base 6</option>
+            <option value="7">Base 7</option>
+            <option value="8">Base 8 — octal</option>
+            <option value="9">Base 9</option>
+            <option value="10">Base 10 — decimal</option>
+            <option value="11">Base 11</option>
+            <option value="12">Base 12</option>
+            <option value="13">Base 13</option>
+            <option value="14">Base 14</option>
+            <option value="15">Base 15</option>
+            <option value="16" selected>Base 16 — hexadecimal</option>
+            <option value="17">Base 17</option>
+            <option value="18">Base 18</option>
+            <option value="19">Base 19</option>
+            <option value="20">Base 20</option>
+            <option value="21">Base 21</option>
+            <option value="22">Base 22</option>
+            <option value="23">Base 23</option>
+            <option value="24">Base 24</option>
+            <option value="25">Base 25</option>
+            <option value="26">Base 26</option>
+            <option value="27">Base 27</option>
+            <option value="28">Base 28</option>
+            <option value="29">Base 29</option>
+            <option value="30">Base 30</option>
+            <option value="31">Base 31</option>
+            <option value="32">Base 32</option>
+            <option value="33">Base 33</option>
+            <option value="34">Base 34</option>
+            <option value="35">Base 35</option>
+            <option value="36">Base 36</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="base-bits">Width</label>
+            <select id="base-bits">
+            <option value="any" selected>Arbitrary precision</option>
+            <option value="8">8-bit</option>
+            <option value="16">16-bit</option>
+            <option value="32">32-bit</option>
+            <option value="64">64-bit</option>
+            </select>
+          </div>
+          <div class="checkbox-row">
+            <label for="base-signed"><input type="checkbox" id="base-signed" disabled> Signed (two's complement)</label>
+          </div>
+          <div class="field" style="margin-top:14px;">
+            <label for="base-custom">Extra base to show</label>
+            <select id="base-custom">
+              <option value="2">Base 2</option>
+              <option value="3">Base 3</option>
+              <option value="4">Base 4</option>
+              <option value="5">Base 5</option>
+              <option value="6">Base 6</option>
+              <option value="7">Base 7</option>
+              <option value="8">Base 8</option>
+              <option value="9">Base 9</option>
+              <option value="10">Base 10</option>
+              <option value="11">Base 11</option>
+              <option value="12">Base 12</option>
+              <option value="13">Base 13</option>
+              <option value="14">Base 14</option>
+              <option value="15">Base 15</option>
+              <option value="16">Base 16</option>
+              <option value="17">Base 17</option>
+              <option value="18">Base 18</option>
+              <option value="19">Base 19</option>
+              <option value="20">Base 20</option>
+              <option value="21">Base 21</option>
+              <option value="22">Base 22</option>
+              <option value="23">Base 23</option>
+              <option value="24">Base 24</option>
+              <option value="25">Base 25</option>
+              <option value="26">Base 26</option>
+              <option value="27">Base 27</option>
+              <option value="28">Base 28</option>
+              <option value="29">Base 29</option>
+              <option value="30">Base 30</option>
+              <option value="31">Base 31</option>
+              <option value="32">Base 32</option>
+              <option value="33">Base 33</option>
+              <option value="34">Base 34</option>
+              <option value="35">Base 35</option>
+              <option value="36" selected>Base 36</option>
+            </select>
+          </div>
+          <div class="error-banner" id="base-error" role="alert"></div>
+          <p class="source-note">Digit separators are fine — <code>1_000_000</code>, <code>1111 0000</code> and <code>0xFF</code> all read correctly. A leading <code>-</code> is a negative value, not a digit.</p>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <h2>Every base at once</h2>
+          <div class="format-list">
+            <div class="format-row">
+              <label for="base-out-binary">BIN</label>
+              <input type="text" id="base-out-binary" class="code-area" readonly spellcheck="false">
+              <button type="button" class="icon-btn" data-base-copy="base-out-binary">Copy</button>
+            </div>
+            <div class="format-row">
+              <label for="base-out-octal">OCT</label>
+              <input type="text" id="base-out-octal" class="code-area" readonly spellcheck="false">
+              <button type="button" class="icon-btn" data-base-copy="base-out-octal">Copy</button>
+            </div>
+            <div class="format-row">
+              <label for="base-out-decimal">DEC</label>
+              <input type="text" id="base-out-decimal" class="code-area" readonly spellcheck="false">
+              <button type="button" class="icon-btn" data-base-copy="base-out-decimal">Copy</button>
+            </div>
+            <div class="format-row">
+              <label for="base-out-hex">HEX</label>
+              <input type="text" id="base-out-hex" class="code-area" readonly spellcheck="false">
+              <button type="button" class="icon-btn" data-base-copy="base-out-hex">Copy</button>
+            </div>
+            <div class="format-row">
+              <label for="base-out-unsigned">UNS</label>
+              <input type="text" id="base-out-unsigned" class="code-area" readonly spellcheck="false">
+              <button type="button" class="icon-btn" data-base-copy="base-out-unsigned">Copy</button>
+            </div>
+            <div class="format-row">
+              <label for="base-out-custom" id="base-custom-label">Base 36</label>
+              <input type="text" id="base-out-custom" class="code-area" readonly spellcheck="false">
+              <button type="button" class="icon-btn" data-base-copy="base-out-custom">Copy</button>
+            </div>
+            <span class="copy-flash" id="base-copy-flash">Copied!</span>
+          </div>
+          <p class="source-note" id="base-note"></p>
+        </div>
+        <!-- sizechips:start -->
+        <nav class="size-chips" aria-label="Directed conversions">
+          <span class="size-chips-label" id="size-chips-label">One direction</span>
+          <ul aria-labelledby="size-chips-label">
+            <li><a href="/hex-to-decimal" class="chip">Hex → Dec</a></li>
+            <li><a href="/decimal-to-hex" class="chip">Dec → Hex</a></li>
+            <li><a href="/binary-to-decimal" class="chip">Bin → Dec</a></li>
+            <li><a href="/decimal-to-binary" class="chip">Dec → Bin</a></li>
+            <li><a href="/hex-to-binary" class="chip">Hex → Bin</a></li>
+            <li><a href="/binary-to-hex" class="chip">Bin → Hex</a></li>
+            <li><a href="/text-to-binary" class="chip">Text → Bin</a></li>
+            <li><a href="/binary-to-text" class="chip">Bin → Text</a></li>
+            <li><a href="/text-to-hex" class="chip">Text → Hex</a></li>
+            <li><a href="/hex-to-text" class="chip">Hex → Text</a></li>
+          </ul>
+        </nav>
+        <!-- sizechips:end -->
+      </div>
+    </div>
+  </section>
+
   <section class="container-narrow" style="padding-top:0;">
     <h2>About DevBox Kit</h2>
-    <p>DevBox Kit bundles fourteen everyday developer utilities into a single page: a <strong>JSON formatter and validator</strong> with precise syntax-error locations, two-way <strong>Base64</strong>, <strong>URL</strong>, and <strong>HTML entity</strong> encoders/decoders, a <strong>UUID generator</strong> (v4 random, v7 time-sortable, or v1-style, single or bulk), a <strong>hash generator</strong> (MD5, SHA-1, SHA-256, SHA-384, SHA-512 and HMAC, over text or a dropped file, with a compare mode), a <strong>JWT decoder</strong> that pretty-prints the header/payload and spells out expiry claims, a <strong>password generator</strong> with a strength meter, a two-way <strong>JSON ⇄ CSV converter</strong>, a <strong>Unix timestamp converter</strong> that shows both local and UTC time, a <strong>regex tester</strong> with live match highlighting and capture groups, a <strong>cron expression explainer</strong> that translates a schedule into plain English and lists its next five run times, a <strong>color converter</strong> covering HEX, RGB, HSL, HSV and the CSS color names with alpha, and a <strong>WCAG contrast checker</strong> that grades a color pair against AA and AAA.</p>
+    <p>DevBox Kit bundles fifteen everyday developer utilities into a single page: a <strong>JSON formatter and validator</strong> with precise syntax-error locations, two-way <strong>Base64</strong>, <strong>URL</strong>, and <strong>HTML entity</strong> encoders/decoders, a <strong>UUID generator</strong> (v4 random, v7 time-sortable, or v1-style, single or bulk), a <strong>hash generator</strong> (MD5, SHA-1, SHA-256, SHA-384, SHA-512 and HMAC, over text or a dropped file, with a compare mode), a <strong>JWT decoder</strong> that pretty-prints the header/payload and spells out expiry claims, a <strong>password generator</strong> with a strength meter, a two-way <strong>JSON ⇄ CSV converter</strong>, a <strong>Unix timestamp converter</strong> that shows both local and UTC time, a <strong>regex tester</strong> with live match highlighting and capture groups, a <strong>cron expression explainer</strong> that translates a schedule into plain English and lists its next five run times, a <strong>color converter</strong> covering HEX, RGB, HSL, HSV and the CSS color names with alpha, a <strong>WCAG contrast checker</strong> that grades a color pair against AA and AAA, and a <strong>number base converter</strong> that works in BigInt so 64-bit values and two&#8217;s-complement negatives stay exact.</p>
     <p>Everything runs entirely client-side in your browser — nothing you paste in is ever uploaded to a server, so there's no wait and nothing to worry about privacy-wise. Use it for debugging API responses, decoding tokens, generating throwaway IDs and passwords, checksumming files, converting between JSON and CSV, sanity-checking query strings, converting timestamps from logs, or testing a regular expression before you commit to it.</p>
-    <p>Prefer a dedicated page for a single tool? Each one also lives on its own: <a href="/json-formatter">JSON Formatter</a>, <a href="/base64-encode-decode">Base64 Encode / Decode</a>, <a href="/url-encoder-decoder">URL Encoder / Decoder</a>, <a href="/unix-timestamp-converter">Unix Timestamp Converter</a>, <a href="/regex-tester">Regex Tester</a>, <a href="/uuid-generator">UUID Generator</a>, <a href="/hash-generator">Hash Generator</a>, <a href="/jwt-decoder">JWT Decoder</a>, <a href="/password-generator">Password Generator</a>, <a href="/json-csv-converter">JSON ⇄ CSV Converter</a>, <a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a>, <a href="/color-converter">Color Converter</a>, and <a href="/contrast-checker">WCAG Contrast Checker</a>.</p>
+    <p>Prefer a dedicated page for a single tool? Each one also lives on its own: <a href="/json-formatter">JSON Formatter</a>, <a href="/base64-encode-decode">Base64 Encode / Decode</a>, <a href="/url-encoder-decoder">URL Encoder / Decoder</a>, <a href="/unix-timestamp-converter">Unix Timestamp Converter</a>, <a href="/regex-tester">Regex Tester</a>, <a href="/uuid-generator">UUID Generator</a>, <a href="/hash-generator">Hash Generator</a>, <a href="/jwt-decoder">JWT Decoder</a>, <a href="/password-generator">Password Generator</a>, <a href="/json-csv-converter">JSON ⇄ CSV Converter</a>, <a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a>, <a href="/color-converter">Color Converter</a>, <a href="/contrast-checker">WCAG Contrast Checker</a>, and <a href="/number-base-converter">Number Base Converter</a>.</p>
   </section>
 
   <section class="container-narrow" style="padding-top:0;" id="articles">

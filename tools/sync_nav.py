@@ -188,7 +188,14 @@ def render_sizechips(url):
            '  <span class="size-chips-label" id="%s">%s</span>' % (label_id, esc(v["label"])),
            '  <ul aria-labelledby="%s">' % label_id]
     for item in v["items"]:
-        data = ' data-target="%s"' % ("" if item["bytes"] is None else item["bytes"])
+        # `bytes` is the paper-size family's payload and is absent on families
+        # that have no numeric target. Emitting an empty data-target for those
+        # would be a lie the CSS could match on, so the attribute is omitted
+        # entirely; sites that do carry it produce byte-identical output.
+        if "bytes" in item:
+            data = ' data-target="%s"' % ("" if item["bytes"] is None else item["bytes"])
+        else:
+            data = ""
         out.append("    <li>%s</li>"
                    % anchor(item["href"], item["label"], url, extra=' class="chip"' + data))
     out += ["  </ul>", "</nav>"]

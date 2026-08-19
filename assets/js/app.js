@@ -1610,6 +1610,345 @@ function nudgeLightnessToPass(fg, bg, target) {
   };
 }
 
+/* ============================= Number base converter =============================
+   Everything here is BigInt end to end, on purpose. A base converter built on
+   Number silently stops being correct somewhere above 2^53: parseInt("9007199254740993")
+   and 0xFFFFFFFFFFFFFFFF both come back wrong, and the sites that own these
+   queries mostly do come back wrong. Exactness past Number.MAX_SAFE_INTEGER and
+   correct two's complement at a fixed width are the two things worth being
+   right about here, so both are implemented rather than approximated.
+
+   Radix conversion is hand-rolled (repeated division / Horner) rather than
+   leaning on BigInt.prototype.toString(radix). It costs ten lines, it makes the
+   digit alphabet explicit in both directions, and it is what the tests pin. */
+
+const BASE_DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+// Prefixes are only honoured when they agree with the base being read, so
+// "0b11" in base 16 is a plain hex number (0xB11) and not a silent base switch.
+const BASE_PREFIXES = { "0x": 16, "0b": 2, "0o": 8 };
+
+function baseIsValid(base) {
+  return Number.isInteger(base) && base >= 2 && base <= 36;
+}
+
+function digitValue(ch) {
+  const i = BASE_DIGITS.indexOf(ch.toLowerCase());
+  return i === -1 ? -1 : i;
+}
+
+/* Reads `str` as an integer in `base` and returns an exact BigInt.
+
+   Accepts a leading sign, an agreeing 0x/0b/0o prefix, and _ , or spaces as
+   digit separators (people paste 1_000_000 and 1010 1010). Everything else is
+   an error with the offending character named, because "invalid input" on a
+   40-digit paste is useless. */
+function parseInBase(str, base) {
+  if (!baseIsValid(base)) return { ok: false, error: "Base must be a whole number from 2 to 36." };
+  const raw = str === undefined || str === null ? "" : String(str);
+  let s = raw.trim();
+  if (!s) return { ok: false, error: "" };
+
+  let negative = false;
+  if (s[0] === "+" || s[0] === "-") {
+    negative = s[0] === "-";
+    s = s.slice(1).trim();
+  }
+
+  const prefix = s.slice(0, 2).toLowerCase();
+  if (BASE_PREFIXES[prefix] === base) s = s.slice(2);
+
+  s = s.replace(/[_,\s]/g, "");
+  if (!s) return { ok: false, error: "No digits to read." };
+
+  const big = BigInt(base);
+  let value = 0n;
+  for (const ch of s) {
+    const d = digitValue(ch);
+    if (d === -1 || d >= base) {
+      return {
+        ok: false,
+        error: '"' + ch + '" is not a base-' + base + " digit (valid: " +
+          baseDigitRange(base) + ").",
+      };
+    }
+    value = value * big + BigInt(d);
+  }
+  return { ok: true, value: negative ? -value : value };
+}
+
+function baseDigitRange(base) {
+  if (base <= 10) return "0–" + (base - 1);
+  return "0–9 and a–" + BASE_DIGITS[base - 1];
+}
+
+/* The exact inverse. Repeated division by the base, least significant digit
+   first, so the only arithmetic involved is BigInt division and remainder —
+   both exact at any magnitude. */
+function formatInBase(value, base) {
+  if (!baseIsValid(base)) return "";
+  let v = typeof value === "bigint" ? value : BigInt(value);
+  const negative = v < 0n;
+  if (negative) v = -v;
+  if (v === 0n) return "0";
+  const big = BigInt(base);
+  let out = "";
+  while (v > 0n) {
+    out = BASE_DIGITS[Number(v % big)] + out;
+    v /= big;
+  }
+  return negative ? "-" + out : out;
+}
+
+const BIT_WIDTHS = [8, 16, 32, 64];
+
+function widthIsValid(bits) {
+  return BIT_WIDTHS.indexOf(Number(bits)) !== -1;
+}
+
+function bitMask(bits) {
+  return (1n << BigInt(bits)) - 1n;
+}
+
+/* The unsigned bit pattern a `bits`-wide register would hold for `value`.
+
+   BigInt's & operates on the infinite two's-complement representation, so
+   (-1n & 0xFFFFFFFFn) is 0xFFFFFFFFn with no special-casing for the sign —
+   which is exactly the semantics a hardware register has. */
+function toTwosComplement(value, bits) {
+  const v = typeof value === "bigint" ? value : BigInt(value);
+  return v & bitMask(bits);
+}
+
+/* And back: read a `bits`-wide pattern as a signed value. This is the case the
+   incumbents fumble — 0xFFFFFFFF is 4294967295 unsigned and -1 signed, and a
+   converter that only ever answers one of those is wrong half the time. */
+function fromTwosComplement(pattern, bits) {
+  const p = toTwosComplement(pattern, bits);
+  const signBit = 1n << BigInt(bits - 1);
+  return p >= signBit ? p - (1n << BigInt(bits)) : p;
+}
+
+function signedRange(bits) {
+  const half = 1n << BigInt(bits - 1);
+  return { min: -half, max: half - 1n };
+}
+
+function unsignedRange(bits) {
+  return { min: 0n, max: bitMask(bits) };
+}
+
+/* Does `value` survive being written into a `bits`-wide field of this signedness
+   without changing? Used to label rather than to refuse: the wrapped answer is
+   still shown, it is just told about. */
+function fitsInWidth(value, bits, signed) {
+  const v = typeof value === "bigint" ? value : BigInt(value);
+  const r = signed ? signedRange(bits) : unsignedRange(bits);
+  return v >= r.min && v <= r.max;
+}
+
+/* Groups a digit string for reading: nibbles in binary, pairs in hex, threes
+   everywhere else. Grouping runs from the least significant digit, which is the
+   only direction that keeps the columns aligned to real place values. */
+function groupDigits(digits, base) {
+  const size = base === 2 ? 4 : base === 16 ? 2 : 3;
+  const negative = digits.startsWith("-");
+  const body = negative ? digits.slice(1) : digits;
+  if (body.length <= size) return digits;
+  const parts = [];
+  for (let end = body.length; end > 0; end -= size) {
+    parts.unshift(body.slice(Math.max(0, end - size), end));
+  }
+  return (negative ? "-" : "") + parts.join(" ");
+}
+
+/* Zero-pads a fixed-width pattern out to its full digit count, so an 8-bit 5
+   reads 00000101 rather than 101. Only meaningful for bases that divide the
+   width evenly — binary, octal-ish and hex — so anything else is left alone. */
+function padToWidth(digits, base, bits) {
+  if (!widthIsValid(bits)) return digits;
+  let perDigit = 0;
+  if (base === 2) perDigit = 1;
+  else if (base === 4) perDigit = 2;
+  else if (base === 8) perDigit = 3;
+  else if (base === 16) perDigit = 4;
+  else if (base === 32) perDigit = 5;
+  else return digits;
+  const want = Math.ceil(bits / perDigit);
+  return digits.length >= want ? digits : "0".repeat(want - digits.length) + digits;
+}
+
+/* The whole answer for one input, in every base at once.
+
+   `bits` is null for arbitrary-precision mode, in which case a negative input
+   simply keeps its minus sign and nothing is masked. With a width set, the
+   register semantics take over: `pattern` is what the hardware holds, `signed`
+   is that pattern read as two's complement, `unsigned` is the same pattern read
+   without a sign, and `wrapped` says whether the input had to lose information
+   to get there. */
+function convertNumberBases(input, fromBase, options) {
+  const opts = options || {};
+  const bits = widthIsValid(opts.bits) ? Number(opts.bits) : null;
+  const signed = !!opts.signed;
+
+  const parsed = parseInBase(input, fromBase);
+  if (!parsed.ok) return { ok: false, error: parsed.error };
+
+  const value = parsed.value;
+  let pattern = null;
+  let signedValue = value;
+  let unsignedValue = value;
+  let wrapped = false;
+
+  let reinterpreted = false;
+  if (bits) {
+    pattern = toTwosComplement(value, bits);
+    signedValue = fromTwosComplement(pattern, bits);
+    unsignedValue = pattern;
+    // Information is only genuinely lost outside [signed min, unsigned max]:
+    // anything inside that span is representable in `bits` under one reading or
+    // the other. 0xFFFFFFFF at 32-bit signed is a reinterpretation, not an
+    // overflow, and flagging it as an overflow would be the wrong answer dressed
+    // as a warning.
+    const lo = signedRange(bits).min;
+    const hi = unsignedRange(bits).max;
+    wrapped = value < lo || value > hi;
+    reinterpreted = !wrapped && !fitsInWidth(value, bits, signed);
+  }
+
+  // With a width set, every non-decimal base shows the register's bit pattern —
+  // that is the thing you would actually see in a debugger — while decimal
+  // carries the sign. Without a width, everything is the plain value.
+  const shown = bits ? pattern : value;
+
+  const out = {
+    ok: true,
+    value,
+    bits,
+    signed,
+    pattern,
+    signedValue,
+    unsignedValue,
+    wrapped,
+    reinterpreted,
+    decimal: formatInBase(bits ? (signed ? signedValue : unsignedValue) : value, 10),
+    signedDecimal: bits ? formatInBase(signedValue, 10) : formatInBase(value, 10),
+    unsignedDecimal: bits ? formatInBase(unsignedValue, 10) : null,
+    binary: bits ? padToWidth(formatInBase(shown, 2), 2, bits) : formatInBase(shown, 2),
+    octal: formatInBase(shown, 8),
+    hex: bits ? padToWidth(formatInBase(shown, 16), 16, bits) : formatInBase(shown, 16),
+  };
+  if (baseIsValid(Number(opts.customBase))) {
+    const cb = Number(opts.customBase);
+    out.customBase = cb;
+    out.custom = bits ? padToWidth(formatInBase(shown, cb), cb, bits) : formatInBase(shown, cb);
+  }
+  return out;
+}
+
+/* ---------------------------- text <-> bytes ---------------------------- */
+
+/* textToBytes is utf8Bytes under a name that says what it is for here. The hash
+   tool already owns the encoder, and two UTF-8 encoders in one file is one too
+   many — a "text to binary" page that disagreed with the hash page about what
+   an emoji is would be worse than not shipping it. */
+function textToBytes(str) {
+  return utf8Bytes(str === undefined || str === null ? "" : String(str));
+}
+
+/* The decoder, hand-rolled so malformed input has a defined answer rather than
+   whatever the platform decides. Over-long encodings, lone continuation bytes,
+   surrogate code points and truncated sequences all become U+FFFD, one per bad
+   byte, which is what the WHATWG encoding standard specifies. */
+function bytesToText(bytes) {
+  const b = Array.from(bytes || [], (x) => Number(x) & 0xff);
+  let out = "";
+  let i = 0;
+  while (i < b.length) {
+    const lead = b[i];
+    let need = 0;
+    let code = 0;
+    let lo = 0;
+    if (lead < 0x80) { out += String.fromCodePoint(lead); i++; continue; }
+    else if (lead >= 0xc2 && lead <= 0xdf) { need = 1; code = lead & 0x1f; lo = 0x80; }
+    else if (lead >= 0xe0 && lead <= 0xef) { need = 2; code = lead & 0x0f; lo = 0x800; }
+    else if (lead >= 0xf0 && lead <= 0xf4) { need = 3; code = lead & 0x07; lo = 0x10000; }
+    else { out += "�"; i++; continue; }
+
+    // Indices i+1 .. i+need have to exist, or the sequence is truncated.
+    if (i + need >= b.length) { out += "�"; i++; continue; }
+    let ok = true;
+    let cp = code;
+    for (let k = 1; k <= need; k++) {
+      const cont = b[i + k];
+      if (cont === undefined || (cont & 0xc0) !== 0x80) { ok = false; break; }
+      cp = (cp << 6) | (cont & 0x3f);
+    }
+    if (!ok || cp < lo || cp > 0x10ffff || (cp >= 0xd800 && cp <= 0xdfff)) {
+      out += "�";
+      i++;
+      continue;
+    }
+    out += String.fromCodePoint(cp);
+    i += need + 1;
+  }
+  return out;
+}
+
+// Reads a run of byte tokens in `base` — "01001000 01100101" or "48 65" or an
+// unseparated "4865" — into a byte array. `perByte` is how many digits one byte
+// takes in that base, which is what makes the unseparated form parseable.
+function bytesFromDigits(str, base, perByte) {
+  const raw = String(str === undefined || str === null ? "" : str).trim();
+  if (!raw) return { ok: false, error: "" };
+  const cleaned = raw.replace(/^0[xb]/i, "").replace(/[\s,_]+/g, " ").trim();
+  const tokens = cleaned.includes(" ") ? cleaned.split(" ") : chunkFromRight(cleaned, perByte);
+  const bytes = [];
+  for (const token of tokens) {
+    if (!token) continue;
+    const parsed = parseInBase(token, base);
+    if (!parsed.ok) return { ok: false, error: parsed.error || "Unreadable input." };
+    if (parsed.value < 0n || parsed.value > 255n) {
+      return { ok: false, error: '"' + token + '" is not a single byte (0–255).' };
+    }
+    bytes.push(Number(parsed.value));
+  }
+  if (!bytes.length) return { ok: false, error: "No bytes to read." };
+  return { ok: true, bytes };
+}
+
+// Chunks from the right, so an odd-length unseparated hex string keeps its low
+// bytes intact and only the leading nibble is short.
+function chunkFromRight(str, size) {
+  const out = [];
+  for (let end = str.length; end > 0; end -= size) {
+    out.unshift(str.slice(Math.max(0, end - size), end));
+  }
+  return out;
+}
+
+function textToBinary(str, options) {
+  const sep = options && options.separator !== undefined ? options.separator : " ";
+  return textToBytes(str).map((b) => formatInBase(BigInt(b), 2).padStart(8, "0")).join(sep);
+}
+
+function binaryToText(str) {
+  const r = bytesFromDigits(str, 2, 8);
+  return r.ok ? { ok: true, value: bytesToText(r.bytes) } : r;
+}
+
+function textToHex(str, options) {
+  const opts = options || {};
+  const sep = opts.separator !== undefined ? opts.separator : " ";
+  const out = textToBytes(str).map((b) => formatInBase(BigInt(b), 16).padStart(2, "0"));
+  return (opts.uppercase ? out.map((h) => h.toUpperCase()) : out).join(sep);
+}
+
+function hexToText(str) {
+  const r = bytesFromDigits(str, 16, 2);
+  return r.ok ? { ok: true, value: bytesToText(r.bytes) } : r;
+}
+
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     escapeHtml,
@@ -1688,6 +2027,29 @@ if (typeof module !== "undefined" && module.exports) {
     rgbToOklch,
     oklchToRgb,
     nudgeLightnessToPass,
+    BASE_DIGITS,
+    BIT_WIDTHS,
+    baseIsValid,
+    baseDigitRange,
+    parseInBase,
+    formatInBase,
+    bitMask,
+    toTwosComplement,
+    fromTwosComplement,
+    signedRange,
+    unsignedRange,
+    fitsInWidth,
+    groupDigits,
+    padToWidth,
+    convertNumberBases,
+    textToBytes,
+    bytesToText,
+    bytesFromDigits,
+    chunkFromRight,
+    textToBinary,
+    binaryToText,
+    textToHex,
+    hexToText,
   };
 }
 
@@ -1813,7 +2175,7 @@ if (typeof document !== "undefined") {
 
     /* ---- homepage instant tool switch ----
        The toolbar's links are real navigation on every page. The homepage is
-       the one page that mounts all fourteen panels, so there a plain left-click
+       the one page that mounts all fifteen panels, so there a plain left-click
        swaps the panel in place and pushes the tool's clean URL instead. Both
        the rail and the sheet are wired, so the two routes to a tool behave
        identically. This is no longer a tablist: the roving tabindex that came
@@ -1838,6 +2200,7 @@ if (typeof document !== "undefined") {
         "/cron-expression-parser": "panel-cron",
         "/color-converter": "panel-color",
         "/contrast-checker": "panel-contrast",
+        "/number-base-converter": "panel-bases",
       };
       const DEFAULT_HREF = "/json-formatter";
 
@@ -2928,6 +3291,237 @@ if (typeof document !== "undefined") {
       }
 
       render();
+    })();
+
+    /* ---- number base converter hub ---- */
+    (function baseConverterTool() {
+      const input = document.getElementById("base-input");
+      if (!input) return;
+      const fromSel = document.getElementById("base-from");
+      const bitsSel = document.getElementById("base-bits");
+      const signedBox = document.getElementById("base-signed");
+      const customSel = document.getElementById("base-custom");
+      const errorEl = document.getElementById("base-error");
+      const noteEl = document.getElementById("base-note");
+      const copyFlash = document.getElementById("base-copy-flash");
+
+      const OUT = {
+        binary: document.getElementById("base-out-binary"),
+        octal: document.getElementById("base-out-octal"),
+        decimal: document.getElementById("base-out-decimal"),
+        hex: document.getElementById("base-out-hex"),
+        custom: document.getElementById("base-out-custom"),
+        unsigned: document.getElementById("base-out-unsigned"),
+      };
+      const customLabel = document.getElementById("base-custom-label");
+
+      function paint(el, text) {
+        if (el) el.value = text;
+      }
+
+      function render() {
+        const fromBase = Number(fromSel.value);
+        const bits = bitsSel.value === "any" ? null : Number(bitsSel.value);
+        const signed = !!(signedBox && signedBox.checked);
+        // Two's complement is a property of a fixed-width field. With no width
+        // there is nothing to complement, so the toggle goes away rather than
+        // sitting there doing nothing.
+        if (signedBox) signedBox.disabled = !bits;
+        const customBase = Number(customSel.value);
+        // Three characters, to match BIN/OCT/DEC/HEX/UNS in a 46px label column.
+        if (customLabel) customLabel.textContent = "B" + customBase;
+
+        const r = convertNumberBases(input.value, fromBase, {
+          bits: bits,
+          signed: signed,
+          customBase: customBase,
+        });
+
+        if (!r.ok) {
+          Object.keys(OUT).forEach((k) => paint(OUT[k], ""));
+          if (noteEl) noteEl.textContent = "";
+          if (r.error) showError(errorEl, r.error);
+          else hideError(errorEl);
+          return;
+        }
+        hideError(errorEl);
+
+        paint(OUT.binary, groupDigits(r.binary, 2));
+        paint(OUT.octal, r.octal);
+        paint(OUT.decimal, r.decimal);
+        paint(OUT.hex, r.hex);
+        paint(OUT.custom, r.custom || "");
+        paint(OUT.unsigned, r.unsignedDecimal === null ? r.decimal : r.unsignedDecimal);
+
+        if (!noteEl) return;
+        const parts = [];
+        if (r.bits) {
+          parts.push(
+            "Read as a " + r.bits + "-bit " + (r.signed ? "signed" : "unsigned") +
+            " field, so binary, octal, hex and base " + (r.customBase || "n") +
+            " show the bit pattern a register would hold."
+          );
+        } else {
+          parts.push("Arbitrary precision — no width, no masking, exact at any size.");
+        }
+        if (r.reinterpreted) {
+          parts.push(
+            "The same bit pattern is " + r.signedDecimal + " signed and " + r.unsignedDecimal +
+            " unsigned; nothing was lost."
+          );
+        }
+        if (r.wrapped) {
+          parts.push(
+            "⚠ " + formatInBase(r.value, 10) + " does not fit in " + r.bits +
+            " bits — the value above is what survives the truncation."
+          );
+        }
+        noteEl.textContent = parts.join(" ");
+      }
+
+      [input, fromSel, bitsSel, customSel].forEach((el) => {
+        if (!el) return;
+        el.addEventListener("input", render);
+        el.addEventListener("change", render);
+      });
+      if (signedBox) signedBox.addEventListener("change", render);
+
+      document.querySelectorAll("[data-base-copy]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = document.getElementById(btn.getAttribute("data-base-copy"));
+          copyText(target ? target.value : "", copyFlash);
+        });
+      });
+
+      render();
+    })();
+
+    /* ---- the directed conversion pages ----
+       One wiring for all ten. The page states its direction in data-from /
+       data-to on the panel; "text" means the UTF-8 side, a number means a
+       radix. Numeric pairs also carry the width and signedness controls,
+       because that is the part these pages exist to get right. */
+    (function basePairTool() {
+      const panels = document.querySelectorAll("[data-base-pair]");
+      if (!panels.length) return;
+
+      panels.forEach((panel) => {
+        const from = panel.getAttribute("data-from");
+        const to = panel.getAttribute("data-to");
+        const input = panel.querySelector("[data-pair-input]");
+        const output = panel.querySelector("[data-pair-output]");
+        const errorEl = panel.querySelector("[data-pair-error]");
+        const noteEl = panel.querySelector("[data-pair-note]");
+        const bitsSel = panel.querySelector("[data-pair-bits]");
+        const signedBox = panel.querySelector("[data-pair-signed]");
+        const upperBox = panel.querySelector("[data-pair-upper]");
+        const copyBtn = panel.querySelector("[data-pair-copy]");
+        const copyFlash = panel.querySelector("[data-pair-flash]");
+        const swapBtn = panel.querySelector("[data-pair-swap]");
+        if (!input || !output) return;
+
+        function render() {
+          const bits = bitsSel && bitsSel.value !== "any" ? Number(bitsSel.value) : null;
+          const signed = !!(signedBox && signedBox.checked);
+          const upper = !!(upperBox && upperBox.checked);
+          if (signedBox) signedBox.disabled = !bits;
+          if (noteEl) noteEl.textContent = "";
+
+          if (!input.value.trim()) {
+            output.value = "";
+            hideError(errorEl);
+            return;
+          }
+
+          if (from === "text") {
+            output.value = to === "2"
+              ? textToBinary(input.value)
+              : textToHex(input.value, { uppercase: upper });
+            hideError(errorEl);
+            const n = textToBytes(input.value).length;
+            if (noteEl) {
+              noteEl.textContent = input.value.length === n
+                ? n + " bytes, one per character."
+                : n + " bytes from " + [...input.value].length +
+                  " characters — UTF-8 spends more than one byte on anything outside ASCII.";
+            }
+            return;
+          }
+
+          if (to === "text") {
+            const r = from === "2" ? binaryToText(input.value) : hexToText(input.value);
+            if (!r.ok) {
+              output.value = "";
+              if (r.error) showError(errorEl, r.error);
+              else hideError(errorEl);
+              return;
+            }
+            hideError(errorEl);
+            output.value = r.value;
+            if (noteEl && r.value.indexOf("�") !== -1) {
+              noteEl.textContent =
+                "The � marks a byte that is not valid UTF-8 — the run is either " +
+                "truncated or is not text in this encoding.";
+            }
+            return;
+          }
+
+          const fromBase = Number(from);
+          const toBase = Number(to);
+          const r = convertNumberBases(input.value, fromBase, {
+            bits: bits,
+            signed: signed,
+            customBase: toBase,
+          });
+          if (!r.ok) {
+            output.value = "";
+            if (r.error) showError(errorEl, r.error);
+            else hideError(errorEl);
+            return;
+          }
+          hideError(errorEl);
+          let text = toBase === 10
+            ? r.decimal
+            : (r.custom === undefined ? formatInBase(r.value, toBase) : r.custom);
+          if (upper) text = text.toUpperCase();
+          output.value = toBase === 2 || toBase === 16 ? groupDigits(text, toBase) : text;
+
+          if (!noteEl) return;
+          const parts = [];
+          if (bits && r.reinterpreted) {
+            parts.push(
+              "That pattern is " + r.signedDecimal + " as a signed " + bits +
+              "-bit value and " + r.unsignedDecimal + " unsigned."
+            );
+          }
+          if (bits && r.wrapped) {
+            parts.push(
+              "⚠ " + formatInBase(r.value, 10) + " does not fit in " + bits +
+              " bits — what you see is what survives."
+            );
+          }
+          if (!bits && r.value > 9007199254740991n) {
+            parts.push("Past 2^53, where a converter built on floating point starts rounding. This one does not.");
+          }
+          noteEl.textContent = parts.join(" ");
+        }
+
+        [input, bitsSel, upperBox].forEach((el) => {
+          if (!el) return;
+          el.addEventListener("input", render);
+          el.addEventListener("change", render);
+        });
+        if (signedBox) signedBox.addEventListener("change", render);
+        if (copyBtn) {
+          copyBtn.addEventListener("click", () => copyText(output.value || "", copyFlash));
+        }
+        if (swapBtn) {
+          swapBtn.addEventListener("click", () => {
+            window.location.href = swapBtn.getAttribute("data-pair-swap");
+          });
+        }
+        render();
+      });
     })();
   })();
 }
