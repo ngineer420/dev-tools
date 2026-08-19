@@ -1,6 +1,6 @@
 # devboxkit.com
 
-A free, ad-supported developer toolkit with twelve tools in one page:
+A free, ad-supported developer toolkit with fourteen tools in one page:
 
 - **JSON Formatter/Validator**: beautify or minify JSON, with syntax-error messages that include the line/column (or character position) of the problem, plus lightweight syntax highlighting of the output.
 - **Base64 Encode/Decode**: two-way text ↔ Base64 conversion, with graceful error handling for invalid Base64 input.
@@ -14,6 +14,8 @@ A free, ad-supported developer toolkit with twelve tools in one page:
 - **JSON ⇄ CSV Converter**: JSON array of objects → CSV and CSV (with a header row) → JSON, both directions, with quoted-field handling, copy, and download.
 - **HTML Entity Encoder/Decoder**: encode text to named/numeric HTML entities and decode entities back to plain text.
 - **Cron Expression Explainer**: translates a standard five-field crontab expression into plain English and lists the next five times it will run. Handles steps (`*/5`), ranges, lists, month/day names and the `@daily`-style shorthands — and says out loud that cron ORs the two day fields when both are restricted.
+- **Color Converter**: live-linked HEX, RGB/RGBA, HSL/HSLA and HSV fields with alpha (`#RRGGBBAA` in and out), all 148 CSS named colors recognised in both directions, a native color picker and a copy button per format.
+- **WCAG Contrast Checker**: the WCAG 2.1 contrast ratio for a text/background pair, with AA and AAA pass/fail at normal text, large text and UI components, and a "nudge lightness until it passes" button that walks the text color's lightness in OKLCH and reports the hex it lands on.
 
 Everything runs client-side — no backend, no build step, nothing is ever uploaded. Deployed as static files on GitHub Pages.
 
@@ -25,7 +27,7 @@ Every page carries one `<nav class="toolbar">` — a menu trigger plus a single
 non-wrapping row of tool chips — rendered between `<!-- nav:start -->` and
 `<!-- nav:end -->`.
 
-**Do not hand-edit that region.** It is written into all 19 files from
+**Do not hand-edit that region.** It is written into all 21 files from
 `tools/nav_data.py`:
 
 ```
@@ -50,10 +52,11 @@ Then open `http://localhost:8000`.
 ## Structure
 
 ```
-index.html            Main app (all twelve tools, tabbed)
+index.html            Main app (all fourteen tools, tabbed)
 uuid-generator.html, hash-generator.html, jwt-decoder.html,
 password-generator.html, json-csv-converter.html,
-html-entity-encoder.html
+html-entity-encoder.html, color-converter.html,
+contrast-checker.html
                         Per-tool SEO landing pages for the newer tools (same
                         pattern as json-formatter.html etc.)
 articles/              Written guides for content depth (JSON, Base64/URL, timestamps, regex)

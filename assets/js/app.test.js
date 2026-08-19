@@ -45,6 +45,27 @@ const {
   cronFormatList,
   formatCronRun,
   cronTimeZoneList,
+  CSS_NAMED_COLORS,
+  parseColor,
+  parseHexColor,
+  rgbToHex,
+  rgbToHsl,
+  hslToRgb,
+  rgbToHsv,
+  hsvToRgb,
+  rgbToNamedColor,
+  formatHex,
+  formatRgb,
+  formatHsl,
+  formatHsv,
+  relativeLuminance,
+  contrastRatio,
+  flattenOver,
+  roundRatio,
+  wcagResults,
+  rgbToOklch,
+  oklchToRgb,
+  nudgeLightnessToPass,
 } = require("./app.js");
 
 /* ------------------------------- existing tools --------------------------- */
@@ -518,4 +539,129 @@ test("CSV converter round-trips", () => {
 test("HTML entity encoder round-trips", () => {
   const raw = '<a href="x">&\'</a>';
   assert.equal(htmlEntityDecode(htmlEntityEncode(raw)), raw);
+});
+
+/* ------------------------------- colour tools ----------------------------- */
+
+test("hex parsing covers 3, 4, 6 and 8 digits, with and without the hash", () => {
+  assert.deepEqual(parseHexColor("#f00"), { r: 255, g: 0, b: 0, a: 1 });
+  assert.deepEqual(parseHexColor("3ce688"), { r: 60, g: 230, b: 136, a: 1 });
+  assert.deepEqual(parseHexColor("#0f08"), { r: 0, g: 255, b: 0, a: 136 / 255 });
+  assert.deepEqual(parseHexColor("#11223344"), { r: 17, g: 34, b: 51, a: 68 / 255 });
+  assert.equal(parseHexColor("#12345"), null);
+  assert.equal(parseHexColor("nothex"), null);
+});
+
+test("HSL conversions match the CSS Color 4 worked values", () => {
+  // Primaries: hue at the three 120-degree stops, full saturation, mid lightness.
+  assert.equal(formatHsl({ r: 255, g: 0, b: 0 }), "hsl(0, 100%, 50%)");
+  assert.equal(formatHsl({ r: 0, g: 255, b: 0 }), "hsl(120, 100%, 50%)");
+  assert.equal(formatHsl({ r: 0, g: 0, b: 255 }), "hsl(240, 100%, 50%)");
+  // Grey has no hue and no saturation.
+  assert.deepEqual(rgbToHsl({ r: 128, g: 128, b: 128 }).s, 0);
+  // ...and back again: CSS named "green" is exactly hsl(120, 100%, 25%).
+  assert.deepEqual(hslToRgb({ h: 120, s: 100, l: 25 }), { r: 0, g: 128, b: 0 });
+  assert.equal(formatHex(parseColor("hsl(120 100% 25%)")), "#008000");
+});
+
+test("HSV is value-based where HSL is lightness-based", () => {
+  // Pure red: HSL calls it 50% light, HSV calls it 100% value. Both are right.
+  assert.equal(formatHsv({ r: 255, g: 0, b: 0 }), "hsv(0, 100%, 100%)");
+  assert.equal(formatHsv({ r: 255, g: 255, b: 255 }), "hsv(0, 0%, 100%)");
+  assert.deepEqual(hsvToRgb({ h: 210, s: 50, v: 80 }), { r: 102, g: 153, b: 204 });
+  assert.deepEqual(rgbToHsv({ r: 102, g: 153, b: 204 }), { h: 210, s: 50, v: 80 });
+});
+
+test("CSS named colours resolve both ways", () => {
+  assert.equal(Object.keys(CSS_NAMED_COLORS).length, 148);
+  assert.equal(formatHex(parseColor("rebeccapurple")), "#663399");
+  assert.equal(formatHex(parseColor("  ForestGreen ")), "#228b22");
+  assert.equal(rgbToNamedColor({ r: 255, g: 99, b: 71 }), "tomato");
+  assert.equal(rgbToNamedColor({ r: 255, g: 99, b: 72 }), null, "near misses are not names");
+  // A translucent colour has no CSS name, because a CSS name is opaque.
+  assert.equal(rgbToNamedColor({ r: 255, g: 99, b: 71, a: 0.5 }), null);
+});
+
+test("parseColor accepts legacy comma and Level 4 space syntax alike", () => {
+  const forms = ["#3ce688", "3CE688", "rgb(60, 230, 136)", "rgb(60 230 136)",
+                 "hsl(146.9, 77.3%, 56.9%)", "hsv(146.9 73.9% 90.2%)"];
+  forms.forEach((f) => {
+    const c = parseColor(f);
+    assert.equal(c.ok, true, f + " should parse");
+    assert.equal(formatHex(c), "#3ce688", f + " should be #3ce688");
+  });
+  assert.equal(parseColor("rgb(60 230)").ok, false);
+  assert.equal(parseColor("chartreusey").ok, false);
+});
+
+test("alpha survives a hex -> rgba -> hex round trip", () => {
+  assert.equal(formatRgb(parseColor("#11223344")), "rgba(17, 34, 51, 0.267)");
+  assert.equal(formatHex(parseColor("rgba(17, 34, 51, 0.267)")), "#11223344");
+  assert.equal(formatHsl(parseColor("#ff000080")), "hsla(0, 100%, 50%, 0.502)");
+  // Fully opaque never grows a redundant alpha pair.
+  assert.equal(formatHex(parseColor("rgba(255, 0, 0, 1)")), "#ff0000");
+});
+
+test("relative luminance hits the WCAG 2.1 anchor values", () => {
+  // W3C: black is 0, white is 1, by definition of the formula.
+  assert.equal(relativeLuminance({ r: 0, g: 0, b: 0 }), 0);
+  assert.equal(relativeLuminance({ r: 255, g: 255, b: 255 }), 1);
+  // The coefficients are the sRGB primaries' share of luminance.
+  assert.equal(roundRatio(relativeLuminance({ r: 0, g: 255, b: 0 })), 0.72);
+});
+
+test("contrast ratio matches published known answers", () => {
+  const white = { r: 255, g: 255, b: 255 }, black = { r: 0, g: 0, b: 0 };
+  // The maximum possible ratio, (1 + 0.05) / (0 + 0.05).
+  assert.equal(contrastRatio(white, black), 21);
+  // Order cannot matter — the formula is lighter-over-darker.
+  assert.equal(contrastRatio(black, white), 21);
+  // #767676 is the canonical "darkest grey that still passes AA on white".
+  assert.equal(roundRatio(contrastRatio(parseColor("#767676"), white)), 4.54);
+  assert.equal(roundRatio(contrastRatio(parseColor("#777777"), white)), 4.48);
+  // ...and #949494 is its large-text equivalent at 3:1.
+  assert.equal(roundRatio(contrastRatio(parseColor("#949494"), white)), 3.03);
+  assert.equal(contrastRatio(white, white), 1);
+});
+
+test("wcagResults applies the 4.5 / 7 / 3 thresholds", () => {
+  const at454 = wcagResults(4.54);
+  const by = {};
+  at454.forEach((r) => { by[r.key] = r.pass; });
+  assert.deepEqual(by, { normalAA: true, normalAAA: false, largeAA: true, largeAAA: true, uiAA: true });
+  const at299 = wcagResults(2.99);
+  assert.equal(at299.every((r) => r.pass === false), true);
+  // The badge reads the rounded ratio, so the boundary is judged on what is shown.
+  assert.equal(wcagResults(4.4951).find((r) => r.key === "normalAA").pass, true);
+});
+
+test("a translucent foreground is flattened before it is measured", () => {
+  // Half-opacity black over white is mid grey, not black: the ratio has to fall.
+  const half = flattenOver({ r: 0, g: 0, b: 0, a: 0.5 }, { r: 255, g: 255, b: 255 });
+  assert.deepEqual(half, { r: 128, g: 128, b: 128, a: 1 });
+  assert.equal(roundRatio(contrastRatio(half, { r: 255, g: 255, b: 255 })), 3.95);
+});
+
+test("OKLCH round-trips sRGB and keeps hue while lightness moves", () => {
+  const rgb = { r: 60, g: 230, b: 136 };
+  assert.deepEqual(oklchToRgb(rgbToOklch(rgb)), rgb);
+  const before = rgbToOklch(rgb);
+  const lighter = rgbToOklch(oklchToRgb({ l: before.l + 0.1, c: before.c, h: before.h }));
+  assert.ok(Math.abs(lighter.h - before.h) < 1.5, "hue held within a degree and a half");
+  assert.ok(lighter.l > before.l);
+});
+
+test("the lightness nudge reaches the target and reports the colour it reached", () => {
+  const white = { r: 255, g: 255, b: 255 };
+  const fixed = nudgeLightnessToPass(parseColor("#777777"), white, 4.5);
+  assert.equal(fixed.ok, true);
+  assert.equal(fixed.direction, "darker");
+  // The reported ratio is the reported hex's real ratio, not the requested one.
+  assert.equal(roundRatio(contrastRatio(parseColor(fixed.hex), white)), fixed.ratio);
+  assert.ok(fixed.ratio >= 4.5);
+
+  // Unreachable targets say so rather than returning a colour that fails.
+  const impossible = nudgeLightnessToPass(parseColor("#808080"), parseColor("#808080"), 7);
+  assert.equal(impossible.ok, false);
+  assert.ok(impossible.best < 7);
 });

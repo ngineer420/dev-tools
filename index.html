@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DevBox Kit — Free JSON, Base64, Hash, JWT, UUID &amp; Password Tools</title>
-<meta name="description" content="Format &amp; validate JSON, encode/decode Base64/URL/HTML entities, generate UUIDs/hashes/passwords, decode JWTs, convert timestamps and JSON⇄CSV, test regex and explain cron expressions — twelve free developer tools in one page. Runs entirely in your browser, nothing is uploaded.">
+<title>DevBox Kit — Free JSON, Base64, Hash, Color &amp; Contrast Tools</title>
+<meta name="description" content="Format &amp; validate JSON, encode/decode Base64/URL/HTML entities, generate UUIDs/hashes/passwords, decode JWTs, convert timestamps, colors and JSON⇄CSV, check WCAG contrast, test regex and explain cron expressions — fourteen free developer tools in one page. Runs entirely in your browser, nothing is uploaded.">
 <link rel="canonical" href="https://devboxkit.com/">
 <meta name="theme-color" content="#090c11">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="DevBox Kit — Free JSON, Base64, Hash, JWT, UUID &amp; Password Tools">
-<meta property="og:description" content="Twelve free developer tools in one page: JSON, Base64, URL, and HTML-entity conversion, UUID/hash/password generators, a JWT decoder, JSON⇄CSV, a timestamp converter, a regex tester and a cron explainer. Runs entirely client-side.">
+<meta property="og:title" content="DevBox Kit — Free JSON, Base64, Hash, Color &amp; Contrast Tools">
+<meta property="og:description" content="Fourteen free developer tools in one page: JSON, Base64, URL, HTML-entity and color conversion, a WCAG contrast checker, UUID/hash/password generators, a JWT decoder, JSON⇄CSV, a timestamp converter, a regex tester and a cron explainer. Runs entirely client-side.">
 <meta property="og:url" content="https://devboxkit.com/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="DevBox Kit — Free JSON, Base64, Hash, JWT, UUID &amp; Password Tools">
-<meta name="twitter:description" content="Twelve free developer tools in one page: JSON, Base64, URL, and HTML-entity conversion, UUID/hash/password generators, a JWT decoder, JSON⇄CSV, a timestamp converter, a regex tester and a cron explainer. Runs entirely client-side.">
+<meta name="twitter:title" content="DevBox Kit — Free JSON, Base64, Hash, Color &amp; Contrast Tools">
+<meta name="twitter:description" content="Fourteen free developer tools in one page: JSON, Base64, URL, HTML-entity and color conversion, a WCAG contrast checker, UUID/hash/password generators, a JWT decoder, JSON⇄CSV, a timestamp converter, a regex tester and a cron explainer. Runs entirely client-side.">
 
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/css/styles.css">
@@ -28,7 +28,7 @@
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Any",
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-  "description": "Free browser-based developer toolkit: JSON formatter/validator, Base64/URL/HTML-entity encode-decode, UUID/hash/password generators, a JWT decoder, a JSON-CSV converter, a Unix timestamp converter, and a regex tester."
+  "description": "Free browser-based developer toolkit: JSON formatter/validator, Base64/URL/HTML-entity encode-decode, a color converter, a WCAG contrast checker, UUID/hash/password generators, a JWT decoder, a JSON-CSV converter, a Unix timestamp converter, and a regex tester."
 }
 </script>
 
@@ -52,9 +52,9 @@
 <!-- nav:start -->
 <nav class="toolbar" aria-label="Tools">
   <details class="tb-menu">
-    <summary class="tb-trigger" aria-label="All 12 tools">
+    <summary class="tb-trigger" aria-label="All 14 tools">
       <span class="tb-glyph" aria-hidden="true">&#9636;</span>
-      <span class="tb-label">All 12<span class="tb-label-long"> tools</span></span>
+      <span class="tb-label">All 14<span class="tb-label-long"> tools</span></span>
     </summary>
     <div class="tb-sheet">
       <div class="tb-sheet-cols">
@@ -82,6 +82,11 @@
           <li><a href="/jwt-decoder">JWT Decoder</a></li>
           <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
         </ul>
+        <p class="tb-grouplabel" id="tb-g5">Color</p>
+        <ul aria-labelledby="tb-g5">
+          <li><a href="/color-converter">Color Converter</a></li>
+          <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+        </ul>
       </div>
     </div>
   </details>
@@ -102,7 +107,7 @@
 <main id="main">
   <div class="hero">
     <h1>Free Developer Formatting &amp; Conversion Tools</h1>
-    <p>JSON, Base64, URL &amp; HTML-entity conversion, UUID/hash/password generators, JWT decoding, JSON⇄CSV, timestamps, regex and cron — twelve tools, one page, no sign-up.</p>
+    <p>JSON, Base64, URL, HTML-entity &amp; color conversion, WCAG contrast, UUID/hash/password generators, JWT decoding, JSON⇄CSV, timestamps, regex and cron — fourteen tools, one page, no sign-up.</p>
     <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
   </div>
 
@@ -670,11 +675,118 @@
     </div>
   </section>
 
+  <!-- ===================== COLOR CONVERTER ===================== -->
+  <section role="tabpanel" id="panel-color" aria-labelledby="tab-color" class="tab-panel" hidden>
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Color</h2>
+          <div class="field">
+            <label for="color-any">Paste any color — hex, <code>rgb()</code>, <code>hsl()</code>, <code>hsv()</code>, or a CSS name</label>
+            <input type="text" id="color-any" class="code-area" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="#3ce688" value="#3ce688">
+          </div>
+          <div class="swatch"><div class="swatch-fill" id="color-swatch"></div></div>
+          <div class="field-row picker-row">
+            <label for="color-picker">Pick</label>
+            <input type="color" id="color-picker" value="#3ce688">
+            <span class="source-note" id="color-name"></span>
+          </div>
+          <div class="field" style="margin-top:16px;">
+            <div class="range-label"><label for="color-alpha">Alpha</label><span id="color-alpha-value">100%</span></div>
+            <input type="range" id="color-alpha" min="0" max="100" step="1" value="100">
+          </div>
+          <div class="error-banner" id="color-error" role="alert"></div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <h2>Formats</h2>
+          <div class="format-list">
+            <div class="format-row">
+              <label for="color-hex">HEX</label>
+              <input type="text" id="color-hex" class="code-area" spellcheck="false" autocapitalize="off" autocorrect="off">
+              <button type="button" class="icon-btn" data-color-copy="color-hex">Copy</button>
+            </div>
+            <div class="format-row">
+              <label for="color-rgb">RGB</label>
+              <input type="text" id="color-rgb" class="code-area" spellcheck="false" autocapitalize="off" autocorrect="off">
+              <button type="button" class="icon-btn" data-color-copy="color-rgb">Copy</button>
+            </div>
+            <div class="format-row">
+              <label for="color-hsl">HSL</label>
+              <input type="text" id="color-hsl" class="code-area" spellcheck="false" autocapitalize="off" autocorrect="off">
+              <button type="button" class="icon-btn" data-color-copy="color-hsl">Copy</button>
+            </div>
+            <div class="format-row">
+              <label for="color-hsv">HSV</label>
+              <input type="text" id="color-hsv" class="code-area" spellcheck="false" autocapitalize="off" autocorrect="off">
+              <button type="button" class="icon-btn" data-color-copy="color-hsv">Copy</button>
+            </div>
+            <span class="copy-flash" id="color-copy-flash">Copied!</span>
+          </div>
+          <p class="source-note">Every field is live: edit any one and the other three follow. Drop the alpha below 100% and the hex grows its <code>AA</code> pair; paste an <code>#RRGGBBAA</code> value and the slider moves to match.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTRAST CHECKER ===================== -->
+  <section role="tabpanel" id="panel-contrast" aria-labelledby="tab-contrast" class="tab-panel" hidden>
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Text color</h2>
+          <div class="field-row picker-row" style="margin-top:0;">
+            <input type="color" id="cc-fg-picker" value="#767676" aria-label="Pick a text color">
+            <input type="text" id="cc-fg" class="code-area" spellcheck="false" autocapitalize="off" autocorrect="off" value="#767676" aria-label="Text color">
+          </div>
+
+          <h2 style="margin-top:20px;">Background color</h2>
+          <div class="field-row picker-row" style="margin-top:0;">
+            <input type="color" id="cc-bg-picker" value="#ffffff" aria-label="Pick a background color">
+            <input type="text" id="cc-bg" class="code-area" spellcheck="false" autocapitalize="off" autocorrect="off" value="#ffffff" aria-label="Background color">
+          </div>
+
+          <div class="field" style="margin-top:20px;">
+            <label for="cc-target">Nudge the text color until it clears</label>
+            <select id="cc-target">
+              <option value="4.5" selected>4.5:1 — AA, normal text</option>
+              <option value="7">7:1 — AAA, normal text</option>
+              <option value="3">3:1 — AA, large text and UI components</option>
+            </select>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="cc-nudge" class="primary">Nudge lightness until it passes</button>
+            <button type="button" id="cc-swap">Swap</button>
+          </div>
+          <div class="error-banner" id="cc-error" role="alert"></div>
+          <div class="success-banner" id="cc-nudged" role="status"></div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <h2>Result</h2>
+          <div class="contrast-preview" id="cc-preview">
+            <p class="cc-normal">Normal text at 16px — the size most body copy actually is.</p>
+            <p class="cc-large">Large text at 24px</p>
+            <p class="cc-large-bold">Large text at 18.66px bold</p>
+            <span class="cc-ui">UI component border</span>
+          </div>
+          <p class="ratio-line"><span class="ratio-value" id="cc-ratio">—</span><span class="ratio-suffix">:1</span></p>
+          <p class="ratio-note" id="cc-note"></p>
+          <ul class="wcag-list" id="cc-list"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="container-narrow" style="padding-top:0;">
     <h2>About DevBox Kit</h2>
-    <p>DevBox Kit bundles twelve everyday developer utilities into a single page: a <strong>JSON formatter and validator</strong> with precise syntax-error locations, two-way <strong>Base64</strong>, <strong>URL</strong>, and <strong>HTML entity</strong> encoders/decoders, a <strong>UUID generator</strong> (v4 random, v7 time-sortable, or v1-style, single or bulk), a <strong>hash generator</strong> (MD5, SHA-1, SHA-256, SHA-384, SHA-512 and HMAC, over text or a dropped file, with a compare mode), a <strong>JWT decoder</strong> that pretty-prints the header/payload and spells out expiry claims, a <strong>password generator</strong> with a strength meter, a two-way <strong>JSON ⇄ CSV converter</strong>, a <strong>Unix timestamp converter</strong> that shows both local and UTC time, a <strong>regex tester</strong> with live match highlighting and capture groups, and a <strong>cron expression explainer</strong> that translates a schedule into plain English and lists its next five run times.</p>
+    <p>DevBox Kit bundles fourteen everyday developer utilities into a single page: a <strong>JSON formatter and validator</strong> with precise syntax-error locations, two-way <strong>Base64</strong>, <strong>URL</strong>, and <strong>HTML entity</strong> encoders/decoders, a <strong>UUID generator</strong> (v4 random, v7 time-sortable, or v1-style, single or bulk), a <strong>hash generator</strong> (MD5, SHA-1, SHA-256, SHA-384, SHA-512 and HMAC, over text or a dropped file, with a compare mode), a <strong>JWT decoder</strong> that pretty-prints the header/payload and spells out expiry claims, a <strong>password generator</strong> with a strength meter, a two-way <strong>JSON ⇄ CSV converter</strong>, a <strong>Unix timestamp converter</strong> that shows both local and UTC time, a <strong>regex tester</strong> with live match highlighting and capture groups, a <strong>cron expression explainer</strong> that translates a schedule into plain English and lists its next five run times, a <strong>color converter</strong> covering HEX, RGB, HSL, HSV and the CSS color names with alpha, and a <strong>WCAG contrast checker</strong> that grades a color pair against AA and AAA.</p>
     <p>Everything runs entirely client-side in your browser — nothing you paste in is ever uploaded to a server, so there's no wait and nothing to worry about privacy-wise. Use it for debugging API responses, decoding tokens, generating throwaway IDs and passwords, checksumming files, converting between JSON and CSV, sanity-checking query strings, converting timestamps from logs, or testing a regular expression before you commit to it.</p>
-    <p>Prefer a dedicated page for a single tool? Each one also lives on its own: <a href="/json-formatter">JSON Formatter</a>, <a href="/base64-encode-decode">Base64 Encode / Decode</a>, <a href="/url-encoder-decoder">URL Encoder / Decoder</a>, <a href="/unix-timestamp-converter">Unix Timestamp Converter</a>, <a href="/regex-tester">Regex Tester</a>, <a href="/uuid-generator">UUID Generator</a>, <a href="/hash-generator">Hash Generator</a>, <a href="/jwt-decoder">JWT Decoder</a>, <a href="/password-generator">Password Generator</a>, <a href="/json-csv-converter">JSON ⇄ CSV Converter</a>, and <a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a>.</p>
+    <p>Prefer a dedicated page for a single tool? Each one also lives on its own: <a href="/json-formatter">JSON Formatter</a>, <a href="/base64-encode-decode">Base64 Encode / Decode</a>, <a href="/url-encoder-decoder">URL Encoder / Decoder</a>, <a href="/unix-timestamp-converter">Unix Timestamp Converter</a>, <a href="/regex-tester">Regex Tester</a>, <a href="/uuid-generator">UUID Generator</a>, <a href="/hash-generator">Hash Generator</a>, <a href="/jwt-decoder">JWT Decoder</a>, <a href="/password-generator">Password Generator</a>, <a href="/json-csv-converter">JSON ⇄ CSV Converter</a>, <a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a>, <a href="/color-converter">Color Converter</a>, and <a href="/contrast-checker">WCAG Contrast Checker</a>.</p>
   </section>
 
   <section class="container-narrow" style="padding-top:0;" id="articles">
