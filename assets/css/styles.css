@@ -234,7 +234,9 @@ main { max-width: var(--maxw); margin: 0 auto; padding: 24px 20px 60px; }
   box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 70%, transparent);
   animation: caret-blink 1.1s steps(1) infinite;
 }
-.hero p { color: var(--text-dim); margin: 0; font-size: 14.5px; }
+/* Capped measure: at 1180px the hero is a full-width band, and an
+   uncapped lede runs to about 150 characters a line there. */
+.hero p { color: var(--text-dim); margin: 0; font-size: 14.5px; max-width: 82ch; }
 .hero .trust-line {
   margin-top: 10px;
   font-size: 12.5px;
@@ -930,3 +932,158 @@ input[type="color"] {
   background: color-mix(in srgb, var(--danger) 12%, var(--bg-inset));
   border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--border));
 }
+
+/* ---------- tier-2 sibling chips (the directed conversion family) ----------
+   Real links in a container that is never hidden or load-gated, inside the
+   tool's own panel rather than in the chrome: a fixed direction is a parameter
+   of the base converter, not a peer of it. */
+
+.size-chips {
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.size-chips-label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 10px;
+}
+
+.size-chips ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.size-chips a.chip {
+  display: inline-block;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12.5px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.size-chips a.chip:hover {
+  color: var(--text);
+  border-color: var(--text-faint);
+  text-decoration: none;
+}
+
+.size-chips a.chip[aria-current="page"] {
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---------- reference tables ----------
+   Every one of these is computed at build time from assets/js/app.js, so the
+   figures and the tool above them cannot drift apart. The scroller is on the
+   wrapper, never the page: a 17-column byte grid must not make the document
+   scroll sideways on a phone. */
+
+.data-table {
+  margin: 20px 0 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 30rem;
+}
+
+.data-table table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table caption {
+  caption-side: top;
+  text-align: left;
+  padding: 12px 14px 10px;
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.data-table th,
+.data-table td {
+  padding: 7px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-soft);
+  white-space: nowrap;
+}
+
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-inset);
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+/* A row header carrying prose must not read as a link — only the ones that are
+   really a value (a hex digit, an offset) take the accent. */
+.data-table tbody th {
+  color: var(--text);
+  font-weight: 700;
+  white-space: normal;
+}
+
+.data-table tbody th code {
+  color: var(--accent-2);
+}
+
+.data-table td {
+  color: var(--text-dim);
+}
+
+.data-table tbody tr:last-child th,
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table code {
+  color: var(--text);
+}
+
+/* The 16x16 byte grid: 257 cells, so the padding comes down and the row header
+   sticks to the left edge while the grid scrolls under it. */
+.data-table--grid table { font-size: 12px; }
+.data-table--grid th,
+.data-table--grid td { padding: 5px 7px; text-align: right; }
+.data-table--grid tbody th {
+  position: sticky;
+  left: 0;
+  background: var(--bg-raised);
+  text-align: left;
+}
+
+.data-table--short { max-width: 22rem; }
+.data-table--tall { max-height: 26rem; }
+
+/* Long reference tables read better with alternating rows once they are past
+   about a screenful. */
+.data-table--grid tbody tr:nth-child(2n),
+.data-table--tall tbody tr:nth-child(2n) {
+  background: color-mix(in srgb, var(--bg-inset) 55%, transparent);
+}
+
+.container-narrow sup { font-size: .72em; }

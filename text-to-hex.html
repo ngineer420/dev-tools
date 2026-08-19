@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text to Hex Converter — UTF-8 Bytes, Two Digits Each — devboxkit.com</title>
+<meta name="description" content="Convert text to hexadecimal in your browser. UTF-8 encoded, two hex digits per byte, with an optional uppercase output and multi-byte characters handled correctly.">
+<link rel="canonical" href="https://devboxkit.com/text-to-hex">
+<meta name="theme-color" content="#090c11">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Text to Hex Converter">
+<meta property="og:description" content="Text to hex via UTF-8, two digits per byte, ready to paste into a dump, an escape sequence or a literal.">
+<meta property="og:url" content="https://devboxkit.com/text-to-hex">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Text to Hex Converter">
+<meta name="twitter:description" content="Text to hex via UTF-8, two digits per byte, ready to paste into a dump, an escape sequence or a literal.">
+
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Text to Hex — DevBox Kit",
+  "url": "https://devboxkit.com/text-to-hex",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "description": "Convert text to hexadecimal in your browser. UTF-8 encoded, two hex digits per byte, with an optional uppercase output and multi-byte characters handled correctly."
+}
+</script>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7560786263587509" crossorigin="anonymous"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+      <span class="brand-tag">JSON, hashes, JWTs, passwords &amp; more — one page</span>
+    </a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark/light theme" title="Toggle theme">◐</button>
+    </div>
+  </div>
+</header>
+
+<!-- nav:start -->
+<nav class="toolbar" aria-label="Tools">
+  <details class="tb-menu">
+    <summary class="tb-trigger" aria-label="All 15 tools">
+      <span class="tb-glyph" aria-hidden="true">&#9636;</span>
+      <span class="tb-label">All 15<span class="tb-label-long"> tools</span></span>
+    </summary>
+    <div class="tb-sheet">
+      <div class="tb-sheet-cols">
+        <p class="tb-grouplabel" id="tb-g1">Format &amp; validate</p>
+        <ul aria-labelledby="tb-g1">
+          <li><a href="/json-formatter">JSON Formatter</a></li>
+          <li><a href="/regex-tester">Regex Tester</a></li>
+          <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g2">Encode &amp; decode</p>
+        <ul aria-labelledby="tb-g2">
+          <li><a href="/base64-encode-decode">Base64 Encode/Decode</a></li>
+          <li><a href="/url-encoder-decoder">URL Encode/Decode</a></li>
+          <li><a href="/html-entity-encoder">HTML Entity Encoder</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g3">Generate</p>
+        <ul aria-labelledby="tb-g3">
+          <li><a href="/uuid-generator">UUID Generator</a></li>
+          <li><a href="/hash-generator">Hash Generator</a></li>
+          <li><a href="/password-generator">Password Generator</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g4">Inspect</p>
+        <ul aria-labelledby="tb-g4">
+          <li><a href="/unix-timestamp-converter">Timestamp Converter</a></li>
+          <li><a href="/jwt-decoder">JWT Decoder</a></li>
+          <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g5">Color</p>
+        <ul aria-labelledby="tb-g5">
+          <li><a href="/color-converter">Color Converter</a></li>
+          <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g6">Convert</p>
+        <ul aria-labelledby="tb-g6">
+          <li><a href="/number-base-converter" aria-current="true">Number Base Converter</a></li>
+        </ul>
+      </div>
+    </div>
+  </details>
+  <div class="tb-scrim"></div>
+  <ul class="tb-rail">
+    <li><a href="/json-formatter">JSON</a></li>
+    <li><a href="/base64-encode-decode">Base64</a></li>
+    <li><a href="/url-encoder-decoder">URL</a></li>
+    <li><a href="/unix-timestamp-converter">Timestamp</a></li>
+    <li><a href="/regex-tester">Regex</a></li>
+    <li><a href="/uuid-generator">UUID</a></li>
+    <li><a href="/hash-generator">Hash</a></li>
+    <li><a href="/jwt-decoder">JWT</a></li>
+  </ul>
+</nav>
+<!-- nav:end -->
+
+<main id="main">
+  <div class="hero">
+    <h1>Text to Hex</h1>
+    <p>Text to hex bytes &mdash; UTF-8 encoded, two digits each, in the form you would paste into a dump, an escape sequence or a literal.</p>
+    <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
+  </div>
+
+  <section aria-label="Text to Hex tool">
+    <div class="tool-grid split" data-base-pair data-from="text" data-to="16">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Text</h2>
+          <div class="field">
+            <label for="pair-input">Anything — accented characters and emoji included</label>
+            <textarea id="pair-input" class="code-area" rows="6" spellcheck="false" autocapitalize="off" autocorrect="off" data-pair-input>Hello</textarea>
+          </div>
+          <div class="checkbox-row">
+            <label for="pair-upper"><input type="checkbox" id="pair-upper" data-pair-upper> Uppercase output</label>
+          </div>
+          <div class="error-banner" data-pair-error role="alert"></div>
+        </div>
+      </div>
+      <div class="output-col">
+        <div class="panel">
+          <h2>Hexadecimal</h2>
+          <div class="field">
+            <label for="pair-output" class="visually-hidden">Hexadecimal</label>
+            <textarea id="pair-output" class="code-area" rows="6" readonly spellcheck="false" data-pair-output></textarea>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="icon-btn" data-pair-copy>Copy</button>
+            <button type="button" class="icon-btn" data-pair-swap="/hex-to-text">Swap → hex to text</button>
+            <span class="copy-flash" data-pair-flash>Copied!</span>
+          </div>
+          <p class="source-note" data-pair-note></p>
+        </div>
+        <!-- sizechips:start -->
+        <nav class="size-chips" aria-label="Directed conversions">
+          <span class="size-chips-label" id="size-chips-label">One direction</span>
+          <ul aria-labelledby="size-chips-label">
+            <li><a href="/hex-to-decimal" class="chip">Hex → Dec</a></li>
+            <li><a href="/decimal-to-hex" class="chip">Dec → Hex</a></li>
+            <li><a href="/binary-to-decimal" class="chip">Bin → Dec</a></li>
+            <li><a href="/decimal-to-binary" class="chip">Dec → Bin</a></li>
+            <li><a href="/hex-to-binary" class="chip">Hex → Bin</a></li>
+            <li><a href="/binary-to-hex" class="chip">Bin → Hex</a></li>
+            <li><a href="/text-to-binary" class="chip">Text → Bin</a></li>
+            <li><a href="/binary-to-text" class="chip">Bin → Text</a></li>
+            <li><a href="/text-to-hex" class="chip" aria-current="page">Text → Hex</a></li>
+            <li><a href="/hex-to-text" class="chip">Hex → Text</a></li>
+          </ul>
+        </nav>
+        <!-- sizechips:end -->
+      </div>
+    </div>
+  </section>
+
+<section class="container-narrow" style="padding-top:40px;">
+    <h2>Two hex digits per byte, always</h2>
+    <p>Text becomes hex in two steps: encode the characters to bytes with UTF-8, then write each byte as exactly two hex digits. The "exactly two" is what makes the output parseable — <code>0A</code> and <code>A</code> are the same number, but only the padded form can be read back unambiguously from a stream where the bytes are not separated.</p>
+    <p>Hex is the notation of choice here rather than binary because it is four times shorter and still maps cleanly onto byte boundaries. A sentence in binary is a wall; the same sentence in hex is something you can scan.</p>
+    <h2>What a hex dump looks like</h2>
+    <p>Tools like <code>xxd</code>, <code>hexdump</code> and every binary editor lay bytes out in fixed-width rows with an offset on the left and a printable rendering on the right. Non-printable bytes show as a dot, which is why the dump below has one at the end — the trailing newline:</p>
+<div class="data-table">
+  <table>
+    <caption>A hex dump of “Hex is just bytes.”, eight bytes to a row</caption>
+    <thead><tr><th scope="col">Offset</th><th scope="col">Bytes</th><th scope="col">As text</th></tr></thead>
+    <tbody>
+      <tr><th scope="row"><code>00000000</code></th><td><code>48 65 78 20 69 73 20 6A</code></td><td><code>Hex is j</code></td></tr>
+      <tr><th scope="row"><code>00000008</code></th><td><code>75 73 74 20 62 79 74 65</code></td><td><code>ust byte</code></td></tr>
+      <tr><th scope="row"><code>00000010</code></th><td><code>73 2E 0A</code></td><td><code>s..</code></td></tr>
+    </tbody>
+  </table>
+</div>
+    <p>The offset column is a byte count from the start of the data, in hex. That is the number a debugger, a parser error or a diff will quote at you, so being able to line it up against the row is most of what reading a dump is.</p>
+    <h2>Where the hex is going</h2>
+    <p>The same bytes get written several different ways depending on what will read them, and picking the wrong form is a common source of "the value looks right but does not work":</p>
+<div class="data-table">
+  <table>
+    <caption>The same two bytes, written for different readers</caption>
+    <thead><tr><th scope="col">Where you would write it</th><th scope="col">Form</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">C, Python, JavaScript string</th><td><code>\x48\x69</code></td></tr>
+      <tr><th scope="row">a numeric literal</th><td><code>0x4869</code></td></tr>
+      <tr><th scope="row">percent-encoding in a URL</th><td><code>%48%69</code></td></tr>
+      <tr><th scope="row">an HTML numeric entity</th><td><code>&amp;#x48;&amp;#x69;</code></td></tr>
+      <tr><th scope="row">a Unicode code point</th><td><code>U+0048 U+0069</code></td></tr>
+    </tbody>
+  </table>
+</div>
+    <p>Percent-encoding in particular is not the same job as hex: it only escapes the bytes a URL cannot carry literally, leaving the rest as characters. If that is what you need, use the <a href="/url-encoder-decoder">URL encoder</a> instead of pasting a full hex string into a query parameter.</p>
+    <h2>Non-ASCII costs more than one byte</h2>
+    <p>Every character above U+007F takes two to four bytes in UTF-8, so its hex is four, six or eight digits rather than two. That is why a string's character count and its hex length are not related by a constant, and why truncating a hex string at an arbitrary even offset can cut a character in half.</p>
+    <p>Related: <a href="/hex-to-text">hex to text</a> for reading a dump back, <a href="/text-to-binary">text to binary</a> when you want the individual bits, and the <a href="/hash-generator">hash generator</a> if what you actually want is a digest of the bytes.</p>
+
+    <h2>More developer tools</h2>
+    <ul>
+      <li><a href="/json-formatter">JSON Formatter</a></li>
+      <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
+      <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
+      <li><a href="/unix-timestamp-converter">Unix Timestamp Converter</a></li>
+      <li><a href="/regex-tester">Regex Tester</a></li>
+      <li><a href="/uuid-generator">UUID Generator (v4 / v7)</a></li>
+      <li><a href="/hash-generator">Hash Generator (MD5 / SHA / HMAC)</a></li>
+      <li><a href="/jwt-decoder">JWT Decoder</a></li>
+      <li><a href="/password-generator">Password Generator</a></li>
+      <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+      <li><a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a></li>
+      <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+      <li><a href="/color-converter">Color Converter</a></li>
+      <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+      <li><a href="/">All tools on one page (home)</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/app.js"></script>
+<a href="https://erabb.it" class="erabbit-mark" aria-label="erabb.it"><img src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐇</text></svg>" width="10" height="10" alt=""></a>
+</body>
+</html>

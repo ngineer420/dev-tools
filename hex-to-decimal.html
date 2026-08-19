@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hex to Decimal Converter — Signed and Unsigned, Exact at 64 Bits — devboxkit.com</title>
+<meta name="description" content="Convert hexadecimal to decimal in your browser. Handles 64-bit values exactly and shows both the signed (two's-complement) and unsigned reading at 8, 16, 32 and 64 bits.">
+<link rel="canonical" href="https://devboxkit.com/hex-to-decimal">
+<meta name="theme-color" content="#090c11">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hex to Decimal Converter">
+<meta property="og:description" content="Hex to decimal with correct signed and unsigned answers at any width, exact well past 2^53. Nothing is uploaded.">
+<meta property="og:url" content="https://devboxkit.com/hex-to-decimal">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hex to Decimal Converter">
+<meta name="twitter:description" content="Hex to decimal with correct signed and unsigned answers at any width, exact well past 2^53. Nothing is uploaded.">
+
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Hex to Decimal — DevBox Kit",
+  "url": "https://devboxkit.com/hex-to-decimal",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "description": "Convert hexadecimal to decimal in your browser. Handles 64-bit values exactly and shows both the signed (two's-complement) and unsigned reading at 8, 16, 32 and 64 bits."
+}
+</script>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7560786263587509" crossorigin="anonymous"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+      <span class="brand-tag">JSON, hashes, JWTs, passwords &amp; more — one page</span>
+    </a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark/light theme" title="Toggle theme">◐</button>
+    </div>
+  </div>
+</header>
+
+<!-- nav:start -->
+<nav class="toolbar" aria-label="Tools">
+  <details class="tb-menu">
+    <summary class="tb-trigger" aria-label="All 15 tools">
+      <span class="tb-glyph" aria-hidden="true">&#9636;</span>
+      <span class="tb-label">All 15<span class="tb-label-long"> tools</span></span>
+    </summary>
+    <div class="tb-sheet">
+      <div class="tb-sheet-cols">
+        <p class="tb-grouplabel" id="tb-g1">Format &amp; validate</p>
+        <ul aria-labelledby="tb-g1">
+          <li><a href="/json-formatter">JSON Formatter</a></li>
+          <li><a href="/regex-tester">Regex Tester</a></li>
+          <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g2">Encode &amp; decode</p>
+        <ul aria-labelledby="tb-g2">
+          <li><a href="/base64-encode-decode">Base64 Encode/Decode</a></li>
+          <li><a href="/url-encoder-decoder">URL Encode/Decode</a></li>
+          <li><a href="/html-entity-encoder">HTML Entity Encoder</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g3">Generate</p>
+        <ul aria-labelledby="tb-g3">
+          <li><a href="/uuid-generator">UUID Generator</a></li>
+          <li><a href="/hash-generator">Hash Generator</a></li>
+          <li><a href="/password-generator">Password Generator</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g4">Inspect</p>
+        <ul aria-labelledby="tb-g4">
+          <li><a href="/unix-timestamp-converter">Timestamp Converter</a></li>
+          <li><a href="/jwt-decoder">JWT Decoder</a></li>
+          <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g5">Color</p>
+        <ul aria-labelledby="tb-g5">
+          <li><a href="/color-converter">Color Converter</a></li>
+          <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g6">Convert</p>
+        <ul aria-labelledby="tb-g6">
+          <li><a href="/number-base-converter" aria-current="true">Number Base Converter</a></li>
+        </ul>
+      </div>
+    </div>
+  </details>
+  <div class="tb-scrim"></div>
+  <ul class="tb-rail">
+    <li><a href="/json-formatter">JSON</a></li>
+    <li><a href="/base64-encode-decode">Base64</a></li>
+    <li><a href="/url-encoder-decoder">URL</a></li>
+    <li><a href="/unix-timestamp-converter">Timestamp</a></li>
+    <li><a href="/regex-tester">Regex</a></li>
+    <li><a href="/uuid-generator">UUID</a></li>
+    <li><a href="/hash-generator">Hash</a></li>
+    <li><a href="/jwt-decoder">JWT</a></li>
+  </ul>
+</nav>
+<!-- nav:end -->
+
+<main id="main">
+  <div class="hero">
+    <h1>Hex to Decimal</h1>
+    <p>Paste hex, get decimal &mdash; with the signed and unsigned readings shown separately, because <code>FFFFFFFF</code> is both 4,294,967,295 and &minus;1 depending on the width it came from.</p>
+    <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
+  </div>
+
+  <section aria-label="Hex to Decimal tool">
+    <div class="tool-grid split" data-base-pair data-from="16" data-to="10">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Hexadecimal</h2>
+          <div class="field">
+            <label for="pair-input">Hex value — 0x prefix and separators are fine</label>
+            <textarea id="pair-input" class="code-area" rows="6" spellcheck="false" autocapitalize="off" autocorrect="off" data-pair-input>FFFFFFFF</textarea>
+          </div>
+          <div class="field">
+            <label for="pair-bits">Width</label>
+            <select id="pair-bits" data-pair-bits>
+            <option value="any" selected>Arbitrary precision</option>
+            <option value="8">8-bit</option>
+            <option value="16">16-bit</option>
+            <option value="32">32-bit</option>
+            <option value="64">64-bit</option>
+            </select>
+          </div>
+          <div class="checkbox-row">
+            <label for="pair-signed"><input type="checkbox" id="pair-signed" data-pair-signed disabled> Signed (two's complement)</label>
+          </div>
+          <div class="error-banner" data-pair-error role="alert"></div>
+        </div>
+      </div>
+      <div class="output-col">
+        <div class="panel">
+          <h2>Decimal</h2>
+          <div class="field">
+            <label for="pair-output" class="visually-hidden">Decimal</label>
+            <textarea id="pair-output" class="code-area" rows="6" readonly spellcheck="false" data-pair-output></textarea>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="icon-btn" data-pair-copy>Copy</button>
+            <button type="button" class="icon-btn" data-pair-swap="/decimal-to-hex">Swap → decimal to hex</button>
+            <span class="copy-flash" data-pair-flash>Copied!</span>
+          </div>
+          <p class="source-note" data-pair-note></p>
+        </div>
+        <!-- sizechips:start -->
+        <nav class="size-chips" aria-label="Directed conversions">
+          <span class="size-chips-label" id="size-chips-label">One direction</span>
+          <ul aria-labelledby="size-chips-label">
+            <li><a href="/hex-to-decimal" class="chip" aria-current="page">Hex → Dec</a></li>
+            <li><a href="/decimal-to-hex" class="chip">Dec → Hex</a></li>
+            <li><a href="/binary-to-decimal" class="chip">Bin → Dec</a></li>
+            <li><a href="/decimal-to-binary" class="chip">Dec → Bin</a></li>
+            <li><a href="/hex-to-binary" class="chip">Hex → Bin</a></li>
+            <li><a href="/binary-to-hex" class="chip">Bin → Hex</a></li>
+            <li><a href="/text-to-binary" class="chip">Text → Bin</a></li>
+            <li><a href="/binary-to-text" class="chip">Bin → Text</a></li>
+            <li><a href="/text-to-hex" class="chip">Text → Hex</a></li>
+            <li><a href="/hex-to-text" class="chip">Hex → Text</a></li>
+          </ul>
+        </nav>
+        <!-- sizechips:end -->
+      </div>
+    </div>
+  </section>
+
+<section class="container-narrow" style="padding-top:40px;">
+    <h2>How hex becomes decimal</h2>
+    <p>Hexadecimal is base 16, so each column is worth sixteen times the one to its right: 1, 16, 256, 4096, and so on. The digits run 0–9 then A–F, where A is ten and F is fifteen. To convert by hand you multiply each digit by its column value and add: <code>2F</code> is (2 × 16) + 15 = 47, and <code>1A2B</code> is (1 × 4096) + (10 × 256) + (2 × 16) + 11 = 6699. The converter above does the same arithmetic in BigInt, so it keeps working at lengths where doing it by hand stops being reasonable.</p>
+    <p>Most hex you meet in a day is a byte or a small run of them. A colour like <code>#3CE688</code> is three bytes — red 60, green 230, blue 136. A permissions value, a status register, an opcode and a memory offset are all the same idea at different widths. The table below is the whole first byte, which covers the majority of hand conversions in one glance.</p>
+<div class="data-table data-table--grid">
+  <table>
+    <caption>Every byte, 00 to FF, in decimal</caption>
+    <thead><tr><th scope="col">&nbsp;</th><th scope="col">0</th><th scope="col">1</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th><th scope="col">6</th><th scope="col">7</th><th scope="col">8</th><th scope="col">9</th><th scope="col">A</th><th scope="col">B</th><th scope="col">C</th><th scope="col">D</th><th scope="col">E</th><th scope="col">F</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">0_</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td></tr>
+      <tr><th scope="row">1_</th><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td></tr>
+      <tr><th scope="row">2_</th><td>32</td><td>33</td><td>34</td><td>35</td><td>36</td><td>37</td><td>38</td><td>39</td><td>40</td><td>41</td><td>42</td><td>43</td><td>44</td><td>45</td><td>46</td><td>47</td></tr>
+      <tr><th scope="row">3_</th><td>48</td><td>49</td><td>50</td><td>51</td><td>52</td><td>53</td><td>54</td><td>55</td><td>56</td><td>57</td><td>58</td><td>59</td><td>60</td><td>61</td><td>62</td><td>63</td></tr>
+      <tr><th scope="row">4_</th><td>64</td><td>65</td><td>66</td><td>67</td><td>68</td><td>69</td><td>70</td><td>71</td><td>72</td><td>73</td><td>74</td><td>75</td><td>76</td><td>77</td><td>78</td><td>79</td></tr>
+      <tr><th scope="row">5_</th><td>80</td><td>81</td><td>82</td><td>83</td><td>84</td><td>85</td><td>86</td><td>87</td><td>88</td><td>89</td><td>90</td><td>91</td><td>92</td><td>93</td><td>94</td><td>95</td></tr>
+      <tr><th scope="row">6_</th><td>96</td><td>97</td><td>98</td><td>99</td><td>100</td><td>101</td><td>102</td><td>103</td><td>104</td><td>105</td><td>106</td><td>107</td><td>108</td><td>109</td><td>110</td><td>111</td></tr>
+      <tr><th scope="row">7_</th><td>112</td><td>113</td><td>114</td><td>115</td><td>116</td><td>117</td><td>118</td><td>119</td><td>120</td><td>121</td><td>122</td><td>123</td><td>124</td><td>125</td><td>126</td><td>127</td></tr>
+      <tr><th scope="row">8_</th><td>128</td><td>129</td><td>130</td><td>131</td><td>132</td><td>133</td><td>134</td><td>135</td><td>136</td><td>137</td><td>138</td><td>139</td><td>140</td><td>141</td><td>142</td><td>143</td></tr>
+      <tr><th scope="row">9_</th><td>144</td><td>145</td><td>146</td><td>147</td><td>148</td><td>149</td><td>150</td><td>151</td><td>152</td><td>153</td><td>154</td><td>155</td><td>156</td><td>157</td><td>158</td><td>159</td></tr>
+      <tr><th scope="row">A_</th><td>160</td><td>161</td><td>162</td><td>163</td><td>164</td><td>165</td><td>166</td><td>167</td><td>168</td><td>169</td><td>170</td><td>171</td><td>172</td><td>173</td><td>174</td><td>175</td></tr>
+      <tr><th scope="row">B_</th><td>176</td><td>177</td><td>178</td><td>179</td><td>180</td><td>181</td><td>182</td><td>183</td><td>184</td><td>185</td><td>186</td><td>187</td><td>188</td><td>189</td><td>190</td><td>191</td></tr>
+      <tr><th scope="row">C_</th><td>192</td><td>193</td><td>194</td><td>195</td><td>196</td><td>197</td><td>198</td><td>199</td><td>200</td><td>201</td><td>202</td><td>203</td><td>204</td><td>205</td><td>206</td><td>207</td></tr>
+      <tr><th scope="row">D_</th><td>208</td><td>209</td><td>210</td><td>211</td><td>212</td><td>213</td><td>214</td><td>215</td><td>216</td><td>217</td><td>218</td><td>219</td><td>220</td><td>221</td><td>222</td><td>223</td></tr>
+      <tr><th scope="row">E_</th><td>224</td><td>225</td><td>226</td><td>227</td><td>228</td><td>229</td><td>230</td><td>231</td><td>232</td><td>233</td><td>234</td><td>235</td><td>236</td><td>237</td><td>238</td><td>239</td></tr>
+      <tr><th scope="row">F_</th><td>240</td><td>241</td><td>242</td><td>243</td><td>244</td><td>245</td><td>246</td><td>247</td><td>248</td><td>249</td><td>250</td><td>251</td><td>252</td><td>253</td><td>254</td><td>255</td></tr>
+    </tbody>
+  </table>
+</div>
+    <h2>The case that trips people up</h2>
+    <p>A hex value with the top bit set has two correct decimal answers, and which one you want depends on the type it came out of. <code>FFFFFFFF</code> is 4,294,967,295 read as unsigned and −1 read as a signed 32-bit integer. If the number came from a C <code>int</code>, a Java <code>int</code>, a Go <code>int32</code> or a register dump, the signed reading is almost certainly the one you want. Set the width above and tick <em>signed</em> and you get both, side by side, rather than having to guess which convention the tool picked for you.</p>
+    <p>The same is true of a value like <code>80000000</code>: unsigned it is 2,147,483,648, signed it is −2,147,483,648, and a converter that only ever prints one of them is wrong for half the people who paste it in.</p>
+    <h2>Where you keep meeting hex</h2>
+    <p>Memory addresses and pointer values in a debugger or a crash log; CSS and design-token colours; the error codes Windows prints as <code>0x80070005</code>; file magic numbers such as the <code>89 50 4E 47</code> that starts every PNG; MAC addresses; and every hash digest you will ever compare. In every one of those cases the hex is the canonical form and the decimal is what you want for a moment, to check a range or a size.</p>
+    <p>Going the other way, or want a bit pattern instead of a decimal? Try <a href="/decimal-to-hex">decimal to hex</a>, <a href="/hex-to-binary">hex to binary</a>, or the <a href="/number-base-converter">full base converter</a> with all bases at once.</p>
+
+    <h2>More developer tools</h2>
+    <ul>
+      <li><a href="/json-formatter">JSON Formatter</a></li>
+      <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
+      <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
+      <li><a href="/unix-timestamp-converter">Unix Timestamp Converter</a></li>
+      <li><a href="/regex-tester">Regex Tester</a></li>
+      <li><a href="/uuid-generator">UUID Generator (v4 / v7)</a></li>
+      <li><a href="/hash-generator">Hash Generator (MD5 / SHA / HMAC)</a></li>
+      <li><a href="/jwt-decoder">JWT Decoder</a></li>
+      <li><a href="/password-generator">Password Generator</a></li>
+      <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+      <li><a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a></li>
+      <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+      <li><a href="/color-converter">Color Converter</a></li>
+      <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+      <li><a href="/">All tools on one page (home)</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/app.js"></script>
+<a href="https://erabb.it" class="erabbit-mark" aria-label="erabb.it"><img src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐇</text></svg>" width="10" height="10" alt=""></a>
+</body>
+</html>

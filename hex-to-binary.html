@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hex to Binary Converter — One Digit, Four Bits — devboxkit.com</title>
+<meta name="description" content="Convert hexadecimal to binary in your browser. Each hex digit expands to exactly four bits, with leading zeros kept and optional padding to 8, 16, 32 or 64 bits.">
+<link rel="canonical" href="https://devboxkit.com/hex-to-binary">
+<meta name="theme-color" content="#090c11">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hex to Binary Converter">
+<meta property="og:description" content="Hex to binary by direct substitution — one digit, four bits — with leading zeros kept and real width padding.">
+<meta property="og:url" content="https://devboxkit.com/hex-to-binary">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hex to Binary Converter">
+<meta name="twitter:description" content="Hex to binary by direct substitution — one digit, four bits — with leading zeros kept and real width padding.">
+
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Hex to Binary — DevBox Kit",
+  "url": "https://devboxkit.com/hex-to-binary",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "description": "Convert hexadecimal to binary in your browser. Each hex digit expands to exactly four bits, with leading zeros kept and optional padding to 8, 16, 32 or 64 bits."
+}
+</script>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7560786263587509" crossorigin="anonymous"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+      <span class="brand-tag">JSON, hashes, JWTs, passwords &amp; more — one page</span>
+    </a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark/light theme" title="Toggle theme">◐</button>
+    </div>
+  </div>
+</header>
+
+<!-- nav:start -->
+<nav class="toolbar" aria-label="Tools">
+  <details class="tb-menu">
+    <summary class="tb-trigger" aria-label="All 15 tools">
+      <span class="tb-glyph" aria-hidden="true">&#9636;</span>
+      <span class="tb-label">All 15<span class="tb-label-long"> tools</span></span>
+    </summary>
+    <div class="tb-sheet">
+      <div class="tb-sheet-cols">
+        <p class="tb-grouplabel" id="tb-g1">Format &amp; validate</p>
+        <ul aria-labelledby="tb-g1">
+          <li><a href="/json-formatter">JSON Formatter</a></li>
+          <li><a href="/regex-tester">Regex Tester</a></li>
+          <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g2">Encode &amp; decode</p>
+        <ul aria-labelledby="tb-g2">
+          <li><a href="/base64-encode-decode">Base64 Encode/Decode</a></li>
+          <li><a href="/url-encoder-decoder">URL Encode/Decode</a></li>
+          <li><a href="/html-entity-encoder">HTML Entity Encoder</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g3">Generate</p>
+        <ul aria-labelledby="tb-g3">
+          <li><a href="/uuid-generator">UUID Generator</a></li>
+          <li><a href="/hash-generator">Hash Generator</a></li>
+          <li><a href="/password-generator">Password Generator</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g4">Inspect</p>
+        <ul aria-labelledby="tb-g4">
+          <li><a href="/unix-timestamp-converter">Timestamp Converter</a></li>
+          <li><a href="/jwt-decoder">JWT Decoder</a></li>
+          <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g5">Color</p>
+        <ul aria-labelledby="tb-g5">
+          <li><a href="/color-converter">Color Converter</a></li>
+          <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g6">Convert</p>
+        <ul aria-labelledby="tb-g6">
+          <li><a href="/number-base-converter" aria-current="true">Number Base Converter</a></li>
+        </ul>
+      </div>
+    </div>
+  </details>
+  <div class="tb-scrim"></div>
+  <ul class="tb-rail">
+    <li><a href="/json-formatter">JSON</a></li>
+    <li><a href="/base64-encode-decode">Base64</a></li>
+    <li><a href="/url-encoder-decoder">URL</a></li>
+    <li><a href="/unix-timestamp-converter">Timestamp</a></li>
+    <li><a href="/regex-tester">Regex</a></li>
+    <li><a href="/uuid-generator">UUID</a></li>
+    <li><a href="/hash-generator">Hash</a></li>
+    <li><a href="/jwt-decoder">JWT</a></li>
+  </ul>
+</nav>
+<!-- nav:end -->
+
+<main id="main">
+  <div class="hero">
+    <h1>Hex to Binary</h1>
+    <p>One hex digit is exactly four bits, so this conversion is pure substitution &mdash; no arithmetic, no carrying, and the bit boundaries never move.</p>
+    <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
+  </div>
+
+  <section aria-label="Hex to Binary tool">
+    <div class="tool-grid split" data-base-pair data-from="16" data-to="2">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Hexadecimal</h2>
+          <div class="field">
+            <label for="pair-input">Hex value — 0x prefix and separators are fine</label>
+            <textarea id="pair-input" class="code-area" rows="6" spellcheck="false" autocapitalize="off" autocorrect="off" data-pair-input>2C</textarea>
+          </div>
+          <div class="field">
+            <label for="pair-bits">Width</label>
+            <select id="pair-bits" data-pair-bits>
+            <option value="any" selected>Arbitrary precision</option>
+            <option value="8">8-bit</option>
+            <option value="16">16-bit</option>
+            <option value="32">32-bit</option>
+            <option value="64">64-bit</option>
+            </select>
+          </div>
+          <div class="checkbox-row">
+            <label for="pair-signed"><input type="checkbox" id="pair-signed" data-pair-signed disabled> Signed (two's complement)</label>
+          </div>
+          <div class="error-banner" data-pair-error role="alert"></div>
+        </div>
+      </div>
+      <div class="output-col">
+        <div class="panel">
+          <h2>Binary</h2>
+          <div class="field">
+            <label for="pair-output" class="visually-hidden">Binary</label>
+            <textarea id="pair-output" class="code-area" rows="6" readonly spellcheck="false" data-pair-output></textarea>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="icon-btn" data-pair-copy>Copy</button>
+            <button type="button" class="icon-btn" data-pair-swap="/binary-to-hex">Swap → binary to hex</button>
+            <span class="copy-flash" data-pair-flash>Copied!</span>
+          </div>
+          <p class="source-note" data-pair-note></p>
+        </div>
+        <!-- sizechips:start -->
+        <nav class="size-chips" aria-label="Directed conversions">
+          <span class="size-chips-label" id="size-chips-label">One direction</span>
+          <ul aria-labelledby="size-chips-label">
+            <li><a href="/hex-to-decimal" class="chip">Hex → Dec</a></li>
+            <li><a href="/decimal-to-hex" class="chip">Dec → Hex</a></li>
+            <li><a href="/binary-to-decimal" class="chip">Bin → Dec</a></li>
+            <li><a href="/decimal-to-binary" class="chip">Dec → Bin</a></li>
+            <li><a href="/hex-to-binary" class="chip" aria-current="page">Hex → Bin</a></li>
+            <li><a href="/binary-to-hex" class="chip">Bin → Hex</a></li>
+            <li><a href="/text-to-binary" class="chip">Text → Bin</a></li>
+            <li><a href="/binary-to-text" class="chip">Bin → Text</a></li>
+            <li><a href="/text-to-hex" class="chip">Text → Hex</a></li>
+            <li><a href="/hex-to-text" class="chip">Hex → Text</a></li>
+          </ul>
+        </nav>
+        <!-- sizechips:end -->
+      </div>
+    </div>
+  </section>
+
+<section class="container-narrow" style="padding-top:40px;">
+    <h2>There is no arithmetic in this one</h2>
+    <p>Hex to binary is the one conversion on this site that needs no division, no multiplication and no carrying. Sixteen is two to the fourth, so one hex digit maps onto exactly four bits and always the same four bits, regardless of what is on either side of it. Replace each digit with its nibble, concatenate, and you are finished: <code>2F</code> becomes <code>0010</code> and <code>1111</code>, which is <code>00101111</code>.</p>
+<div class="data-table">
+  <table>
+    <caption>One hex digit is exactly four bits</caption>
+    <thead><tr><th scope="col">Hex</th><th scope="col">Binary</th><th scope="col">Decimal</th></tr></thead>
+    <tbody>
+      <tr><th scope="row"><code>0</code></th><td><code>0000</code></td><td>0</td></tr>
+      <tr><th scope="row"><code>1</code></th><td><code>0001</code></td><td>1</td></tr>
+      <tr><th scope="row"><code>2</code></th><td><code>0010</code></td><td>2</td></tr>
+      <tr><th scope="row"><code>3</code></th><td><code>0011</code></td><td>3</td></tr>
+      <tr><th scope="row"><code>4</code></th><td><code>0100</code></td><td>4</td></tr>
+      <tr><th scope="row"><code>5</code></th><td><code>0101</code></td><td>5</td></tr>
+      <tr><th scope="row"><code>6</code></th><td><code>0110</code></td><td>6</td></tr>
+      <tr><th scope="row"><code>7</code></th><td><code>0111</code></td><td>7</td></tr>
+      <tr><th scope="row"><code>8</code></th><td><code>1000</code></td><td>8</td></tr>
+      <tr><th scope="row"><code>9</code></th><td><code>1001</code></td><td>9</td></tr>
+      <tr><th scope="row"><code>A</code></th><td><code>1010</code></td><td>10</td></tr>
+      <tr><th scope="row"><code>B</code></th><td><code>1011</code></td><td>11</td></tr>
+      <tr><th scope="row"><code>C</code></th><td><code>1100</code></td><td>12</td></tr>
+      <tr><th scope="row"><code>D</code></th><td><code>1101</code></td><td>13</td></tr>
+      <tr><th scope="row"><code>E</code></th><td><code>1110</code></td><td>14</td></tr>
+      <tr><th scope="row"><code>F</code></th><td><code>1111</code></td><td>15</td></tr>
+    </tbody>
+  </table>
+</div>
+    <p>That table is the entire conversion. It is worth learning by heart, because it also runs backwards for <a href="/binary-to-hex">binary to hex</a>, and because it is the reason hex exists at all: it is a shorthand for binary that a person can read aloud, where every digit still lines up with a fixed group of bits. Base 10 has no such property — there is no fixed number of bits per decimal digit — which is why a decimal number tells you nothing about its own bit pattern at a glance.</p>
+    <h2>Keep the leading zeros</h2>
+    <p>Each hex digit expands to four bits including any leading zeros, so <code>5</code> is <code>0101</code>, not <code>101</code>. Dropping them is the usual way this goes wrong: <code>0x15</code> is <code>0001 0101</code>, and writing it as <code>1 0101</code> makes it look like a five-bit value. Set a width above and the output is padded to the full 8, 16, 32 or 64 bits so the columns line up against whatever you are comparing it with.</p>
+    <h2>Why this is the conversion you want for flags</h2>
+    <p>When documentation gives you a status word as <code>0x2C</code> and a table of what each bit means, the fast route is not through decimal. Expand straight to <code>0010 1100</code>, then read off bits 5, 3 and 2 as set. Going via decimal (44) throws away exactly the structure you were trying to read, and then you have to convert back.</p>
+    <p>The same applies to masks. An RGB channel mask of <code>0x00FF0000</code> is obviously "the second byte" once expanded, and much less obviously 16,711,680 in decimal.</p>
+    <p>Related: <a href="/binary-to-hex">binary to hex</a> for the return trip, <a href="/hex-to-decimal">hex to decimal</a> when you want a magnitude rather than a pattern, and the <a href="/number-base-converter">full converter</a>.</p>
+
+    <h2>More developer tools</h2>
+    <ul>
+      <li><a href="/json-formatter">JSON Formatter</a></li>
+      <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
+      <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
+      <li><a href="/unix-timestamp-converter">Unix Timestamp Converter</a></li>
+      <li><a href="/regex-tester">Regex Tester</a></li>
+      <li><a href="/uuid-generator">UUID Generator (v4 / v7)</a></li>
+      <li><a href="/hash-generator">Hash Generator (MD5 / SHA / HMAC)</a></li>
+      <li><a href="/jwt-decoder">JWT Decoder</a></li>
+      <li><a href="/password-generator">Password Generator</a></li>
+      <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+      <li><a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a></li>
+      <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+      <li><a href="/color-converter">Color Converter</a></li>
+      <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+      <li><a href="/">All tools on one page (home)</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/app.js"></script>
+<a href="https://erabb.it" class="erabbit-mark" aria-label="erabb.it"><img src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐇</text></svg>" width="10" height="10" alt=""></a>
+</body>
+</html>

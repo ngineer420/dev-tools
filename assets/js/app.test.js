@@ -66,6 +66,24 @@ const {
   rgbToOklch,
   oklchToRgb,
   nudgeLightnessToPass,
+  parseInBase,
+  formatInBase,
+  toTwosComplement,
+  fromTwosComplement,
+  fitsInWidth,
+  signedRange,
+  unsignedRange,
+  groupDigits,
+  padToWidth,
+  convertNumberBases,
+  textToBytes,
+  bytesToText,
+  bytesFromDigits,
+  textToBinary,
+  binaryToText,
+  textToHex,
+  hexToText,
+  baseDigitRange,
 } = require("./app.js");
 
 /* ------------------------------- existing tools --------------------------- */
@@ -664,4 +682,216 @@ test("the lightness nudge reaches the target and reports the colour it reached",
   const impossible = nudgeLightnessToPass(parseColor("#808080"), parseColor("#808080"), 7);
   assert.equal(impossible.ok, false);
   assert.ok(impossible.best < 7);
+});
+
+/* ===================== number base converter ===================== */
+
+test("parseInBase reads every base exactly, past Number.MAX_SAFE_INTEGER", () => {
+  assert.equal(parseInBase("ff", 16).value, 255n);
+  assert.equal(parseInBase("FF", 16).value, 255n);
+  assert.equal(parseInBase("0xFF", 16).value, 255n);
+  assert.equal(parseInBase("1010", 2).value, 10n);
+  assert.equal(parseInBase("0b1010", 2).value, 10n);
+  assert.equal(parseInBase("777", 8).value, 511n);
+  assert.equal(parseInBase("zz", 36).value, 1295n);
+
+  // The whole reason this is BigInt. Number(9007199254740993) is 9007199254740992.
+  assert.equal(parseInBase("9007199254740993", 10).value, 9007199254740993n);
+  assert.equal(parseInBase("FFFFFFFFFFFFFFFF", 16).value, 18446744073709551615n);
+  assert.equal(parseInBase("ffffffffffffffff", 16).value, 2n ** 64n - 1n);
+
+  // Separators people actually paste, and a sign.
+  assert.equal(parseInBase("1_000_000", 10).value, 1000000n);
+  assert.equal(parseInBase("1111 0000", 2).value, 240n);
+  assert.equal(parseInBase("-42", 10).value, -42n);
+  assert.equal(parseInBase("  +42  ", 10).value, 42n);
+});
+
+test("a prefix only counts when it agrees with the base being read", () => {
+  // 0b11 in hex is 0xB11, not binary 3 — a silent base switch here would be a
+  // wrong answer with no error to notice.
+  assert.equal(parseInBase("0b11", 16).value, 0xb11n);
+  assert.equal(parseInBase("0b11", 2).value, 3n);
+  assert.equal(parseInBase("0x10", 16).value, 16n);
+});
+
+test("parseInBase names the character it choked on", () => {
+  const bad = parseInBase("12G", 16);
+  assert.equal(bad.ok, false);
+  assert.match(bad.error, /"G" is not a base-16 digit/);
+  assert.match(bad.error, /0–9 and a–f/);
+  assert.equal(parseInBase("2", 2).ok, false); // in range for a digit, not for base 2
+  assert.equal(parseInBase("", 10).ok, false);
+  assert.equal(parseInBase("1", 37).ok, false);
+  assert.equal(parseInBase("1", 1).ok, false);
+  assert.equal(baseDigitRange(8), "0–7");
+});
+
+test("formatInBase is the exact inverse of parseInBase in every base", () => {
+  for (let base = 2; base <= 36; base++) {
+    for (const v of [0n, 1n, 255n, 65535n, 123456789n, 2n ** 64n - 1n, -987654321n]) {
+      assert.equal(parseInBase(formatInBase(v, base), base).value, v,
+        `base ${base} value ${v}`);
+    }
+  }
+  assert.equal(formatInBase(0n, 16), "0");
+  assert.equal(formatInBase(255n, 16), "ff");
+  assert.equal(formatInBase(-255n, 16), "-ff");
+  assert.equal(formatInBase(2n ** 64n - 1n, 16), "ffffffffffffffff");
+  assert.equal(formatInBase(2n ** 64n - 1n, 10), "18446744073709551615");
+});
+
+test("two's complement round-trips at every supported width", () => {
+  assert.equal(toTwosComplement(-1n, 8), 255n);
+  assert.equal(toTwosComplement(-1n, 16), 65535n);
+  assert.equal(toTwosComplement(-1n, 32), 4294967295n);
+  assert.equal(toTwosComplement(-1n, 64), 18446744073709551615n);
+
+  assert.equal(fromTwosComplement(255n, 8), -1n);
+  assert.equal(fromTwosComplement(0xffffffffn, 32), -1n);
+  assert.equal(fromTwosComplement(0x80000000n, 32), -2147483648n);
+  assert.equal(fromTwosComplement(0x7fffffffn, 32), 2147483647n);
+  assert.equal(fromTwosComplement(0xffffffffffffffffn, 64), -1n);
+  assert.equal(fromTwosComplement(0x8000000000000000n, 64), -9223372036854775808n);
+  assert.equal(fromTwosComplement(0x7fffffffffffffffn, 64), 9223372036854775807n);
+
+  for (const bits of [8, 16, 32, 64]) {
+    const { min, max } = signedRange(bits);
+    for (const v of [min, min + 1n, -1n, 0n, 1n, max - 1n, max]) {
+      assert.equal(fromTwosComplement(toTwosComplement(v, bits), bits), v,
+        `${bits}-bit ${v}`);
+    }
+    assert.equal(unsignedRange(bits).max, 2n ** BigInt(bits) - 1n);
+  }
+});
+
+test("fitsInWidth knows the boundary in both signednesses", () => {
+  assert.equal(fitsInWidth(127n, 8, true), true);
+  assert.equal(fitsInWidth(128n, 8, true), false);
+  assert.equal(fitsInWidth(-128n, 8, true), true);
+  assert.equal(fitsInWidth(-129n, 8, true), false);
+  assert.equal(fitsInWidth(255n, 8, false), true);
+  assert.equal(fitsInWidth(256n, 8, false), false);
+  assert.equal(fitsInWidth(-1n, 8, false), false);
+});
+
+test("0xFFFFFFFF is -1 at 32-bit signed and 4294967295 unsigned", () => {
+  const signed = convertNumberBases("FFFFFFFF", 16, { bits: 32, signed: true });
+  assert.equal(signed.signedDecimal, "-1");
+  assert.equal(signed.unsignedDecimal, "4294967295");
+  assert.equal(signed.decimal, "-1");
+  assert.equal(signed.hex, "ffffffff");
+  assert.equal(signed.binary, "1".repeat(32));
+  // A pattern that fills the width is a reinterpretation, not an overflow.
+  assert.equal(signed.wrapped, false);
+  assert.equal(signed.reinterpreted, true);
+
+  const unsigned = convertNumberBases("FFFFFFFF", 16, { bits: 32, signed: false });
+  assert.equal(unsigned.decimal, "4294967295");
+  assert.equal(unsigned.reinterpreted, false);
+});
+
+test("negative input comes back as the register pattern, not a minus sign", () => {
+  const r = convertNumberBases("-1", 10, { bits: 8, signed: true });
+  assert.equal(r.hex, "ff");
+  assert.equal(r.binary, "11111111");
+  assert.equal(r.signedDecimal, "-1");
+  assert.equal(r.unsignedDecimal, "255");
+  assert.equal(r.wrapped, false);
+
+  // -128 is the edge that fits; -129 is the edge that does not.
+  assert.equal(convertNumberBases("-128", 10, { bits: 8, signed: true }).hex, "80");
+  assert.equal(convertNumberBases("-129", 10, { bits: 8, signed: true }).wrapped, true);
+});
+
+test("64-bit values survive with no float precision loss", () => {
+  const r = convertNumberBases("18446744073709551615", 10, { bits: 64, signed: false });
+  assert.equal(r.hex, "ffffffffffffffff");
+  assert.equal(r.decimal, "18446744073709551615");
+  assert.equal(r.binary, "1".repeat(64));
+
+  const s = convertNumberBases("9223372036854775807", 10, { bits: 64, signed: true });
+  assert.equal(s.hex, "7fffffffffffffff");
+  assert.equal(s.signedDecimal, "9223372036854775807");
+
+  // The value one past the top of the signed range wraps to the bottom of it.
+  const over = convertNumberBases("9223372036854775808", 10, { bits: 64, signed: true });
+  assert.equal(over.signedDecimal, "-9223372036854775808");
+  assert.equal(over.reinterpreted, true);
+
+  // And with no width set, nothing is masked at any magnitude.
+  const huge = convertNumberBases("340282366920938463463374607431768211455", 10, {});
+  assert.equal(huge.hex, "f".repeat(32));
+  assert.equal(huge.bits, null);
+});
+
+test("fixed widths zero-pad, arbitrary precision does not", () => {
+  assert.equal(convertNumberBases("5", 10, { bits: 8 }).binary, "00000101");
+  assert.equal(convertNumberBases("5", 10, { bits: 8 }).hex, "05");
+  assert.equal(convertNumberBases("5", 10, {}).binary, "101");
+  assert.equal(padToWidth("101", 2, 8), "00000101");
+  assert.equal(padToWidth("101", 10, 8), "101"); // base 10 does not divide a width
+  assert.equal(groupDigits("11110000", 2), "1111 0000");
+  assert.equal(groupDigits("deadbeef", 16), "de ad be ef");
+  assert.equal(groupDigits("1234567", 10), "1 234 567");
+  assert.equal(groupDigits("-1234", 10), "-1 234");
+});
+
+test("a custom base rides along with the four standard ones", () => {
+  const r = convertNumberBases("255", 10, { customBase: 36 });
+  assert.equal(r.custom, "73");
+  assert.equal(r.customBase, 36);
+  assert.equal(convertNumberBases("255", 10, { customBase: 3 }).custom, "100110");
+  assert.equal(convertNumberBases("255", 10, { customBase: 99 }).custom, undefined);
+});
+
+test("text and bytes round-trip through UTF-8, multi-byte included", () => {
+  assert.deepEqual(textToBytes("Hi"), [0x48, 0x69]);
+  assert.equal(bytesToText([0x48, 0x69]), "Hi");
+  assert.equal(bytesToText(textToBytes("héllo — 日本 🐇")), "héllo — 日本 🐇");
+  assert.deepEqual(textToBytes("€"), [0xe2, 0x82, 0xac]);
+  assert.deepEqual(textToBytes("🐇"), [0xf0, 0x9f, 0x90, 0x87]);
+});
+
+test("a malformed byte run decodes to U+FFFD rather than to nonsense", () => {
+  assert.equal(bytesToText([0xff]), "�");
+  assert.equal(bytesToText([0xe2, 0x82]), "��"); // truncated euro sign
+  assert.equal(bytesToText([0x80]), "�"); // lone continuation byte
+  assert.equal(bytesToText([0xc0, 0x80]), "��"); // over-long encoding of NUL
+  // WHATWG's algorithm emits one U+FFFD per byte it has to abandon, so a
+  // surrogate encoded as three bytes is three replacements, not one: 0xED
+  // fails on its second byte, and 0xA0/0x80 are then read as stray
+  // continuation bytes in their own right.
+  assert.equal(bytesToText([0xed, 0xa0, 0x80]), "���");
+  assert.equal(bytesToText([0x41, 0xff, 0x42]), "A�B");
+});
+
+test("text to binary and hex, and back", () => {
+  assert.equal(textToBinary("Hi"), "01001000 01101001");
+  assert.equal(textToBinary("Hi", { separator: "" }), "0100100001101001");
+  assert.deepEqual(binaryToText("01001000 01101001"), { ok: true, value: "Hi" });
+  assert.deepEqual(binaryToText("0100100001101001"), { ok: true, value: "Hi" });
+
+  assert.equal(textToHex("Hi"), "48 69");
+  assert.equal(textToHex("Hi", { uppercase: true }), "48 69".toUpperCase());
+  assert.equal(textToHex("Hi", { separator: "" }), "4869");
+  assert.deepEqual(hexToText("48 69"), { ok: true, value: "Hi" });
+  assert.deepEqual(hexToText("4869"), { ok: true, value: "Hi" });
+  assert.deepEqual(hexToText("0x4869"), { ok: true, value: "Hi" });
+
+  // Multi-byte characters go out and come back as the same string.
+  assert.equal(binaryToText(textToBinary("héllo 🐇")).value, "héllo 🐇");
+  assert.equal(hexToText(textToHex("héllo 🐇")).value, "héllo 🐇");
+});
+
+test("a byte run rejects tokens that are not bytes", () => {
+  assert.equal(bytesFromDigits("100000000", 2, 8).ok, true); // unseparated, chunked from the right
+  assert.equal(bytesFromDigits("1 0000000", 2, 8).ok, true);
+  // Unseparated "999" is a valid odd-length run — 0x9 then 0x99 — because the
+  // chunking runs from the right. Separated, "999" is one token and too big.
+  assert.deepEqual(bytesFromDigits("999", 16, 2).bytes, [0x9, 0x99]);
+  assert.equal(bytesFromDigits("999 00", 16, 2).ok, false);
+  assert.match(bytesFromDigits("999 00", 16, 2).error, /not a single byte/);
+  assert.equal(bytesFromDigits("zz", 16, 2).ok, false);
+  assert.equal(bytesFromDigits("", 16, 2).ok, false);
 });
