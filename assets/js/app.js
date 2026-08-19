@@ -1149,6 +1149,467 @@ function formatCronRun(date, timeZone) {
   };
 }
 
+/* ============================= Colour tools ============================= *
+   Shared by /color-converter and /contrast-checker. Pure arithmetic, no DOM,
+   no dependencies. Conversions follow CSS Color Level 4; the contrast maths
+   follows WCAG 2.1 (Understanding SC 1.4.3), quoted in the comments below so
+   the thresholds are auditable without leaving the file. */
+
+/* The 148 CSS named colours (CSS Color Level 4, §6.1 "Named Colors"), including
+   the grey/gray spelling pairs and rebeccapurple. Inlined rather than fetched —
+   this site makes zero external requests. */
+const CSS_NAMED_COLORS = {
+  aliceblue: "#f0f8ff", antiquewhite: "#faebd7", aqua: "#00ffff",
+  aquamarine: "#7fffd4", azure: "#f0ffff", beige: "#f5f5dc", bisque: "#ffe4c4",
+  black: "#000000", blanchedalmond: "#ffebcd", blue: "#0000ff",
+  blueviolet: "#8a2be2", brown: "#a52a2a", burlywood: "#deb887",
+  cadetblue: "#5f9ea0", chartreuse: "#7fff00", chocolate: "#d2691e",
+  coral: "#ff7f50", cornflowerblue: "#6495ed", cornsilk: "#fff8dc",
+  crimson: "#dc143c", cyan: "#00ffff", darkblue: "#00008b", darkcyan: "#008b8b",
+  darkgoldenrod: "#b8860b", darkgray: "#a9a9a9", darkgreen: "#006400",
+  darkgrey: "#a9a9a9", darkkhaki: "#bdb76b", darkmagenta: "#8b008b",
+  darkolivegreen: "#556b2f", darkorange: "#ff8c00", darkorchid: "#9932cc",
+  darkred: "#8b0000", darksalmon: "#e9967a", darkseagreen: "#8fbc8f",
+  darkslateblue: "#483d8b", darkslategray: "#2f4f4f", darkslategrey: "#2f4f4f",
+  darkturquoise: "#00ced1", darkviolet: "#9400d3", deeppink: "#ff1493",
+  deepskyblue: "#00bfff", dimgray: "#696969", dimgrey: "#696969",
+  dodgerblue: "#1e90ff", firebrick: "#b22222", floralwhite: "#fffaf0",
+  forestgreen: "#228b22", fuchsia: "#ff00ff", gainsboro: "#dcdcdc",
+  ghostwhite: "#f8f8ff", gold: "#ffd700", goldenrod: "#daa520", gray: "#808080",
+  green: "#008000", greenyellow: "#adff2f", grey: "#808080",
+  honeydew: "#f0fff0", hotpink: "#ff69b4", indianred: "#cd5c5c",
+  indigo: "#4b0082", ivory: "#fffff0", khaki: "#f0e68c", lavender: "#e6e6fa",
+  lavenderblush: "#fff0f5", lawngreen: "#7cfc00", lemonchiffon: "#fffacd",
+  lightblue: "#add8e6", lightcoral: "#f08080", lightcyan: "#e0ffff",
+  lightgoldenrodyellow: "#fafad2", lightgray: "#d3d3d3", lightgreen: "#90ee90",
+  lightgrey: "#d3d3d3", lightpink: "#ffb6c1", lightsalmon: "#ffa07a",
+  lightseagreen: "#20b2aa", lightskyblue: "#87cefa", lightslategray: "#778899",
+  lightslategrey: "#778899", lightsteelblue: "#b0c4de", lightyellow: "#ffffe0",
+  lime: "#00ff00", limegreen: "#32cd32", linen: "#faf0e6", magenta: "#ff00ff",
+  maroon: "#800000", mediumaquamarine: "#66cdaa", mediumblue: "#0000cd",
+  mediumorchid: "#ba55d3", mediumpurple: "#9370db", mediumseagreen: "#3cb371",
+  mediumslateblue: "#7b68ee", mediumspringgreen: "#00fa9a",
+  mediumturquoise: "#48d1cc", mediumvioletred: "#c71585",
+  midnightblue: "#191970", mintcream: "#f5fffa", mistyrose: "#ffe4e1",
+  moccasin: "#ffe4b5", navajowhite: "#ffdead", navy: "#000080",
+  oldlace: "#fdf5e6", olive: "#808000", olivedrab: "#6b8e23", orange: "#ffa500",
+  orangered: "#ff4500", orchid: "#da70d6", palegoldenrod: "#eee8aa",
+  palegreen: "#98fb98", paleturquoise: "#afeeee", palevioletred: "#db7093",
+  papayawhip: "#ffefd5", peachpuff: "#ffdab9", peru: "#cd853f", pink: "#ffc0cb",
+  plum: "#dda0dd", powderblue: "#b0e0e6", purple: "#800080",
+  rebeccapurple: "#663399", red: "#ff0000", rosybrown: "#bc8f8f",
+  royalblue: "#4169e1", saddlebrown: "#8b4513", salmon: "#fa8072",
+  sandybrown: "#f4a460", seagreen: "#2e8b57", seashell: "#fff5ee",
+  sienna: "#a0522d", silver: "#c0c0c0", skyblue: "#87ceeb",
+  slateblue: "#6a5acd", slategray: "#708090", slategrey: "#708090",
+  snow: "#fffafa", springgreen: "#00ff7f", steelblue: "#4682b4",
+  tan: "#d2b48c", teal: "#008080", thistle: "#d8bfd8", tomato: "#ff6347",
+  turquoise: "#40e0d0", violet: "#ee82ee", wheat: "#f5deb3", white: "#ffffff",
+  whitesmoke: "#f5f5f5", yellow: "#ffff00", yellowgreen: "#9acd32",
+};
+
+// Reverse table, built once. Where two names share a hex (gray/grey, aqua/cyan)
+// the first spelling in the table above wins, so the answer is stable.
+const CSS_HEX_TO_NAME = (() => {
+  const out = {};
+  Object.keys(CSS_NAMED_COLORS).forEach((name) => {
+    const hex = CSS_NAMED_COLORS[name];
+    if (!(hex in out)) out[hex] = name;
+  });
+  return out;
+})();
+
+function clamp(n, lo, hi) {
+  return n < lo ? lo : n > hi ? hi : n;
+}
+function clamp255(n) {
+  return clamp(Math.round(n), 0, 255);
+}
+
+// Trims a float for display: 33.333 -> "33.33", 50 -> "50", 49.9999 -> "50".
+function trimNum(n, places) {
+  const p = places === undefined ? 2 : places;
+  return String(parseFloat(n.toFixed(p)));
+}
+
+/* ---------- hex ---------- */
+
+// #RGB, #RGBA, #RRGGBB and #RRGGBBAA, with or without the leading '#'.
+// Returns {r,g,b,a} with a in 0..1, or null.
+function parseHexColor(input) {
+  const s = String(input).trim().replace(/^#/, "");
+  if (!/^[0-9a-fA-F]+$/.test(s)) return null;
+  let hex = s;
+  if (s.length === 3 || s.length === 4) {
+    hex = s.split("").map((c) => c + c).join("");
+  } else if (s.length !== 6 && s.length !== 8) {
+    return null;
+  }
+  const num = (i) => parseInt(hex.slice(i, i + 2), 16);
+  return {
+    r: num(0),
+    g: num(2),
+    b: num(4),
+    a: hex.length === 8 ? num(6) / 255 : 1,
+  };
+}
+
+// Alpha is only emitted when it is not fully opaque, so the common case stays
+// the six-digit hex everyone pastes into a stylesheet.
+function rgbToHex(rgb) {
+  const two = (n) => clamp255(n).toString(16).padStart(2, "0");
+  let out = "#" + two(rgb.r) + two(rgb.g) + two(rgb.b);
+  const a = rgb.a === undefined ? 1 : rgb.a;
+  if (a < 1) out += clamp(Math.round(a * 255), 0, 255).toString(16).padStart(2, "0");
+  return out;
+}
+
+/* ---------- HSL / HSV ---------- */
+
+// h in 0..360, s and l in 0..100.
+function rgbToHsl(rgb) {
+  const r = rgb.r / 255, g = rgb.g / 255, b = rgb.b / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const d = max - min;
+  const l = (max + min) / 2;
+  let h = 0, s = 0;
+  if (d !== 0) {
+    s = d / (1 - Math.abs(2 * l - 1));
+    if (max === r) h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+  return { h, s: s * 100, l: l * 100 };
+}
+
+function hslToRgb(hsl) {
+  const h = ((hsl.h % 360) + 360) % 360;
+  const s = clamp(hsl.s, 0, 100) / 100;
+  const l = clamp(hsl.l, 0, 100) / 100;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+  let rgb;
+  if (h < 60) rgb = [c, x, 0];
+  else if (h < 120) rgb = [x, c, 0];
+  else if (h < 180) rgb = [0, c, x];
+  else if (h < 240) rgb = [0, x, c];
+  else if (h < 300) rgb = [x, 0, c];
+  else rgb = [c, 0, x];
+  return {
+    r: clamp255((rgb[0] + m) * 255),
+    g: clamp255((rgb[1] + m) * 255),
+    b: clamp255((rgb[2] + m) * 255),
+  };
+}
+
+// h in 0..360, s and v in 0..100. HSV is not a CSS colour space; it is here
+// because it is what every colour picker's square-and-slider actually is.
+function rgbToHsv(rgb) {
+  const r = rgb.r / 255, g = rgb.g / 255, b = rgb.b / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const d = max - min;
+  let h = 0;
+  if (d !== 0) {
+    if (max === r) h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+  return { h, s: (max === 0 ? 0 : d / max) * 100, v: max * 100 };
+}
+
+function hsvToRgb(hsv) {
+  const h = ((hsv.h % 360) + 360) % 360;
+  const s = clamp(hsv.s, 0, 100) / 100;
+  const v = clamp(hsv.v, 0, 100) / 100;
+  const c = v * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = v - c;
+  let rgb;
+  if (h < 60) rgb = [c, x, 0];
+  else if (h < 120) rgb = [x, c, 0];
+  else if (h < 180) rgb = [0, c, x];
+  else if (h < 240) rgb = [0, x, c];
+  else if (h < 300) rgb = [x, 0, c];
+  else rgb = [c, 0, x];
+  return {
+    r: clamp255((rgb[0] + m) * 255),
+    g: clamp255((rgb[1] + m) * 255),
+    b: clamp255((rgb[2] + m) * 255),
+  };
+}
+
+/* ---------- named colours, both directions ---------- */
+
+function namedColorToRgb(name) {
+  const hex = CSS_NAMED_COLORS[String(name).trim().toLowerCase()];
+  return hex ? parseHexColor(hex) : null;
+}
+
+// Exact matches only — "close to tomato" is not a fact worth printing.
+function rgbToNamedColor(rgb) {
+  const a = rgb.a === undefined ? 1 : rgb.a;
+  if (a < 1) return null;
+  return CSS_HEX_TO_NAME[rgbToHex({ r: rgb.r, g: rgb.g, b: rgb.b })] || null;
+}
+
+/* ---------- the one entry point ---------- */
+
+// Number or percentage, scaled to `full` (255 for rgb channels, 1 for alpha).
+function colorComponent(token, full) {
+  const t = token.trim();
+  if (t === "") return null;
+  const pct = t.endsWith("%");
+  const n = parseFloat(pct ? t.slice(0, -1) : t);
+  if (!isFinite(n)) return null;
+  return pct ? (n / 100) * full : n;
+}
+
+// Splits "10 20 30 / .5" or "10, 20, 30, .5" into up to four raw tokens.
+function splitColorArgs(body) {
+  const slash = body.split("/");
+  const head = slash[0].trim().replace(/,/g, " ").split(/\s+/).filter(Boolean);
+  if (slash.length > 1) head.push(slash[1].trim());
+  return head;
+}
+
+/* Accepts every notation the two pages offer, in any of the forms a developer
+   is likely to paste: hex (3/4/6/8 digits, '#' optional), rgb()/rgba(),
+   hsl()/hsla(), hsv()/hsb() and a CSS colour name. Legacy comma syntax and
+   Level 4 space syntax both parse. Returns {ok, r, g, b, a, format} or
+   {ok:false, error}. */
+function parseColor(input) {
+  const raw = String(input == null ? "" : input).trim();
+  if (!raw) return { ok: false, error: "Enter a color value." };
+
+  const named = namedColorToRgb(raw);
+  if (named) return { ok: true, r: named.r, g: named.g, b: named.b, a: 1, format: "name" };
+
+  const fn = /^([a-zA-Z]+)\s*\(([^)]*)\)$/.exec(raw);
+  if (fn) {
+    const name = fn[1].toLowerCase();
+    const args = splitColorArgs(fn[2]);
+    if (args.length < 3) return { ok: false, error: name + "() needs three values." };
+    const alpha = args.length > 3 ? colorComponent(args[3], 1) : 1;
+    if (alpha === null) return { ok: false, error: "Alpha is not a number." };
+    const a = clamp(alpha, 0, 1);
+
+    if (name === "rgb" || name === "rgba") {
+      const c = args.slice(0, 3).map((t) => colorComponent(t, 255));
+      if (c.some((v) => v === null)) return { ok: false, error: "rgb() needs three numbers." };
+      return { ok: true, r: clamp255(c[0]), g: clamp255(c[1]), b: clamp255(c[2]), a, format: "rgb" };
+    }
+    if (name === "hsl" || name === "hsla" || name === "hsv" || name === "hsb" ||
+        name === "hsva" || name === "hsba") {
+      const h = parseFloat(args[0].replace(/deg$/i, ""));
+      const s = colorComponent(args[1], 100);
+      const third = colorComponent(args[2], 100);
+      if (!isFinite(h) || s === null || third === null) {
+        return { ok: false, error: name + "() needs a hue and two percentages." };
+      }
+      const rgb = name.startsWith("hsl")
+        ? hslToRgb({ h, s, l: third })
+        : hsvToRgb({ h, s, v: third });
+      return { ok: true, r: rgb.r, g: rgb.g, b: rgb.b, a, format: name.slice(0, 3) };
+    }
+    return { ok: false, error: "Unknown color function " + name + "()." };
+  }
+
+  const hex = parseHexColor(raw);
+  if (hex) return { ok: true, r: hex.r, g: hex.g, b: hex.b, a: hex.a, format: "hex" };
+
+  return { ok: false, error: "Not a color: try #3ce688, rgb(60 230 136), hsl(147 77% 57%) or a CSS name." };
+}
+
+/* ---------- formatting ---------- */
+
+function formatHex(c) {
+  return rgbToHex(c);
+}
+function formatRgb(c) {
+  const a = c.a === undefined ? 1 : c.a;
+  const body = [clamp255(c.r), clamp255(c.g), clamp255(c.b)].join(", ");
+  return a < 1 ? "rgba(" + body + ", " + trimNum(a, 3) + ")" : "rgb(" + body + ")";
+}
+function formatHsl(c) {
+  const hsl = rgbToHsl(c);
+  const a = c.a === undefined ? 1 : c.a;
+  const body = trimNum(hsl.h, 0) + ", " + trimNum(hsl.s, 1) + "%, " + trimNum(hsl.l, 1) + "%";
+  return a < 1 ? "hsla(" + body + ", " + trimNum(a, 3) + ")" : "hsl(" + body + ")";
+}
+function formatHsv(c) {
+  const hsv = rgbToHsv(c);
+  const a = c.a === undefined ? 1 : c.a;
+  const body = trimNum(hsv.h, 0) + ", " + trimNum(hsv.s, 1) + "%, " + trimNum(hsv.v, 1) + "%";
+  return a < 1 ? "hsva(" + body + ", " + trimNum(a, 3) + ")" : "hsv(" + body + ")";
+}
+
+/* ---------- WCAG contrast ---------- */
+
+/* WCAG 2.1, "relative luminance":
+     if C <= 0.03928 then C/12.92 else ((C + 0.055) / 1.055) ^ 2.4
+     L = 0.2126 R + 0.7152 G + 0.0722 B
+   (WCAG 2.2 restates the threshold as 0.04045, matching IEC 61966-2-1. Both
+   land on the same branch for every 8-bit channel value, so the two spellings
+   cannot disagree here.) */
+function channelLuminance(value) {
+  const c = clamp(value, 0, 255) / 255;
+  return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+
+function relativeLuminance(rgb) {
+  return (
+    0.2126 * channelLuminance(rgb.r) +
+    0.7152 * channelLuminance(rgb.g) +
+    0.0722 * channelLuminance(rgb.b)
+  );
+}
+
+/* WCAG 2.1, "contrast ratio": (L1 + 0.05) / (L2 + 0.05), lighter over darker,
+   so the result is always >= 1 and order of arguments does not matter. */
+function contrastRatio(rgbA, rgbB) {
+  const l1 = relativeLuminance(rgbA);
+  const l2 = relativeLuminance(rgbB);
+  const hi = Math.max(l1, l2), lo = Math.min(l1, l2);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/* Composites a translucent colour over an opaque backdrop. A ratio is only
+   defined for what the eye actually receives, so an alpha-carrying foreground
+   has to be flattened before it is measured. */
+function flattenOver(fg, bg) {
+  const a = fg.a === undefined ? 1 : clamp(fg.a, 0, 1);
+  return {
+    r: clamp255(fg.r * a + bg.r * (1 - a)),
+    g: clamp255(fg.g * a + bg.g * (1 - a)),
+    b: clamp255(fg.b * a + bg.b * (1 - a)),
+    a: 1,
+  };
+}
+
+/* The thresholds, from WCAG 2.1 SC 1.4.3 (Contrast (Minimum), AA), 1.4.6
+   (Contrast (Enhanced), AAA) and 1.4.11 (Non-text Contrast, AA). "Large" is
+   at least 18pt, or 14pt bold — roughly 24px and 18.66px bold on the web.
+   There is no AAA requirement for non-text contrast, hence the null. */
+const WCAG_THRESHOLDS = [
+  { key: "normalAA",  label: "Normal text",    level: "AA",  min: 4.5 },
+  { key: "normalAAA", label: "Normal text",    level: "AAA", min: 7 },
+  { key: "largeAA",   label: "Large text",     level: "AA",  min: 3 },
+  { key: "largeAAA",  label: "Large text",     level: "AAA", min: 4.5 },
+  { key: "uiAA",      label: "UI components",  level: "AA",  min: 3 },
+];
+
+// Ratios are reported to two decimals, and the pass test uses that rounded
+// figure: 4.4996 renders as "4.50", and a badge that reads 4.50 next to a FAIL
+// is a bug report waiting to happen.
+function roundRatio(ratio) {
+  return Math.round(ratio * 100) / 100;
+}
+
+function wcagResults(ratio) {
+  const r = roundRatio(ratio);
+  return WCAG_THRESHOLDS.map((t) => ({
+    key: t.key,
+    label: t.label,
+    level: t.level,
+    min: t.min,
+    pass: r >= t.min,
+  }));
+}
+
+/* ---------- OKLCH, used only to walk lightness ---------- */
+
+/* Oklab, from Björn Ottosson's derivation (the matrices CSS Color Level 4 §9.2
+   adopts verbatim). It is here for one reason: nudging a colour's lightness in
+   sRGB or HSL visibly shifts its hue, and Oklab's L axis is perceptually
+   uniform, so the nudged colour still reads as the same colour. There is no
+   OKLCH input row on either page — this is machinery, not a feature. */
+function srgbToLinear(c) {
+  const v = clamp(c, 0, 255) / 255;
+  return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+}
+function linearToSrgb(v) {
+  const c = v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
+  return c * 255;
+}
+
+function rgbToOklch(rgb) {
+  const r = srgbToLinear(rgb.r), g = srgbToLinear(rgb.g), b = srgbToLinear(rgb.b);
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+  const L = 0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s;
+  const A = 1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s;
+  const B = 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s;
+  let h = (Math.atan2(B, A) * 180) / Math.PI;
+  if (h < 0) h += 360;
+  return { l: L, c: Math.sqrt(A * A + B * B), h };
+}
+
+// Out-of-gamut results are clamped per channel, which is why every caller
+// re-measures the colour it gets back instead of trusting the requested L.
+function oklchToRgb(oklch) {
+  const A = oklch.c * Math.cos((oklch.h * Math.PI) / 180);
+  const B = oklch.c * Math.sin((oklch.h * Math.PI) / 180);
+  const l = Math.pow(oklch.l + 0.3963377774 * A + 0.2158037573 * B, 3);
+  const m = Math.pow(oklch.l - 0.1055613458 * A - 0.0638541728 * B, 3);
+  const s = Math.pow(oklch.l - 0.0894841775 * A - 1.2914855480 * B, 3);
+  return {
+    r: clamp255(linearToSrgb(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s)),
+    g: clamp255(linearToSrgb(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s)),
+    b: clamp255(linearToSrgb(-0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s)),
+  };
+}
+
+/* Walks the foreground's OKLCH lightness — chroma and hue held — until the pair
+   clears `target`, and returns whichever direction moved least. Both colours
+   must already be opaque; the caller flattens alpha first. Every candidate is
+   round-tripped back through sRGB and re-measured, so the ratio reported is the
+   ratio of the hex reported, gamut clamping included. Returns {ok:false, best}
+   when the target is unreachable in either direction, which is the honest
+   answer for e.g. 7:1 against a mid-grey background. */
+function nudgeLightnessToPass(fg, bg, target) {
+  const flatBg = { r: bg.r, g: bg.g, b: bg.b };
+  const start = rgbToOklch(fg);
+  const STEP = 0.002;
+  let bestRatio = roundRatio(contrastRatio(fg, flatBg));
+
+  function walk(sign) {
+    for (let i = 1; i <= 500; i++) {
+      const l = start.l + sign * i * STEP;
+      if (l < 0 || l > 1) break;
+      const rgb = oklchToRgb({ l, c: start.c, h: start.h });
+      const ratio = roundRatio(contrastRatio(rgb, flatBg));
+      if (ratio > bestRatio) bestRatio = ratio;
+      if (ratio >= target) return { rgb, ratio, delta: i * STEP, l };
+    }
+    return null;
+  }
+
+  const up = walk(1);
+  const down = walk(-1);
+  const pick = !up ? down : !down ? up : up.delta <= down.delta ? up : down;
+  if (!pick) {
+    return {
+      ok: false,
+      error: "No lightness of this color reaches " + target + ":1 on that background.",
+      best: bestRatio,
+    };
+  }
+  return {
+    ok: true,
+    rgb: pick.rgb,
+    hex: rgbToHex(pick.rgb),
+    ratio: pick.ratio,
+    lightness: pick.l,
+    direction: pick === up ? "lighter" : "darker",
+  };
+}
+
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     escapeHtml,
@@ -1204,6 +1665,29 @@ if (typeof module !== "undefined" && module.exports) {
     formatCronRun,
     cronTimeZoneList,
     localTimeZone,
+    CSS_NAMED_COLORS,
+    parseHexColor,
+    rgbToHex,
+    rgbToHsl,
+    hslToRgb,
+    rgbToHsv,
+    hsvToRgb,
+    namedColorToRgb,
+    rgbToNamedColor,
+    parseColor,
+    formatHex,
+    formatRgb,
+    formatHsl,
+    formatHsv,
+    relativeLuminance,
+    contrastRatio,
+    flattenOver,
+    roundRatio,
+    wcagResults,
+    WCAG_THRESHOLDS,
+    rgbToOklch,
+    oklchToRgb,
+    nudgeLightnessToPass,
   };
 }
 
@@ -1329,7 +1813,7 @@ if (typeof document !== "undefined") {
 
     /* ---- homepage instant tool switch ----
        The toolbar's links are real navigation on every page. The homepage is
-       the one page that mounts all twelve panels, so there a plain left-click
+       the one page that mounts all fourteen panels, so there a plain left-click
        swaps the panel in place and pushes the tool's clean URL instead. Both
        the rail and the sheet are wired, so the two routes to a tool behave
        identically. This is no longer a tablist: the roving tabindex that came
@@ -1352,6 +1836,8 @@ if (typeof document !== "undefined") {
         "/json-csv-converter": "panel-csv",
         "/html-entity-encoder": "panel-entity",
         "/cron-expression-parser": "panel-cron",
+        "/color-converter": "panel-color",
+        "/contrast-checker": "panel-contrast",
       };
       const DEFAULT_HREF = "/json-formatter";
 
@@ -2217,6 +2703,231 @@ if (typeof document !== "undefined") {
       document.getElementById("entity-copy").addEventListener("click", () => {
         copyText(output.textContent || "", copyFlash);
       });
+    })();
+
+    /* ---- colour converter tool ---- */
+    (function colorConverterTool() {
+      const any = document.getElementById("color-any");
+      if (!any) return;
+      const picker = document.getElementById("color-picker");
+      const alpha = document.getElementById("color-alpha");
+      const alphaOut = document.getElementById("color-alpha-value");
+      const swatch = document.getElementById("color-swatch");
+      const nameOut = document.getElementById("color-name");
+      const errorEl = document.getElementById("color-error");
+      const copyFlash = document.getElementById("color-copy-flash");
+
+      const FIELDS = {
+        hex: { el: document.getElementById("color-hex"), format: formatHex },
+        rgb: { el: document.getElementById("color-rgb"), format: formatRgb },
+        hsl: { el: document.getElementById("color-hsl"), format: formatHsl },
+        hsv: { el: document.getElementById("color-hsv"), format: formatHsv },
+      };
+
+      let current = { r: 60, g: 230, b: 136, a: 1 };
+
+      // `except` is the field the visitor is typing in: rewriting it under the
+      // cursor would fight the caret and normalise half-typed values away.
+      function render(except) {
+        Object.keys(FIELDS).forEach((key) => {
+          const f = FIELDS[key];
+          if (!f.el || key === except) return;
+          f.el.value = f.format(current);
+        });
+        const opaque = { r: current.r, g: current.g, b: current.b };
+        // The swatch is painted with the alpha so the checkerboard behind it
+        // shows through; the picker cannot express alpha, so it gets the
+        // opaque colour.
+        swatch.style.backgroundColor = formatRgb(current);
+        if (picker) picker.value = rgbToHex(opaque);
+        if (alpha && except !== "alpha") alpha.value = String(Math.round(current.a * 100));
+        if (alphaOut) alphaOut.textContent = Math.round(current.a * 100) + "%";
+        if (nameOut) {
+          const name = rgbToNamedColor(current);
+          nameOut.innerHTML = name
+            ? "CSS name: <b>" + escapeHtml(name) + "</b>"
+            : "No exact CSS color name";
+        }
+      }
+
+      function apply(text, except) {
+        const parsed = parseColor(text);
+        if (!parsed.ok) {
+          showError(errorEl, parsed.error);
+          return false;
+        }
+        hideError(errorEl);
+        current = { r: parsed.r, g: parsed.g, b: parsed.b, a: parsed.a };
+        render(except);
+        return true;
+      }
+
+      Object.keys(FIELDS).forEach((key) => {
+        const el = FIELDS[key].el;
+        if (!el) return;
+        el.addEventListener("input", () => {
+          if (apply(el.value, key) && any !== el) any.value = el.value;
+        });
+        // Leaving the field is the moment to normalise it: "f00" becomes
+        // "#ff0000" only once the visitor has stopped typing it.
+        el.addEventListener("blur", () => render());
+      });
+
+      any.addEventListener("input", () => apply(any.value, "any"));
+      any.addEventListener("blur", () => {
+        if (parseColor(any.value).ok) any.value = formatHex(current);
+      });
+
+      if (picker) {
+        picker.addEventListener("input", () => {
+          const rgb = parseHexColor(picker.value);
+          if (!rgb) return;
+          current = { r: rgb.r, g: rgb.g, b: rgb.b, a: current.a };
+          hideError(errorEl);
+          any.value = formatHex(current);
+          render();
+        });
+      }
+      if (alpha) {
+        alpha.addEventListener("input", () => {
+          current.a = clamp(parseInt(alpha.value, 10) / 100, 0, 1);
+          any.value = formatHex(current);
+          render("alpha");
+        });
+      }
+
+      document.querySelectorAll("[data-color-copy]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const target = document.getElementById(btn.getAttribute("data-color-copy"));
+          if (target) copyText(target.value || "", copyFlash);
+        });
+      });
+
+      apply(any.value || "#3ce688", "any");
+    })();
+
+    /* ---- WCAG contrast checker tool ---- */
+    (function contrastCheckerTool() {
+      const fgField = document.getElementById("cc-fg");
+      if (!fgField) return;
+      const bgField = document.getElementById("cc-bg");
+      const fgPicker = document.getElementById("cc-fg-picker");
+      const bgPicker = document.getElementById("cc-bg-picker");
+      const swapBtn = document.getElementById("cc-swap");
+      const nudgeBtn = document.getElementById("cc-nudge");
+      const targetSel = document.getElementById("cc-target");
+      const preview = document.getElementById("cc-preview");
+      const ratioEl = document.getElementById("cc-ratio");
+      const noteEl = document.getElementById("cc-note");
+      const listEl = document.getElementById("cc-list");
+      const errorEl = document.getElementById("cc-error");
+      const okEl = document.getElementById("cc-nudged");
+
+      // A background that is itself translucent has no defined ground, so the
+      // page picks one and says so rather than quietly measuring nonsense.
+      const PAGE_WHITE = { r: 255, g: 255, b: 255 };
+
+      function pair() {
+        const fg = parseColor(fgField.value);
+        const bg = parseColor(bgField.value);
+        if (!fg.ok) return { ok: false, error: "Text colour: " + fg.error };
+        if (!bg.ok) return { ok: false, error: "Background colour: " + bg.error };
+        const flatBg = flattenOver(bg, PAGE_WHITE);
+        return { ok: true, fg: flattenOver(fg, flatBg), bg: flatBg, fgAlpha: fg.a, bgAlpha: bg.a };
+      }
+
+      function render() {
+        const p = pair();
+        if (!p.ok) {
+          showError(errorEl, p.error);
+          return;
+        }
+        hideError(errorEl);
+        const ratio = roundRatio(contrastRatio(p.fg, p.bg));
+        ratioEl.textContent = ratio.toFixed(2);
+        preview.style.backgroundColor = rgbToHex(p.bg);
+        preview.style.color = rgbToHex(p.fg);
+        if (fgPicker) fgPicker.value = rgbToHex({ r: p.fg.r, g: p.fg.g, b: p.fg.b });
+        if (bgPicker) bgPicker.value = rgbToHex(p.bg);
+
+        const notes = [];
+        if (p.fgAlpha < 1) notes.push("the text colour was composited onto the background at " + Math.round(p.fgAlpha * 100) + "% opacity first");
+        if (p.bgAlpha < 1) notes.push("the translucent background was composited onto white first");
+        noteEl.textContent = notes.length
+          ? "Measured as " + rgbToHex(p.fg) + " on " + rgbToHex(p.bg) + " — " + notes.join(", ") + "."
+          : "WCAG 2.1 relative luminance, (L1 + 0.05) / (L2 + 0.05).";
+
+        listEl.innerHTML = "";
+        wcagResults(ratio).forEach((r) => {
+          const li = document.createElement("li");
+          li.className = "wcag-item";
+          const what = document.createElement("span");
+          what.className = "wcag-what";
+          const title = document.createElement("span");
+          title.textContent = r.label + " · " + r.level;
+          const min = document.createElement("span");
+          min.className = "wcag-min";
+          min.textContent = "needs " + r.min + ":1";
+          what.appendChild(title);
+          what.appendChild(min);
+          const verdict = document.createElement("span");
+          verdict.className = "verdict " + (r.pass ? "pass" : "fail");
+          verdict.textContent = r.pass ? "PASS" : "FAIL";
+          li.appendChild(what);
+          li.appendChild(verdict);
+          listEl.appendChild(li);
+        });
+      }
+
+      function syncFromPicker(picker, field) {
+        if (!picker) return;
+        picker.addEventListener("input", () => {
+          field.value = picker.value;
+          okEl.classList.remove("show");
+          render();
+        });
+      }
+
+      [fgField, bgField].forEach((f) => {
+        f.addEventListener("input", () => {
+          okEl.classList.remove("show");
+          render();
+        });
+      });
+      syncFromPicker(fgPicker, fgField);
+      syncFromPicker(bgPicker, bgField);
+
+      if (swapBtn) {
+        swapBtn.addEventListener("click", () => {
+          const t = fgField.value;
+          fgField.value = bgField.value;
+          bgField.value = t;
+          okEl.classList.remove("show");
+          render();
+        });
+      }
+
+      if (nudgeBtn) {
+        nudgeBtn.addEventListener("click", () => {
+          const p = pair();
+          if (!p.ok) return;
+          const target = parseFloat(targetSel ? targetSel.value : "4.5");
+          const moved = nudgeLightnessToPass(p.fg, p.bg, target);
+          if (!moved.ok) {
+            okEl.classList.remove("show");
+            showError(errorEl, moved.error + " The best it reaches is " + moved.best.toFixed(2) + ":1 — change the background instead.");
+            return;
+          }
+          fgField.value = moved.hex;
+          render();
+          okEl.textContent =
+            "Walked the text color " + moved.direction + " in OKLCH — same hue, same chroma — to " +
+            moved.hex + ", which measures " + moved.ratio.toFixed(2) + ":1.";
+          okEl.classList.add("show");
+        });
+      }
+
+      render();
     })();
   })();
 }

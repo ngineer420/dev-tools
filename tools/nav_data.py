@@ -5,13 +5,15 @@ copies verbatim. Nothing here is computed at runtime by the browser: sync_nav
 renders it into the static HTML of every page.
 
 Tier rule (portfolio spec, ngineer420.github.io#13): a page is tier 1 only if it
-answers a *different question*. All twelve of these do — there is no preset
+answers a *different question*. All fourteen of these do — there is no preset
 family on this site, so no tier 2, no hub row and no in-panel sibling chips.
+Colour conversion and WCAG contrast are two of those different questions, not
+one: a single page straddling both would rank for neither.
 
 hrefs are the extensionless clean paths the canonicals already use.
 """
 
-# Noun used in the menu trigger: "All 12 tools".
+# Noun used in the menu trigger: "All 14 tools".
 NOUN = "tools"
 
 # Tier-1 tools. The first eight are the rail, in the order the old tab strip
@@ -34,23 +36,26 @@ TOOLS = [
     {"href": "/json-csv-converter",       "label": "JSON ⇄ CSV", "long": "JSON ⇄ CSV Converter", "group": "format", "tier": 1},
     {"href": "/html-entity-encoder",      "label": "Entities",  "long": "HTML Entity Encoder",       "group": "encode", "tier": 1},
     {"href": "/cron-expression-parser",   "label": "Cron",      "long": "Cron Expression Explainer", "group": "inspect", "tier": 1},
+    {"href": "/color-converter",          "label": "Color",     "long": "Color Converter",           "group": "color", "tier": 1},
+    {"href": "/contrast-checker",         "label": "Contrast",  "long": "WCAG Contrast Checker",     "group": "color", "tier": 1},
 ]
 
-# Sheet groups, in order. Three destinations each. Named from the visitor's
-# vocabulary, not the implementation's. No category hub pages on this site, so
-# the labels are plain text (a third element would make them links).
+# Sheet groups, in order. Named from the visitor's vocabulary, not the
+# implementation's. No category hub pages on this site, so the labels are plain
+# text (a third element would make them links).
 GROUPS = [
     ("format",   "Format & validate"),
     ("encode",   "Encode & decode"),
     ("generate", "Generate"),
     ("inspect",  "Inspect"),
+    ("color",    "Color"),
 ]
 
 # No preset family on this site: every tool answers a different question.
 HUBS = []
 
 # The footer carries Home/Privacy/Terms and never carried a tool list. The rail
-# plus the sheet carry all twelve destinations on every page, so adding one now
+# plus the sheet carry all fourteen destinations on every page, so adding one now
 # would be boilerplate without a new crawl surface.
 FOOTER = []
 

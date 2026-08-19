@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WCAG Contrast Checker — AA &amp; AAA Ratio Test — devboxkit.com</title>
+<meta name="description" content="Free WCAG contrast checker. Enter a text and background color for the exact contrast ratio, with pass/fail for AA and AAA at normal text, large text and UI components — plus a button that nudges lightness until it passes.">
+<link rel="canonical" href="https://devboxkit.com/contrast-checker">
+<meta name="theme-color" content="#090c11">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="WCAG Contrast Checker — AA &amp; AAA Ratio Test">
+<meta property="og:description" content="The exact WCAG 2.1 contrast ratio for any pair of colors, with AA/AAA pass-fail for normal text, large text and UI components.">
+<meta property="og:url" content="https://devboxkit.com/contrast-checker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="WCAG Contrast Checker — AA &amp; AAA Ratio Test">
+<meta name="twitter:description" content="The exact WCAG 2.1 contrast ratio for any pair of colors, with AA/AAA pass-fail for normal text, large text and UI components.">
+
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "WCAG Contrast Checker — DevBox Kit",
+  "url": "https://devboxkit.com/contrast-checker",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "Free browser-based WCAG 2.1 contrast checker: exact contrast ratio with AA and AAA pass/fail for normal text, large text and UI components."
+}
+</script>
+
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7560786263587509" crossorigin="anonymous"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+      <span class="brand-tag">JSON, hashes, JWTs, passwords &amp; more — one page</span>
+    </a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="icon-btn" type="button" aria-label="Toggle dark/light theme" title="Toggle theme">◐</button>
+    </div>
+  </div>
+</header>
+
+<!-- nav:start -->
+<nav class="toolbar" aria-label="Tools">
+  <details class="tb-menu">
+    <summary class="tb-trigger" aria-label="All 14 tools">
+      <span class="tb-glyph" aria-hidden="true">&#9636;</span>
+      <span class="tb-label">All 14<span class="tb-label-long"> tools</span></span>
+    </summary>
+    <div class="tb-sheet">
+      <div class="tb-sheet-cols">
+        <p class="tb-grouplabel" id="tb-g1">Format &amp; validate</p>
+        <ul aria-labelledby="tb-g1">
+          <li><a href="/json-formatter">JSON Formatter</a></li>
+          <li><a href="/regex-tester">Regex Tester</a></li>
+          <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g2">Encode &amp; decode</p>
+        <ul aria-labelledby="tb-g2">
+          <li><a href="/base64-encode-decode">Base64 Encode/Decode</a></li>
+          <li><a href="/url-encoder-decoder">URL Encode/Decode</a></li>
+          <li><a href="/html-entity-encoder">HTML Entity Encoder</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g3">Generate</p>
+        <ul aria-labelledby="tb-g3">
+          <li><a href="/uuid-generator">UUID Generator</a></li>
+          <li><a href="/hash-generator">Hash Generator</a></li>
+          <li><a href="/password-generator">Password Generator</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g4">Inspect</p>
+        <ul aria-labelledby="tb-g4">
+          <li><a href="/unix-timestamp-converter">Timestamp Converter</a></li>
+          <li><a href="/jwt-decoder">JWT Decoder</a></li>
+          <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g5">Color</p>
+        <ul aria-labelledby="tb-g5">
+          <li><a href="/color-converter">Color Converter</a></li>
+          <li><a href="/contrast-checker" aria-current="page">WCAG Contrast Checker</a></li>
+        </ul>
+      </div>
+    </div>
+  </details>
+  <div class="tb-scrim"></div>
+  <ul class="tb-rail">
+    <li><a href="/json-formatter">JSON</a></li>
+    <li><a href="/base64-encode-decode">Base64</a></li>
+    <li><a href="/url-encoder-decoder">URL</a></li>
+    <li><a href="/unix-timestamp-converter">Timestamp</a></li>
+    <li><a href="/regex-tester">Regex</a></li>
+    <li><a href="/uuid-generator">UUID</a></li>
+    <li><a href="/hash-generator">Hash</a></li>
+    <li><a href="/jwt-decoder">JWT</a></li>
+  </ul>
+</nav>
+<!-- nav:end -->
+
+<main id="main">
+  <div class="hero">
+    <h1>WCAG Contrast Checker</h1>
+    <p>The exact contrast ratio for any two colors, with AA and AAA pass/fail for normal text, large text and UI components.</p>
+    <p class="trust-line">Runs 100% in your browser<span class="dot">•</span>Nothing is uploaded to a server<span class="dot">•</span>Free forever</p>
+  </div>
+
+  <!-- ===================== CONTRAST CHECKER ===================== -->
+  <section aria-label="WCAG contrast checker tool">
+    <div class="tool-grid split">
+      <div class="controls-col">
+        <div class="panel">
+          <h2>Text color</h2>
+          <div class="field-row picker-row" style="margin-top:0;">
+            <input type="color" id="cc-fg-picker" value="#767676" aria-label="Pick a text color">
+            <input type="text" id="cc-fg" class="code-area" spellcheck="false" autocapitalize="off" autocorrect="off" value="#767676" aria-label="Text color">
+          </div>
+
+          <h2 style="margin-top:20px;">Background color</h2>
+          <div class="field-row picker-row" style="margin-top:0;">
+            <input type="color" id="cc-bg-picker" value="#ffffff" aria-label="Pick a background color">
+            <input type="text" id="cc-bg" class="code-area" spellcheck="false" autocapitalize="off" autocorrect="off" value="#ffffff" aria-label="Background color">
+          </div>
+
+          <div class="field" style="margin-top:20px;">
+            <label for="cc-target">Nudge the text color until it clears</label>
+            <select id="cc-target">
+              <option value="4.5" selected>4.5:1 — AA, normal text</option>
+              <option value="7">7:1 — AAA, normal text</option>
+              <option value="3">3:1 — AA, large text and UI components</option>
+            </select>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="cc-nudge" class="primary">Nudge lightness until it passes</button>
+            <button type="button" id="cc-swap">Swap</button>
+          </div>
+          <div class="error-banner" id="cc-error" role="alert"></div>
+          <div class="success-banner" id="cc-nudged" role="status"></div>
+        </div>
+      </div>
+
+      <div class="output-col">
+        <div class="panel">
+          <h2>Result</h2>
+          <div class="contrast-preview" id="cc-preview">
+            <p class="cc-normal">Normal text at 16px — the size most body copy actually is.</p>
+            <p class="cc-large">Large text at 24px</p>
+            <p class="cc-large-bold">Large text at 18.66px bold</p>
+            <span class="cc-ui">UI component border</span>
+          </div>
+          <p class="ratio-line"><span class="ratio-value" id="cc-ratio">—</span><span class="ratio-suffix">:1</span></p>
+          <p class="ratio-note" id="cc-note"></p>
+          <ul class="wcag-list" id="cc-list"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container-narrow" style="padding-top:40px;">
+    <h2 style="margin-top:0;">How the contrast ratio is calculated</h2>
+    <p>WCAG 2.1 defines contrast as <code>(L1 + 0.05) / (L2 + 0.05)</code>, where <code>L1</code> is the relative luminance of the lighter color and <code>L2</code> that of the darker one. Relative luminance is not the average of the channels: each of R, G and B is divided by 255, linearised (<code>c / 12.92</code> below the 0.03928 knee, <code>((c + 0.055) / 1.055) ^ 2.4</code> above it), then weighted <code>0.2126 R + 0.7152 G + 0.0722 B</code> — green carries most of the luminance because the eye is most sensitive to it. Black comes out at 0, white at 1, and the two together give the maximum possible ratio of 21:1.</p>
+
+    <h2>AA vs AAA, and what counts as large text</h2>
+    <p>There are only three numbers to remember, and each one appears twice:</p>
+    <ul>
+      <li><strong>4.5:1</strong> — AA for normal text (SC 1.4.3), and AAA for large text (SC 1.4.6).</li>
+      <li><strong>7:1</strong> — AAA for normal text.</li>
+      <li><strong>3:1</strong> — AA for large text, and AA for user-interface components and graphical objects (SC 1.4.11), which is what a focus ring, an input border or an icon has to clear.</li>
+    </ul>
+    <p><strong>"Large" is a size, not an opinion:</strong> at least 18pt, or 14pt bold — about 24px, or 18.66px bold, on the web. The preview above shows all three sizes at once so you can see which threshold your own type actually falls under.</p>
+    <p><strong>#767676 is the famous one.</strong> It is the darkest neutral grey that still clears 4.5:1 on white, at 4.54:1 — one shade lighter, <code>#777777</code>, drops to 4.48:1 and fails. That is how little headroom a "close enough" grey has.</p>
+
+    <h2>The lightness nudge</h2>
+    <p>When a pair fails, the <strong>Nudge lightness until it passes</strong> button walks the text color's lightness in <a href="https://www.w3.org/TR/css-color-4/#ok-lab">OKLCH</a> — hue and chroma held fixed — in whichever direction reaches the target first, and reports the hex it landed on. OKLCH rather than HSL because OKLCH's lightness axis is perceptually uniform: darkening a blue in HSL visibly shifts it toward purple, while in OKLCH it stays the same blue, only darker. Every candidate is converted back to sRGB and re-measured before it is offered, so the ratio shown is the ratio of the hex shown — gamut clamping included. If no lightness of that hue can reach the target, the page says so instead of handing you a color that fails.</p>
+    <p>A translucent text color is composited onto the background before it is measured, because a ratio is only meaningful for the color the eye actually receives. Everything runs locally in your browser — nothing is uploaded. Need to convert a color rather than check it? The <a href="/color-converter">color converter</a> shares this page's color maths.</p>
+
+    <h2>More developer tools</h2>
+    <ul>
+      <li><a href="/color-converter">Color Converter (HEX / RGB / HSL / HSV)</a></li>
+      <li><a href="/json-formatter">JSON Formatter</a></li>
+      <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
+      <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
+      <li><a href="/unix-timestamp-converter">Unix Timestamp Converter</a></li>
+      <li><a href="/regex-tester">Regex Tester</a></li>
+      <li><a href="/uuid-generator">UUID Generator (v4 / v7)</a></li>
+      <li><a href="/hash-generator">Hash Generator (MD5 / SHA / HMAC)</a></li>
+      <li><a href="/jwt-decoder">JWT Decoder</a></li>
+      <li><a href="/password-generator">Password Generator</a></li>
+      <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+      <li><a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a></li>
+      <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+      <li><a href="/">All tools on one page (home)</a></li>
+    </ul>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/app.js"></script>
+<a href="https://erabb.it" class="erabbit-mark" aria-label="erabb.it"><img src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐇</text></svg>" width="10" height="10" alt=""></a>
+</body>
+</html>
