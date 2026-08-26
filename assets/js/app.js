@@ -2101,6 +2101,64 @@ if (typeof document !== "undefined") {
       };
     }
 
+    /* ---- URL state ----
+       A tool that reads its input from the URL can be sent as a link. Short
+       state goes in the query string. State over URL_QUERY_LIMIT bytes goes
+       in the hash as one lz-string blob, and a secret (a JWT) goes in the
+       hash uncompressed, because the hash never reaches a server log. */
+    const URL_QUERY_LIMIT = 2048;
+
+    function readUrlState() {
+      const state = {};
+      new URLSearchParams(location.search).forEach((v, k) => { state[k] = v; });
+      const hash = location.hash.replace(/^#/, "");
+      if (!hash) return state;
+      const hashParams = new URLSearchParams(hash);
+      const lz = hashParams.get("lz");
+      if (lz && typeof LZString !== "undefined") {
+        try {
+          const packed = JSON.parse(LZString.decompressFromEncodedURIComponent(lz) || "{}");
+          Object.keys(packed).forEach((k) => { state[k] = String(packed[k]); });
+        } catch { /* a damaged hash reads as no state */ }
+        return state;
+      }
+      hashParams.forEach((v, k) => { state[k] = v; });
+      return state;
+    }
+
+    // Write the state with replaceState so the back button is never
+    // flooded. `hashOnly` keeps every key out of the query string.
+    function writeUrlState(state, opts) {
+      const options = opts || {};
+      const params = new URLSearchParams();
+      Object.keys(state).forEach((k) => {
+        if (state[k] !== "" && state[k] !== null && state[k] !== undefined) params.set(k, state[k]);
+      });
+      const serialized = params.toString();
+      let url = location.pathname;
+      if (!serialized) {
+        // nothing to keep
+      } else if (options.hashOnly) {
+        url += "#" + serialized;
+      } else if (serialized.length <= URL_QUERY_LIMIT || typeof LZString === "undefined") {
+        url += "?" + serialized;
+      } else {
+        url += "#lz=" + LZString.compressToEncodedURIComponent(JSON.stringify(state));
+      }
+      try { history.replaceState(history.state, "", url); } catch { /* file: URLs refuse */ }
+    }
+
+    // "Copy link" refreshes the URL first, so the copied link always holds
+    // the current input even when the last keystroke is still debounced.
+    function wireCopyLink(buttonId, flashId, refresh) {
+      const btn = document.getElementById(buttonId);
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        refresh();
+        copyText(location.href, document.getElementById(flashId));
+      });
+    }
+
     /* ---- theme toggle ---- */
     (function initTheme() {
       const stored = localStorage.getItem("dbk-theme");
@@ -2303,6 +2361,12 @@ if (typeof document !== "undefined") {
         copyText(output.dataset.raw || "", copyFlash);
       });
 
+      function syncUrl() { writeUrlState({ input: input.value }); }
+      input.addEventListener("input", debounce(syncUrl, 150));
+      wireCopyLink("json-copy-link", "json-link-flash", syncUrl);
+
+      const shared = readUrlState();
+      if (shared.input) input.value = shared.input;
       render(formatJson(input.value, 2));
     })();
 
@@ -2430,6 +2494,30 @@ if (typeof document !== "undefined") {
       document.getElementById("ts-copy").addEventListener("click", () => {
         copyText(outSeconds.textContent || "", copyFlash);
       });
+
+      // The link carries the epoch field as typed, and the unit only when
+      // the reader picked one, so `?ts=1700000000` stays short.
+      function syncUrl() {
+        writeUrlState({ ts: epochInput.value.trim(), unit: unitSelect.value === "auto" ? "" : unitSelect.value });
+      }
+      epochInput.addEventListener("input", debounce(syncUrl, 150));
+      unitSelect.addEventListener("change", syncUrl);
+      document.getElementById("ts-now").addEventListener("click", syncUrl);
+      document.getElementById("ts-to-epoch").addEventListener("click", () => {
+        if (outSeconds.textContent && outSeconds.textContent !== "\u2014") {
+          epochInput.value = outSeconds.textContent;
+          unitSelect.value = "seconds";
+          syncUrl();
+        }
+      });
+      wireCopyLink("ts-copy-link", "ts-link-flash", syncUrl);
+
+      const shared = readUrlState();
+      if (shared.ts) {
+        epochInput.value = shared.ts;
+        if (shared.unit === "seconds" || shared.unit === "milliseconds") unitSelect.value = shared.unit;
+        document.getElementById("ts-to-date").click();
+      }
     })();
 
     /* ---- Regex tool ---- */
@@ -2492,7 +2580,11 @@ if (typeof document !== "undefined") {
         renderMatches(result.matches);
       }
 
-      document.getElementById("regex-run").addEventListener("click", run);
+      function syncUrl() {
+        writeUrlState({ pattern: patternInput.value, flags: currentFlags(), test: testInput.value });
+      }
+
+      document.getElementById("regex-run").addEventListener("click", () => { run(); syncUrl(); });
       document.getElementById("regex-clear").addEventListener("click", () => {
         patternInput.value = "";
         testInput.value = "";
@@ -2500,7 +2592,20 @@ if (typeof document !== "undefined") {
         hideError(errorEl);
         renderMatches([]);
         patternInput.focus();
+        syncUrl();
       });
+      const syncSoon = debounce(syncUrl, 150);
+      patternInput.addEventListener("input", syncSoon);
+      testInput.addEventListener("input", syncSoon);
+      Object.keys(flagIds).forEach((k) => document.getElementById(flagIds[k]).addEventListener("change", syncUrl));
+      wireCopyLink("regex-copy-link", "regex-link-flash", syncUrl);
+
+      const shared = readUrlState();
+      if (shared.pattern !== undefined) patternInput.value = shared.pattern;
+      if (shared.flags !== undefined) {
+        Object.keys(flagIds).forEach((k) => { document.getElementById(flagIds[k]).checked = shared.flags.includes(k); });
+      }
+      if (shared.test !== undefined) testInput.value = shared.test;
 
       run();
     })();
@@ -2861,13 +2966,27 @@ if (typeof document !== "undefined") {
         });
       }
 
+      function syncUrl() {
+        writeUrlState({ expr: input.value.trim(), tz: displayZone === "UTC" ? "" : displayZone });
+      }
+
       examples.forEach((btn) =>
         btn.addEventListener("click", () => {
           input.value = btn.dataset.cronExample;
           render();
+          syncUrl();
         })
       );
-      input.addEventListener("input", debounce(render, 150));
+      input.addEventListener("input", debounce(() => { render(); syncUrl(); }, 150));
+      if (tzSelect) tzSelect.addEventListener("change", syncUrl);
+      wireCopyLink("cron-copy-link", "cron-link-flash", syncUrl);
+
+      const shared = readUrlState();
+      if (shared.expr) input.value = shared.expr;
+      if (shared.tz && tzSelect && [...tzSelect.options].some((o) => o.value === shared.tz)) {
+        tzSelect.value = shared.tz;
+        displayZone = shared.tz;
+      }
       render();
     })();
 
@@ -2935,6 +3054,15 @@ if (typeof document !== "undefined") {
         copyText(payloadOut.dataset.raw || "", payloadFlash);
       });
 
+      // The token stays in the hash only. A hash never leaves the browser,
+      // so a shared link does not put the token in a server log.
+      function syncUrl() { writeUrlState({ token: input.value.trim() }, { hashOnly: true }); }
+      input.addEventListener("input", debounce(syncUrl, 150));
+      document.getElementById("jwt-clear").addEventListener("click", syncUrl);
+      wireCopyLink("jwt-copy-link", "jwt-link-flash", syncUrl);
+
+      const shared = readUrlState();
+      if (shared.token) input.value = shared.token;
       render();
     })();
 

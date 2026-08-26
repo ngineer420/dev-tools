@@ -140,12 +140,14 @@
             <h2 style="margin:0;">Output</h2>
             <div class="btn-row">
               <button type="button" id="json-copy" class="icon-btn">Copy</button>
+              <button type="button" id="json-copy-link" class="icon-btn" title="Copy a link that opens this input">Copy link</button>
             </div>
           </div>
           <div class="surface" id="json-output-wrap">
             <pre id="json-output" class="code-area" tabindex="0"></pre>
           </div>
           <span class="copy-flash" id="json-copy-flash">Copied!</span>
+          <span class="copy-flash" id="json-link-flash">Link copied!</span>
         </div>
       </div>
     </div>
@@ -264,6 +266,7 @@
         <h2 style="margin:0;">Result</h2>
         <div class="btn-row">
           <button type="button" id="ts-copy" class="icon-btn">Copy epoch (seconds)</button>
+          <button type="button" id="ts-copy-link" class="icon-btn" title="Copy a link that opens this timestamp">Copy link</button>
         </div>
       </div>
       <div class="result-grid" id="ts-result">
@@ -275,6 +278,7 @@
         <div class="result-item"><div class="result-label">Detected unit</div><div class="result-value" id="ts-out-unit">—</div></div>
       </div>
       <span class="copy-flash" id="ts-copy-flash">Copied!</span>
+      <span class="copy-flash" id="ts-link-flash">Link copied!</span>
     </div>
   </section>
 
@@ -306,7 +310,9 @@
           <div class="btn-row">
             <button type="button" id="regex-run" class="primary">Test</button>
             <button type="button" id="regex-clear">Clear</button>
+            <button type="button" id="regex-copy-link" title="Copy a link that opens this pattern and test string">Copy link</button>
           </div>
+          <span class="copy-flash" id="regex-link-flash">Link copied!</span>
           <div class="error-banner" id="regex-error" role="alert"></div>
         </div>
       </div>
@@ -472,7 +478,9 @@
           <div class="btn-row">
             <button type="button" id="jwt-decode" class="primary">Decode</button>
             <button type="button" id="jwt-clear">Clear</button>
+            <button type="button" id="jwt-copy-link" title="Copy a link that opens this token. The token stays in the URL hash.">Copy link</button>
           </div>
+          <span class="copy-flash" id="jwt-link-flash">Link copied!</span>
           <div class="error-banner" id="jwt-error" role="alert"></div>
           <p style="font-size:12.5px;color:var(--text-faint);margin-top:12px;">Decoding only — the signature is shown but never verified against a key.</p>
         </div>
@@ -639,6 +647,10 @@
 │ │ │ ┌── month (1–12 or JAN–DEC)
 │ │ │ │ ┌── day of week (0–7 or SUN–SAT)
 * * * * *</p>
+          <div class="btn-row">
+            <button type="button" id="cron-copy-link" class="icon-btn" title="Copy a link that opens this expression">Copy link</button>
+          </div>
+          <span class="copy-flash" id="cron-link-flash">Link copied!</span>
           <div class="error-banner" id="cron-error" role="alert"></div>
         </div>
 
@@ -991,6 +1003,7 @@
   </div>
 </footer>
 
+<script src="/assets/js/lz-string.min.js"></script>
 <script src="/assets/js/app.js"></script>
 <a href="https://erabb.it" class="erabbit-mark" aria-label="erabb.it"><img src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐇</text></svg>" width="10" height="10" alt=""></a>
 </body>
