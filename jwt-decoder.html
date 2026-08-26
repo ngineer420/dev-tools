@@ -128,7 +128,9 @@
           <div class="btn-row">
             <button type="button" id="jwt-decode" class="primary">Decode</button>
             <button type="button" id="jwt-clear">Clear</button>
+            <button type="button" id="jwt-copy-link" title="Copy a link that opens this token. The token stays in the URL hash.">Copy link</button>
           </div>
+          <span class="copy-flash" id="jwt-link-flash">Link copied!</span>
           <div class="error-banner" id="jwt-error" role="alert"></div>
           <p style="font-size:12.5px;color:var(--text-faint);margin-top:12px;">Decoding only — the signature is shown but never verified against a key.</p>
         </div>
