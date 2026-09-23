@@ -122,6 +122,29 @@ STATUS = {
 # would be boilerplate without a new crawl surface.
 FOOTER = []
 
+# The contact address for the whole site. `sync_nav.py` renders it into the
+# footer of every page as an entity-encoded mailto link. Keep it here, not in
+# the HTML: the privacy policy promises a contact route, and one string in one
+# file is the only way that promise stays true across 33 pages.
+CONTACT = "hello@goodbotbad.bot"
+
+# The copyright row and the Home/Privacy/Terms links at the foot of every page.
+#
+# This block was hand-copied into all 33 files and it drifted the same way the
+# body tool list did. The `footerlinks` region now renders it. The renderer
+# drops the link that points at the page it renders, which is the rule the
+# hand-written copies already followed on the home, privacy and terms pages.
+#
+# `owner` is raw HTML, not text: app.js stamps the year into the span.
+FOOTER_LINKS = {
+    "owner": '© <span id="year"></span> devboxkit.com',
+    "links": [
+        ("/", "Home"),
+        ("/privacy.html", "Privacy"),
+        ("/terms.html", "Terms"),
+    ],
+}
+
 # The site origin. Every absolute URL the generators emit starts here.
 SITE = "https://devboxkit.com"
 
@@ -240,4 +263,9 @@ MIGRATE = [
     # The sibling-site band sits above the copyright row, inside the footer.
     {"op": "insert_after", "region": "peers",
      "pattern": r'<footer class="site-footer">', "indent": "  "},
+    # The copyright row and the footer links. As with the `tools` region, the
+    # leading indent stays in the file for region_re to pick up, so the pattern
+    # starts at the opening tag and ends at the matching close two spaces in.
+    {"op": "replace", "region": "footerlinks",
+     "pattern": r'<div class="footer-inner">.*?\n  </div>'},
 ]

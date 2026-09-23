@@ -73,6 +73,16 @@ def esc(text):
     )
 
 
+def entity_encode(text):
+    """Every character as a decimal numeric character reference.
+
+    The browser decodes these while it parses, so the href is a real mailto
+    and the link needs no JavaScript. A scraper that reads the raw HTML and
+    looks for an at sign finds nothing.
+    """
+    return "".join("&#%d;" % ord(c) for c in text)
+
+
 def anchor(href, text, current, extra="", owns=()):
     """One anchor, with the page's only per-page difference stamped on it.
 
@@ -262,6 +272,37 @@ def render_status(url):
         esc(cfg["id"]), esc(cfg.get("class", "visually-hidden")))
 
 
+def render_footerlinks(url):
+    """The copyright row, the footer links, and the contact address.
+
+    This block sat outside every region and was hand-copied into 33 files, so
+    it drifted the way the body tool list did. The renderer drops the link that
+    points at the page it renders, which is what the hand-written copies on the
+    home, privacy and terms pages already did.
+
+    The contact link is entity-encoded, so the raw HTML holds no at sign while
+    the parsed link is an ordinary mailto. It needs no JavaScript, it keeps its
+    place in the tab order, and a screen reader reads the plain address.
+    """
+    cfg = getattr(D, "FOOTER_LINKS", None)
+    if not cfg:
+        return ""
+    out = ['<div class="footer-inner">',
+           # `owner` is raw HTML: it carries the span that app.js fills.
+           "  <div>%s</div>" % cfg["owner"],
+           '  <div class="footer-links">']
+    for href, text in cfg["links"]:
+        if canon(href) == url:
+            continue
+        out.append("    " + anchor(href, text, url))
+    contact = getattr(D, "CONTACT", "")
+    if contact:
+        out.append('    <a href="%s">%s</a>'
+                   % (entity_encode("mailto:" + contact), entity_encode(contact)))
+    out += ["  </div>", "</div>"]
+    return "\n".join(out)
+
+
 def render_peers(url):
     """Sibling sites, beside the mark the footer already carries.
 
@@ -377,6 +418,7 @@ RENDERERS = {
     "tools": render_tools,
     "status": render_status,
     "peers": render_peers,
+    "footerlinks": render_footerlinks,
     "jsonld": render_jsonld,
 }
 

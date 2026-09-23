@@ -510,14 +510,7 @@ TAIL = """</main>
 
 <footer class="site-footer">
   <!-- peers:start --><!-- peers:end -->
-  <div class="footer-inner">
-    <div>© <span id="year"></span> devboxkit.com</div>
-    <div class="footer-links">
-      <a href="/">Home</a>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/terms.html">Terms</a>
-    </div>
-  </div>
+  <!-- footerlinks:start --><!-- footerlinks:end -->
 </footer>
 
 <!-- status:start --><!-- status:end -->
