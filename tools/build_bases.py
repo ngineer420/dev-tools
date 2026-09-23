@@ -35,6 +35,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import sync_nav  # noqa: E402  — the toolbar and the sibling chips come from here
+import sync_sitemap as sync_sitemap_module  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 APP_JS = ROOT / "assets" / "js" / "app.js"
@@ -477,6 +478,7 @@ HEAD = """<!doctype html>
 </script>
 
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7560786263587509" crossorigin="anonymous"></script>
+<!-- jsonld:start --><!-- jsonld:end -->
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -507,6 +509,7 @@ HEAD = """<!doctype html>
 TAIL = """</main>
 
 <footer class="site-footer">
+  <!-- peers:start --><!-- peers:end -->
   <div class="footer-inner">
     <div>© <span id="year"></span> devboxkit.com</div>
     <div class="footer-links">
@@ -1002,28 +1005,14 @@ PAGES = [
 # Sitemap
 # --------------------------------------------------------------------------
 
+# sitemap.xml is owned by tools/sync_sitemap.py, which rebuilds the whole file
+# from the canonical of every page on disk. This module used to append its own
+# eleven URLs to a hand-written list, which could only ever add: it never
+# corrected a wrong priority and never wrote a <lastmod>. Delegating keeps one
+# generator responsible for the file.
+
 def sync_sitemap(check):
-    path = ROOT / "sitemap.xml"
-    text = path.read_text(encoding="utf-8")
-    additions = []
-    for page in PAGES:
-        loc = SITE + page["slug"]
-        if "<loc>%s</loc>" % loc in text:
-            continue
-        # The hub is a tool in its own right; the directed pages are the family
-        # underneath it, so they rank a notch lower.
-        priority = "0.8" if page["slug"] == HUB else "0.7"
-        additions.append(
-            "  <url>\n    <loc>%s</loc>\n    <changefreq>monthly</changefreq>\n"
-            "    <priority>%s</priority>\n  </url>\n" % (loc, priority)
-        )
-    if not additions:
-        return False
-    if check:
-        return True
-    text = text.replace("</urlset>", "".join(additions) + "</urlset>")
-    path.write_text(text, encoding="utf-8")
-    return True
+    return sync_sitemap_module.main(["--check"] if check else []) == 1
 
 
 # --------------------------------------------------------------------------

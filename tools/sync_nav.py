@@ -28,6 +28,7 @@ between sweeps is how these repos drift.
 """
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
@@ -261,12 +262,122 @@ def render_status(url):
         esc(cfg["id"]), esc(cfg.get("class", "visually-hidden")))
 
 
+def render_peers(url):
+    """Sibling sites, beside the mark the footer already carries.
+
+    Three peers, not the whole portfolio. A footer that lists nineteen sites
+    reads as a link farm, and a visitor who wanted the other eighteen would
+    not have landed here.
+    """
+    peers = getattr(D, "PEERS", None)
+    if not peers:
+        return ""
+    out = ['<nav class="peer-sites" aria-label="Sibling sites">',
+           '  <p class="peer-lead">More small tools that run in your browser</p>',
+           "  <ul>"]
+    for href, name, blurb in peers:
+        out.append('    <li><a href="%s">%s</a> <span>%s</span></li>'
+                   % (esc(href), esc(name), esc(blurb)))
+    out += ["  </ul>", "</nav>"]
+    return "\n".join(out)
+
+
+# --------------------------------------------------------------------------
+# JSON-LD. One <script> per schema, because a validator that rejects one
+# block should not take the others down with it.
+# --------------------------------------------------------------------------
+
+def _json_ld(obj):
+    """A JSON-LD <script>, safe to embed in HTML.
+
+    `</` inside a JSON string would close the <script> element early, so it is
+    escaped. json.dumps with ensure_ascii=False keeps the em dashes readable.
+    """
+    body = json.dumps(obj, ensure_ascii=False, indent=2)
+    body = body.replace("</", "<\\/")
+    return '<script type="application/ld+json">\n%s\n</script>' % body
+
+
+def crumb_trail(url):
+    """(absolute URL, name) pairs from the site root down to this page.
+
+    Returns () for the root itself and for any page that has no name, which is
+    how 404.html opts out: a "page not found" is not a place in the site.
+    """
+    cfg = getattr(D, "BREADCRUMBS", None)
+    site = getattr(D, "SITE", "").rstrip("/")
+    if not cfg or not site or url == "/":
+        return ()
+
+    trail = [(site + "/", cfg["home"])]
+
+    # A directed conversion page hangs off the tool it is a variant of.
+    variants = getattr(D, "VARIANTS", None)
+    if variants:
+        for item in variants["items"]:
+            if canon(item["href"]) != url:
+                continue
+            parent = next((t for t in D.TOOLS
+                           if canon(t["href"]) == canon(variants["parent"])), None)
+            if parent:
+                trail.append((site + parent["href"], parent["long"]))
+            return tuple(trail) + ((site + item["href"], item.get("crumb") or item["label"]),)
+
+    tool = next((t for t in D.TOOLS if canon(t["href"]) == url), None)
+    if tool:
+        return tuple(trail) + ((site + tool["href"], tool["long"]),)
+
+    extra = cfg.get("extra", {}).get(url)
+    if extra:
+        return tuple(trail) + ((site + extra["path"], extra["name"]),)
+    return ()
+
+
+def render_jsonld(url):
+    """BreadcrumbList for every page below the root, plus Article on articles.
+
+    The hand-written WebApplication block in each page's head is left alone.
+    This region only adds what no page had.
+    """
+    blocks = []
+
+    trail = crumb_trail(url)
+    if trail:
+        blocks.append(_json_ld({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": i, "name": name, "item": href}
+                for i, (href, name) in enumerate(trail, start=1)
+            ],
+        }))
+
+    article = getattr(D, "ARTICLES", {}).get(url)
+    if article:
+        site = getattr(D, "SITE", "").rstrip("/")
+        publisher = getattr(D, "PUBLISHER", {"name": "", "url": site + "/"})
+        blocks.append(_json_ld({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            "headline": article["headline"],
+            "datePublished": article["published"],
+            "dateModified": article["modified"],
+            "mainEntityOfPage": {"@type": "WebPage", "@id": trail[-1][0] if trail else site},
+            "author": {"@type": "Organization", "name": publisher["name"], "url": publisher["url"]},
+            "publisher": {"@type": "Organization", "name": publisher["name"], "url": publisher["url"]},
+        }))
+
+    return "\n".join(blocks)
+
+
 RENDERERS = {
     "nav": render_nav,
     "sizechips": render_sizechips,
     "footernav": render_footernav,
     "tools": render_tools,
     "status": render_status,
+    "peers": render_peers,
+    "jsonld": render_jsonld,
 }
 
 

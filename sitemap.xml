@@ -2,162 +2,194 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://devboxkit.com/</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/json-formatter</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://devboxkit.com/base64-encode-decode</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://devboxkit.com/url-encoder-decoder</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://devboxkit.com/unix-timestamp-converter</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://devboxkit.com/regex-tester</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://devboxkit.com/uuid-generator</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://devboxkit.com/hash-generator</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://devboxkit.com/jwt-decoder</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://devboxkit.com/password-generator</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://devboxkit.com/json-csv-converter</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://devboxkit.com/html-entity-encoder</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://devboxkit.com/cron-expression-parser</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://devboxkit.com/color-converter</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://devboxkit.com/contrast-checker</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/articles/json-formatting-guide.html</loc>
+    <loc>https://devboxkit.com/cron-expression-parser</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/articles/base64-and-url-encoding-explained.html</loc>
+    <loc>https://devboxkit.com/hash-generator</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/articles/unix-timestamp-guide.html</loc>
+    <loc>https://devboxkit.com/html-entity-encoder</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/articles/regex-cheat-sheet.html</loc>
+    <loc>https://devboxkit.com/json-csv-converter</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/privacy.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://devboxkit.com/json-formatter</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/terms.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://devboxkit.com/jwt-decoder</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://devboxkit.com/number-base-converter</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/hex-to-decimal</loc>
+    <loc>https://devboxkit.com/password-generator</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/decimal-to-hex</loc>
+    <loc>https://devboxkit.com/regex-tester</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://devboxkit.com/unix-timestamp-converter</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://devboxkit.com/url-encoder-decoder</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://devboxkit.com/uuid-generator</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://devboxkit.com/binary-to-decimal</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://devboxkit.com/decimal-to-binary</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://devboxkit.com/hex-to-binary</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://devboxkit.com/binary-to-hex</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://devboxkit.com/text-to-binary</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://devboxkit.com/binary-to-text</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://devboxkit.com/text-to-hex</loc>
+    <loc>https://devboxkit.com/decimal-to-binary</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://devboxkit.com/decimal-to-hex</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://devboxkit.com/hex-to-binary</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://devboxkit.com/hex-to-decimal</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://devboxkit.com/hex-to-text</loc>
+    <lastmod>2026-09-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://devboxkit.com/text-to-binary</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://devboxkit.com/text-to-hex</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://devboxkit.com/articles/base64-and-url-encoding-explained.html</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://devboxkit.com/articles/json-formatting-guide.html</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://devboxkit.com/articles/regex-cheat-sheet.html</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://devboxkit.com/articles/unix-timestamp-guide.html</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://devboxkit.com/privacy.html</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  <url>
+    <loc>https://devboxkit.com/terms.html</loc>
+    <lastmod>2026-09-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
   </url>
 </urlset>
