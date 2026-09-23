@@ -167,6 +167,7 @@
     <p><strong>Version 7</strong> (RFC 9562) is the one to reach for when the IDs become database keys. It puts a 48-bit millisecond timestamp in the leading bytes and fills the rest with randomness, so sorting v7 strings sorts them by creation time. That locality is the whole point: v4 keys scatter across a B-tree index because consecutive inserts land in unrelated places, while v7 keys append, the way an auto-incrementing integer does, without giving up global uniqueness.</p>
     <p>The <strong>v1-style</strong> option produces a time-ordered UUID that packs the current timestamp into the same fields a real RFC 4122 v1 UUID uses — but since browsers do not expose a real MAC address, it fills the node ID with random bytes instead of genuine hardware identifiers, so treat it as roughly time-sortable rather than a byte-for-byte spec-faithful v1 UUID. Everything runs locally in your browser — no UUID generated here is ever sent anywhere.</p>
 
+    <!-- tools:start -->
     <h2>More developer tools</h2>
     <ul>
       <li><a href="/json-formatter">JSON Formatter</a></li>
@@ -182,8 +183,10 @@
       <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
       <li><a href="/color-converter">Color Converter (HEX / RGB / HSL / HSV)</a></li>
       <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+      <li><a href="/number-base-converter">Number Base Converter (any base 2–36)</a></li>
       <li><a href="/">All tools on one page (home)</a></li>
     </ul>
+    <!-- tools:end -->
   </section>
 </main>
 

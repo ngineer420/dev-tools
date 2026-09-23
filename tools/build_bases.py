@@ -523,25 +523,13 @@ TAIL = """</main>
 </html>
 """
 
+# The in-page tool list is owned by tools/sync_nav.py, which renders it from
+# nav_data.TOOLS into every `tools` region on the site. Emitting only the
+# marker pair here keeps one source of truth: a new tool reaches these eleven
+# pages and the other fourteen in the same sweep. Run sync_nav.py after this
+# script to fill the region.
 OTHER_TOOLS = """
-    <h2>More developer tools</h2>
-    <ul>
-      <li><a href="/json-formatter">JSON Formatter</a></li>
-      <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
-      <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
-      <li><a href="/unix-timestamp-converter">Unix Timestamp Converter</a></li>
-      <li><a href="/regex-tester">Regex Tester</a></li>
-      <li><a href="/uuid-generator">UUID Generator (v4 / v7)</a></li>
-      <li><a href="/hash-generator">Hash Generator (MD5 / SHA / HMAC)</a></li>
-      <li><a href="/jwt-decoder">JWT Decoder</a></li>
-      <li><a href="/password-generator">Password Generator</a></li>
-      <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
-      <li><a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a></li>
-      <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
-      <li><a href="/color-converter">Color Converter</a></li>
-      <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
-      <li><a href="/">All tools on one page (home)</a></li>
-    </ul>
+    <!-- tools:start --><!-- tools:end -->
 """
 
 

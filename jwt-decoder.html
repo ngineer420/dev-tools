@@ -165,6 +165,7 @@
     <h2 style="margin-top:0;">About this JWT decoder</h2>
     <p>Paste any JSON Web Token and this tool splits it on its two dots, base64url-decodes the header and payload, and pretty-prints both as JSON. If the payload has <code>iat</code>, <code>nbf</code>, or <code>exp</code> claims, their Unix-timestamp values are also shown as human-readable dates, along with whether the token is currently expired. This is a decoder, not a verifier — the signature segment is displayed as-is so you can see it exists, but it is never checked against a key, so a decoded token here tells you nothing about whether the JWT is authentic. Nothing is uploaded; decoding happens entirely in your browser, which also means you can safely inspect tokens containing sensitive claims without them leaving your machine.</p>
 
+    <!-- tools:start -->
     <h2>More developer tools</h2>
     <ul>
       <li><a href="/json-formatter">JSON Formatter</a></li>
@@ -180,8 +181,10 @@
       <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
       <li><a href="/color-converter">Color Converter (HEX / RGB / HSL / HSV)</a></li>
       <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+      <li><a href="/number-base-converter">Number Base Converter (any base 2–36)</a></li>
       <li><a href="/">All tools on one page (home)</a></li>
     </ul>
+    <!-- tools:end -->
   </section>
 </main>
 

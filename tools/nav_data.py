@@ -25,25 +25,27 @@ NOUN = "tools"
 # already used; the rest are sheet-only.
 #   label -> rail chip text, <= 18 chars
 #   long  -> anchor text in the sheet
+#   body  -> anchor text in the in-page "More developer tools" list, which has
+#            room for the disambiguating parenthetical the rail does not
 #   group -> sheet grouping key
 TOOLS = [
     # --- the rail (first eight) ---
-    {"href": "/json-formatter",           "label": "JSON",      "long": "JSON Formatter",            "group": "format", "tier": 1},
-    {"href": "/base64-encode-decode",     "label": "Base64",    "long": "Base64 Encode/Decode",      "group": "encode", "tier": 1},
-    {"href": "/url-encoder-decoder",      "label": "URL",       "long": "URL Encode/Decode",         "group": "encode", "tier": 1},
-    {"href": "/unix-timestamp-converter", "label": "Timestamp", "long": "Timestamp Converter",       "group": "inspect", "tier": 1},
-    {"href": "/regex-tester",             "label": "Regex",     "long": "Regex Tester",              "group": "format", "tier": 1},
-    {"href": "/uuid-generator",           "label": "UUID",      "long": "UUID Generator",            "group": "generate", "tier": 1},
-    {"href": "/hash-generator",           "label": "Hash",      "long": "Hash Generator",            "group": "generate", "tier": 1},
-    {"href": "/jwt-decoder",              "label": "JWT",       "long": "JWT Decoder",               "group": "inspect", "tier": 1},
+    {"href": "/json-formatter",           "label": "JSON",      "long": "JSON Formatter",            "group": "format", "body": "JSON Formatter", "tier": 1},
+    {"href": "/base64-encode-decode",     "label": "Base64",    "long": "Base64 Encode/Decode",      "group": "encode", "body": "Base64 Encode / Decode", "tier": 1},
+    {"href": "/url-encoder-decoder",      "label": "URL",       "long": "URL Encode/Decode",         "group": "encode", "body": "URL Encoder / Decoder", "tier": 1},
+    {"href": "/unix-timestamp-converter", "label": "Timestamp", "long": "Timestamp Converter",       "group": "inspect", "body": "Unix Timestamp Converter", "tier": 1},
+    {"href": "/regex-tester",             "label": "Regex",     "long": "Regex Tester",              "group": "format", "body": "Regex Tester", "tier": 1},
+    {"href": "/uuid-generator",           "label": "UUID",      "long": "UUID Generator",            "group": "generate", "body": "UUID Generator (v4 / v7)", "tier": 1},
+    {"href": "/hash-generator",           "label": "Hash",      "long": "Hash Generator",            "group": "generate", "body": "Hash Generator (MD5 / SHA / HMAC)", "tier": 1},
+    {"href": "/jwt-decoder",              "label": "JWT",       "long": "JWT Decoder",               "group": "inspect", "body": "JWT Decoder", "tier": 1},
     # --- sheet only ---
-    {"href": "/password-generator",       "label": "Password",  "long": "Password Generator",        "group": "generate", "tier": 1},
-    {"href": "/json-csv-converter",       "label": "JSON ⇄ CSV", "long": "JSON ⇄ CSV Converter", "group": "format", "tier": 1},
-    {"href": "/html-entity-encoder",      "label": "Entities",  "long": "HTML Entity Encoder",       "group": "encode", "tier": 1},
-    {"href": "/cron-expression-parser",   "label": "Cron",      "long": "Cron Expression Explainer", "group": "inspect", "tier": 1},
-    {"href": "/color-converter",          "label": "Color",     "long": "Color Converter",           "group": "color", "tier": 1},
-    {"href": "/contrast-checker",         "label": "Contrast",  "long": "WCAG Contrast Checker",     "group": "color", "tier": 1},
-    {"href": "/number-base-converter",    "label": "Bases",     "long": "Number Base Converter",     "group": "convert", "tier": 1},
+    {"href": "/password-generator",       "label": "Password",  "long": "Password Generator",        "group": "generate", "body": "Password Generator", "tier": 1},
+    {"href": "/json-csv-converter",       "label": "JSON ⇄ CSV", "long": "JSON ⇄ CSV Converter", "group": "format", "body": "JSON ⇄ CSV Converter", "tier": 1},
+    {"href": "/html-entity-encoder",      "label": "Entities",  "long": "HTML Entity Encoder",       "group": "encode", "body": "HTML Entity Encoder / Decoder", "tier": 1},
+    {"href": "/cron-expression-parser",   "label": "Cron",      "long": "Cron Expression Explainer", "group": "inspect", "body": "Cron Expression Explainer", "tier": 1},
+    {"href": "/color-converter",          "label": "Color",     "long": "Color Converter",           "group": "color", "body": "Color Converter (HEX / RGB / HSL / HSV)", "tier": 1},
+    {"href": "/contrast-checker",         "label": "Contrast",  "long": "WCAG Contrast Checker",     "group": "color", "body": "WCAG Contrast Checker", "tier": 1},
+    {"href": "/number-base-converter",    "label": "Bases",     "long": "Number Base Converter",     "group": "convert", "body": "Number Base Converter (any base 2–36)", "tier": 1},
 ]
 
 # The one tier-2 family on this site. Ten directed pages — the same converter
@@ -84,6 +86,19 @@ GROUPS = [
 # No preset family on this site: every tool answers a different question.
 HUBS = []
 
+# The in-page tool list near the foot of <main>. The toolbar is chrome and
+# search engines discount it; this list is body copy and is the crawl surface
+# that actually distributes link equity between the tools. It was hand-copied
+# into 25 files and drifted: /number-base-converter was missing from every one
+# of them (issue #24). The `tools` region now renders it from TOOLS above.
+#
+# `heading` is emitted inside the region so the markers wrap one whole block.
+# `home` is the last item, and the renderer drops it on the home page itself.
+TOOLS_LIST = {
+    "heading": "More developer tools",
+    "home": ("/", "All tools on one page (home)"),
+}
+
 # The footer carries Home/Privacy/Terms and never carried a tool list. The rail
 # plus the sheet carry all fifteen destinations on every page, so adding one now
 # would be boilerplate without a new crawl surface.
@@ -101,4 +116,10 @@ MIGRATE = [
     {"op": "strip", "pattern": r'\n\n  <div role="tablist" class="tabbar".*?\n  </div>'},
     # The toolbar is a direct child of <body>, immediately after </header>.
     {"op": "insert_after", "region": "nav", "pattern": r"</header>", "indent": ""},
+    # The hand-written "More developer tools" list in the body of every tool
+    # page. The heading is inside the match, so the region owns the whole block
+    # and the renderer can change the heading later without a second migration.
+    # The leading indent is left in the file for region_re to pick up.
+    {"op": "replace", "region": "tools",
+     "pattern": r"<h2>More developer tools</h2>\s*<ul>.*?</ul>"},
 ]
