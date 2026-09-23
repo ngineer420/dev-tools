@@ -688,6 +688,39 @@ mark.regex-match {
 .footer-links { display: flex; gap: 16px; flex-wrap: wrap; }
 .footer-links a { color: var(--text-dim); }
 
+/* ---------- sibling sites ---------- */
+/* One spacing system in this block: the list owns the gaps, the items carry
+   no margin. Mixing the two is how a declared 8px becomes a rendered 20px. */
+.peer-sites {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 24px 20px 0;
+  font-size: 12.5px;
+}
+.peer-lead {
+  margin: 0 0 10px;
+  color: var(--text-dim);
+}
+.peer-sites ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+}
+.peer-sites li {
+  margin: 0;
+  /* min-width: 0 lets a long blurb wrap instead of forcing the row wider than
+     the footer. A flex item will not shrink below its widest word otherwise. */
+  min-width: 0;
+}
+.peer-sites a { color: var(--text-dim); }
+.peer-sites li span {
+  color: var(--text-faint);
+  margin-left: 8px;
+}
+
 /* ---------- misc ---------- */
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;

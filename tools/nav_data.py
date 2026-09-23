@@ -57,17 +57,19 @@ VARIANTS = {
     "parent": "/number-base-converter",
     "aria": "Directed conversions",
     "label": "One direction",
+    # `crumb` is the full name, for the breadcrumb trail. The chip
+    # label has to fit a chip; a breadcrumb has the room to say it.
     "items": [
-        {"href": "/hex-to-decimal",   "label": "Hex → Dec"},
-        {"href": "/decimal-to-hex",   "label": "Dec → Hex"},
-        {"href": "/binary-to-decimal", "label": "Bin → Dec"},
-        {"href": "/decimal-to-binary", "label": "Dec → Bin"},
-        {"href": "/hex-to-binary",    "label": "Hex → Bin"},
-        {"href": "/binary-to-hex",    "label": "Bin → Hex"},
-        {"href": "/text-to-binary",   "label": "Text → Bin"},
-        {"href": "/binary-to-text",   "label": "Bin → Text"},
-        {"href": "/text-to-hex",      "label": "Text → Hex"},
-        {"href": "/hex-to-text",      "label": "Hex → Text"},
+        {"href": "/hex-to-decimal", "label": "Hex → Dec", "crumb": "Hex to Decimal"},
+        {"href": "/decimal-to-hex", "label": "Dec → Hex", "crumb": "Decimal to Hex"},
+        {"href": "/binary-to-decimal", "label": "Bin → Dec", "crumb": "Binary to Decimal"},
+        {"href": "/decimal-to-binary", "label": "Dec → Bin", "crumb": "Decimal to Binary"},
+        {"href": "/hex-to-binary", "label": "Hex → Bin", "crumb": "Hex to Binary"},
+        {"href": "/binary-to-hex", "label": "Bin → Hex", "crumb": "Binary to Hex"},
+        {"href": "/text-to-binary", "label": "Text → Bin", "crumb": "Text to Binary"},
+        {"href": "/binary-to-text", "label": "Bin → Text", "crumb": "Binary to Text"},
+        {"href": "/text-to-hex", "label": "Text → Hex", "crumb": "Text to Hex"},
+        {"href": "/hex-to-text", "label": "Hex → Text", "crumb": "Hex to Text"},
     ],
 }
 
@@ -120,6 +122,94 @@ STATUS = {
 # would be boilerplate without a new crawl surface.
 FOOTER = []
 
+# The site origin. Every absolute URL the generators emit starts here.
+SITE = "https://devboxkit.com"
+
+# Breadcrumb trail data for the `jsonld` region.
+#
+# The trail is computed, not listed: Home, then the parent tool if the page is
+# one of the ten directed conversions, then the page itself. `extra` names the
+# pages that are not tools and gives the exact path their canonical uses, which
+# is what keeps the BreadcrumbList item and the canonical link in agreement.
+#
+# 404.html is absent on purpose. A "page not found" is not a place in the site,
+# and structured data on it would invite indexing of a page that must not rank.
+BREADCRUMBS = {
+    "home": "DevBox Kit",
+    "extra": {
+        "/privacy": {"name": "Privacy Policy", "path": "/privacy.html"},
+        "/terms": {"name": "Terms of Use", "path": "/terms.html"},
+        "/articles/json-formatting-guide": {
+            "name": "JSON Formatting Guide",
+            "path": "/articles/json-formatting-guide.html"},
+        "/articles/base64-and-url-encoding-explained": {
+            "name": "Base64 and URL Encoding Explained",
+            "path": "/articles/base64-and-url-encoding-explained.html"},
+        "/articles/unix-timestamp-guide": {
+            "name": "Unix Timestamp Guide",
+            "path": "/articles/unix-timestamp-guide.html"},
+        "/articles/regex-cheat-sheet": {
+            "name": "Regex Cheat Sheet",
+            "path": "/articles/regex-cheat-sheet.html"},
+    },
+}
+
+# The four written guides. The `jsonld` region emits an Article block for each.
+#
+# The dates come from git: `published` is the commit that added the file and
+# `modified` is the commit that last changed it. Nothing in the markup or the
+# prose of these pages carries a date, so git is the only honest source.
+# Refresh `modified` when you rewrite an article.
+ARTICLES = {
+    "/articles/json-formatting-guide": {
+        "headline": "JSON Formatting Guide: Syntax Rules, Common Errors and When to Minify",
+        "published": "2026-07-16",
+        "modified": "2026-08-26",
+    },
+    "/articles/base64-and-url-encoding-explained": {
+        "headline": "Base64 and URL Encoding Explained: What They Actually Do",
+        "published": "2026-07-16",
+        "modified": "2026-08-26",
+    },
+    "/articles/unix-timestamp-guide": {
+        "headline": "Unix Timestamp Guide: Epoch Time, Y2038, and Seconds vs. Milliseconds",
+        "published": "2026-07-16",
+        "modified": "2026-08-26",
+    },
+    "/articles/regex-cheat-sheet": {
+        "headline": "Practical Regex Cheat Sheet: Patterns, Flags and Common Gotchas",
+        "published": "2026-07-16",
+        "modified": "2026-08-26",
+    },
+}
+
+# The publisher, named once for every Article and WebApplication block.
+PUBLISHER = {"name": "DevBox Kit", "url": SITE + "/"}
+
+# Sitemap weights, matched longest-prefix-first by tools/sync_sitemap.py.
+# `lastmod` is never written here: the generator reads it from git.
+SITEMAP = {
+    "default": {"changefreq": "monthly", "priority": "0.8"},
+    "rules": [
+        ("/", {"changefreq": "weekly", "priority": "1.0"}),
+        ("/privacy.html", {"changefreq": "yearly", "priority": "0.2"}),
+        ("/terms.html", {"changefreq": "yearly", "priority": "0.2"}),
+        ("/articles/", {"changefreq": "monthly", "priority": "0.6"}),
+    ],
+    # The ten directed conversions rank a notch under their parent tool.
+    "variants": {"changefreq": "monthly", "priority": "0.7"},
+}
+
+# Sibling sites in the portfolio, rendered by the `peers` region into the
+# footer of every page. Three, not nineteen: a footer that lists the whole
+# portfolio reads as a link farm and helps nobody. These are the sites a
+# visitor holding a blob of text or a string of bytes would actually want.
+PEERS = [
+    ("https://textkitpro.com", "textkitpro.com", "Text cleaning and case conversion"),
+    ("https://inascii.com", "inascii.com", "ASCII art from text and images"),
+    ("https://qrmint.net", "qrmint.net", "QR codes in the browser"),
+]
+
 # One-time --migrate: what the legacy markup looked like and where the marker
 # pair goes. Per-site, because the legacy markup is per-site. Ops run in order.
 MIGRATE = [
@@ -143,4 +233,11 @@ MIGRATE = [
     # four articles never load it, so they never get an empty live region.
     {"op": "insert_before", "region": "status",
      "pattern": r'<script src="/assets/js/app\.js"></script>', "indent": ""},
+    # JSON-LD goes last in the head, after the hand-written WebApplication
+    # block each page already carries. That block stays hand-written; this
+    # region only adds what no page had.
+    {"op": "insert_before", "region": "jsonld", "pattern": r"</head>", "indent": ""},
+    # The sibling-site band sits above the copyright row, inside the footer.
+    {"op": "insert_after", "region": "peers",
+     "pattern": r'<footer class="site-footer">', "indent": "  "},
 ]

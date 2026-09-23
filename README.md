@@ -38,6 +38,8 @@ comment pair. The site uses these:
 | `tools` | the in-page "More developer tools" list near the foot of `<main>` | `TOOLS`, `TOOLS_LIST` |
 | `footernav` | a footer tool list (empty on this site) | `FOOTER` |
 | `status` | the page's one polite live region, `#tool-status` | `STATUS` |
+| `peers` | the sibling-site band in the footer | `PEERS` |
+| `jsonld` | `BreadcrumbList` on every page below the root, plus `Article` on the four guides | `SITE`, `BREADCRUMBS`, `ARTICLES`, `PUBLISHER` |
 
 The `tools` region is body copy, not chrome, so it is the crawl surface that
 spreads link equity between the tools. It was hand-copied into 25 files until
@@ -67,6 +69,45 @@ python3 tools/build_bases.py --check # exit 1 if any of them has drifted
 It fills its own nav regions, so a `sync_nav.py` run afterwards is a no-op for
 those files. It needs `node` on PATH: every reference table on those pages is
 computed from the shipped module rather than typed out.
+
+## Structured data and the sitemap
+
+Each page carries a hand-written `WebApplication` block in its `<head>`. Leave
+that one alone. Everything else is generated into the `jsonld` region:
+
+- `BreadcrumbList` on all 31 pages below the root. The trail is computed, not
+  listed: Home, then the parent tool if the page is one of the ten directed
+  conversions, then the page itself.
+- `Article` on the four guides in `articles/`.
+
+`404.html` gets no structured data on purpose. A "page not found" is not a
+place in the site.
+
+**There is no `FAQPage` block, because no page has FAQ markup.** The
+`.faq-item` class in `index.html` styles the four article teaser cards, which
+are link titles, not questions. Marking those up as an FAQ would be a lie to a
+search engine. Write real questions first.
+
+`sitemap.xml` is generated:
+
+```
+python3 tools/sync_sitemap.py           # rewrite sitemap.xml
+python3 tools/sync_sitemap.py --check   # exit 1 if it is stale
+```
+
+It reads the URL of each page from that page's own `<link rel="canonical">`,
+so the sitemap and the canonicals cannot disagree. `<lastmod>` comes from
+`git log -1` on the file, not from its mtime: a fresh clone writes every file
+at checkout time, which would stamp the whole sitemap with the deploy date.
+`changefreq` and `priority` come from `SITEMAP` in `nav_data.py`.
+`build_bases.py` calls this module, so a base-page rebuild keeps the sitemap
+current.
+
+**Run it after you commit, not before.** `lastmod` reads the commit that last
+touched each file, so a commit that changes a page makes the sitemap stale one
+second later. Commit the page, run `sync_sitemap.py`, then amend or add a
+second commit. The dates are day-granular, so a second run on the same day
+settles.
 
 ## Accessibility: announcing results
 
