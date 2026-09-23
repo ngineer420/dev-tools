@@ -37,6 +37,7 @@ comment pair. The site uses these:
 | `sizechips` | the directed-conversion chips inside the base converter | `VARIANTS` |
 | `tools` | the in-page "More developer tools" list near the foot of `<main>` | `TOOLS`, `TOOLS_LIST` |
 | `footernav` | a footer tool list (empty on this site) | `FOOTER` |
+| `status` | the page's one polite live region, `#tool-status` | `STATUS` |
 
 The `tools` region is body copy, not chrome, so it is the crawl surface that
 spreads link equity between the tools. It was hand-copied into 25 files until
@@ -66,6 +67,37 @@ python3 tools/build_bases.py --check # exit 1 if any of them has drifted
 It fills its own nav regions, so a `sync_nav.py` run afterwards is a no-op for
 those files. It needs `node` on PATH: every reference table on those pages is
 computed from the shipped module rather than typed out.
+
+## Accessibility: announcing results
+
+Every tool answers silently. The answer appears in a box, and a screen reader
+user gets no signal that anything happened.
+
+One polite live region per page carries that signal. `sync_nav.py` renders
+`<p id="tool-status" class="visually-hidden" role="status">` into every page
+that loads `app.js`, and each tool writes one short sentence into it.
+
+The region is not the output box, for two reasons:
+
+- Half the outputs are a `<textarea>` or an `<input>`, which cannot be live
+  regions at all.
+- The other half hold a whole formatted document. A screen reader that reads
+  400 lines of JSON aloud is worse than one that says nothing.
+
+So the announcement is a headline, and a long value is reported by size:
+`Encoded: aGk=.` for a short answer, `Encoded, 536 characters.` for a blob.
+The password generator never speaks the password.
+
+`announce()` and `announceValue()` in `assets/js/app.js` apply three rules:
+
+1. Nothing is announced until the visitor acts. Every tool renders once on
+   load, and the homepage carries fifteen of them.
+2. Announcements are debounced by 500 ms, so a burst of keystrokes produces
+   one announcement, not one per key.
+3. Text identical to the last announcement is dropped.
+
+**One region per page, always.** Two live regions interrupt each other. Add a
+call to `announce()` rather than a second `role="status"` node.
 
 ## Local development
 

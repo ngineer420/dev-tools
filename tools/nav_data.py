@@ -99,6 +99,22 @@ TOOLS_LIST = {
     "home": ("/", "All tools on one page (home)"),
 }
 
+# The one polite live region per tool page. Every tool writes one short
+# sentence into it after it produces a result, so a screen reader hears the
+# answer without the visitor hunting for the output box.
+#
+# One region, not one per tool. Two live regions on a page interrupt each
+# other, and the homepage carries all fifteen tools at once. The region is in
+# the served HTML rather than built by script, so it is already registered
+# before the first result lands in it.
+#
+# `class` is the site's own visually-hidden utility. `sync_nav.py` reads both
+# keys, so a site with a different utility class only edits this file.
+STATUS = {
+    "id": "tool-status",
+    "class": "visually-hidden",
+}
+
 # The footer carries Home/Privacy/Terms and never carried a tool list. The rail
 # plus the sheet carry all fifteen destinations on every page, so adding one now
 # would be boilerplate without a new crawl surface.
@@ -122,4 +138,9 @@ MIGRATE = [
     # The leading indent is left in the file for region_re to pick up.
     {"op": "replace", "region": "tools",
      "pattern": r"<h2>More developer tools</h2>\s*<ul>.*?</ul>"},
+    # The live region belongs on the pages that actually run a tool, and
+    # loading app.js is exactly what those pages do. Privacy, Terms and the
+    # four articles never load it, so they never get an empty live region.
+    {"op": "insert_before", "region": "status",
+     "pattern": r'<script src="/assets/js/app\.js"></script>', "indent": ""},
 ]

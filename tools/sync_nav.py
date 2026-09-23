@@ -242,11 +242,31 @@ def render_tools(url):
     return "\n".join(out)
 
 
+def render_status(url):
+    """One polite live region per page, for the tools to announce into.
+
+    An output box is not a live region. Most of these outputs are a textarea
+    or an input, which cannot be one at all, and the rest hold a whole
+    formatted document — a screen reader reading 400 lines of JSON aloud is
+    worse than silence. So the region is empty markup and the page's script
+    writes one short sentence into it.
+
+    One region, not one per tool: two live regions interrupt each other, and
+    the homepage carries every tool at once.
+    """
+    cfg = getattr(D, "STATUS", None)
+    if not cfg:
+        return ""
+    return '<p id="%s" class="%s" role="status"></p>' % (
+        esc(cfg["id"]), esc(cfg.get("class", "visually-hidden")))
+
+
 RENDERERS = {
     "nav": render_nav,
     "sizechips": render_sizechips,
     "footernav": render_footernav,
     "tools": render_tools,
+    "status": render_status,
 }
 
 

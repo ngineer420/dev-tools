@@ -2101,6 +2101,75 @@ if (typeof document !== "undefined") {
       };
     }
 
+    /* ---- result announcements ----
+       Every tool here answers silently: the answer appears in a box the
+       visitor has to go and find. A screen reader user gets no signal that
+       anything happened at all.
+
+       One polite live region per page carries that signal — `#tool-status`,
+       rendered by tools/sync_nav.py into every page that loads this file. It
+       is deliberately NOT the output box:
+
+         - half the outputs are <textarea> or <input>, which cannot be live
+           regions in the first place;
+         - the other half hold a whole formatted document, and a screen reader
+           reading 400 lines of JSON aloud is worse than silence.
+
+       So the region gets one short sentence instead, and a long value is
+       reported by size rather than read out.
+
+       Three rules keep it from becoming a stuck horn:
+
+         1. Nothing is announced until the visitor has acted. Every tool
+            renders once on load, and the homepage carries fifteen of them: a
+            region that speaks on arrival talks over the page's own heading.
+         2. Announcements are debounced. A tool that re-renders per keystroke
+            would otherwise queue an announcement per keystroke.
+         3. Text identical to the last announcement is dropped. Toggling a
+            checkbox back and forth must not repeat the same sentence.
+    */
+    const STATUS_DELAY_MS = 500;
+    // Past this many characters a value is reported by size, not read out.
+    // A 64-character digest is already past the point of being useful aloud.
+    const STATUS_SPEAK_MAX = 48;
+
+    const statusEl = document.getElementById("tool-status");
+    let statusArmed = false;
+    let statusLast = "";
+    let statusTimer = null;
+
+    ["pointerdown", "keydown", "input", "change"].forEach((type) => {
+      document.addEventListener(type, () => { statusArmed = true; },
+        { capture: true, once: true });
+    });
+
+    function announce(text) {
+      if (!statusEl) return;
+      clearTimeout(statusTimer);
+      statusTimer = setTimeout(() => {
+        // Checked inside the timer, not outside it: the keystroke that arms
+        // the region is the same keystroke that produces the first result.
+        if (!statusArmed || text === statusLast) return;
+        statusLast = text;
+        statusEl.textContent = text;
+      }, STATUS_DELAY_MS);
+    }
+
+    // "Decoded: hello." for a short answer, "Decoded, 4096 characters." for a
+    // blob. `label` names the thing, never the tool.
+    function announceValue(label, value) {
+      const text = value === null || value === undefined ? "" : String(value);
+      if (!text) return;
+      const speakable = text.length <= STATUS_SPEAK_MAX && text.indexOf("\n") === -1;
+      announce(speakable
+        ? label + ": " + text + "."
+        : label + ", " + text.length + " characters.");
+    }
+
+    function plural(n, word) {
+      return n + " " + word + (n === 1 ? "" : "s");
+    }
+
     /* ---- URL state ----
        A tool that reads its input from the URL can be sent as a link. Short
        state goes in the query string. State over URL_QUERY_LIMIT bytes goes
@@ -2337,6 +2406,10 @@ if (typeof document !== "undefined") {
           hideError(errorEl);
           output.innerHTML = highlightJson(result.value);
           output.dataset.raw = result.value;
+          // The document itself is the wrong thing to read aloud, so the
+          // announcement is its shape: valid, and how much of it there is.
+          announce("Valid JSON, " + plural(result.value.split("\n").length, "line") +
+                   ", " + plural(result.value.length, "character") + ".");
         } else {
           output.innerHTML = "";
           output.dataset.raw = "";
@@ -2382,12 +2455,14 @@ if (typeof document !== "undefined") {
         hideError(errorEl);
         const value = base64Encode(input.value);
         output.textContent = value;
+        announceValue("Encoded", value);
       });
       document.getElementById("b64-decode").addEventListener("click", () => {
         const result = base64Decode(input.value);
         if (result.ok) {
           hideError(errorEl);
           output.textContent = result.value;
+          announceValue("Decoded", result.value);
         } else {
           output.textContent = "";
           showError(errorEl, result.message);
@@ -2415,12 +2490,14 @@ if (typeof document !== "undefined") {
       document.getElementById("url-encode").addEventListener("click", () => {
         hideError(errorEl);
         output.textContent = urlEncode(input.value);
+        announceValue("Encoded", output.textContent);
       });
       document.getElementById("url-decode").addEventListener("click", () => {
         const result = urlDecode(input.value);
         if (result.ok) {
           hideError(errorEl);
           output.textContent = result.value;
+          announceValue("Decoded", result.value);
         } else {
           output.textContent = "";
           showError(errorEl, result.message);
@@ -2461,6 +2538,8 @@ if (typeof document !== "undefined") {
         outSeconds.textContent = String(result.epochSeconds);
         outMillis.textContent = String(result.epochMillis);
         outUnit.textContent = result.resolvedUnit || "—";
+        // Six fields, one headline. Local time is the one people came for.
+        announceValue("Local time", result.local);
       }
 
       document.getElementById("ts-now").addEventListener("click", () => {
@@ -2544,8 +2623,12 @@ if (typeof document !== "undefined") {
           matchesEl.hidden = true;
           matchesEmptyEl.hidden = false;
           matchesEmptyEl.textContent = "No matches found.";
+          announce("No matches found.");
           return;
         }
+        // The count, never the match list: a pattern over a long document
+        // produces hundreds of list items.
+        announce(matches.length === 1 ? "1 match found." : matches.length + " matches found.");
         matchesEmptyEl.hidden = true;
         matchesEl.hidden = false;
         matches.forEach((m, i) => {
@@ -2643,7 +2726,11 @@ if (typeof document !== "undefined") {
       setVersion("v4");
 
       function render() {
-        output.textContent = generateUuids(countInput.value, version).join("\n");
+        const ids = generateUuids(countInput.value, version);
+        output.textContent = ids.join("\n");
+        // A UUID is 36 characters of hex. Reading one aloud helps nobody, so
+        // the announcement confirms the count and the version instead.
+        announce("Generated " + plural(ids.length, version + " UUID") + ".");
       }
 
       document.getElementById("uuid-generate").addEventListener("click", render);
@@ -2687,6 +2774,12 @@ if (typeof document !== "undefined") {
         Object.keys(outputs).forEach((k) => {
           if (outputs[k]) outputs[k].textContent = result ? result[k] : "—";
         });
+        // Five digests, and every one of them is a wall of hex. The last eight
+        // characters are what people actually compare against, so those are
+        // what the announcement carries.
+        if (result && result.sha256) {
+          announce("Digests ready. SHA-256 ends " + result.sha256.slice(-8) + ".");
+        }
       }
 
       async function runHmac() {
@@ -2808,6 +2901,7 @@ if (typeof document !== "undefined") {
       function render() {
         const r = compareHashes(a.value, b.value);
         result.textContent = r.message;
+        announce(r.message);
         result.classList.toggle("is-match", r.status === "match");
         result.classList.toggle("is-mismatch", r.status !== "match" && r.status !== "empty");
       }
@@ -2911,6 +3005,7 @@ if (typeof document !== "undefined") {
         }
         hideError(errorEl);
         description.textContent = describeCron(parsed);
+        announce(description.textContent);
 
         FIELD_LABELS.forEach(([key, label]) => {
           const row = document.createElement("div");
@@ -3034,6 +3129,11 @@ if (typeof document !== "undefined") {
           claimsEl.appendChild(claimItem("Status", result.expired ? "Expired" : "Not expired"));
         }
         claimsEl.appendChild(claimItem("Signature (unverified)", result.signature));
+        // Two JSON blobs and a claim table. Expiry is the one answer a reader
+        // wants first, so that is the sentence.
+        announce("Token decoded. " + (result.expired === null
+          ? "No expiry claim."
+          : result.expired ? "Expired." : "Not expired."));
       }
 
       document.getElementById("jwt-decode").addEventListener("click", render);
@@ -3098,6 +3198,10 @@ if (typeof document !== "undefined") {
         output.textContent = result.value;
         bitsEl.textContent = `~${result.bits} bits`;
         strengthEl.textContent = result.strength;
+        // The password is never announced. Spelling a secret out loud is the
+        // one thing a live region must not do in an open-plan office.
+        announce("Password generated, " + plural(result.value.length, "character") +
+                 ", about " + result.bits + " bits, " + result.strength + ".");
       }
 
       lengthInput.addEventListener("input", () => {
@@ -3140,6 +3244,9 @@ if (typeof document !== "undefined") {
           hideError(errorEl);
           output.textContent = result.value;
           lastFormat = "csv";
+          // Row count, not the table. A CSV read out cell by cell is noise.
+          announce("Converted to CSV, " +
+                   plural(Math.max(result.value.split("\n").length - 1, 0), "data row") + ".");
         } else {
           output.textContent = "";
           showError(errorEl, result.message);
@@ -3151,6 +3258,7 @@ if (typeof document !== "undefined") {
           hideError(errorEl);
           output.textContent = result.value;
           lastFormat = "json";
+          announce("Converted to JSON, " + plural(result.value.length, "character") + ".");
         } else {
           output.textContent = "";
           showError(errorEl, result.message);
@@ -3182,9 +3290,11 @@ if (typeof document !== "undefined") {
 
       document.getElementById("entity-encode").addEventListener("click", () => {
         output.textContent = htmlEntityEncode(input.value);
+        announceValue("Encoded", output.textContent);
       });
       document.getElementById("entity-decode").addEventListener("click", () => {
         output.textContent = htmlEntityDecode(input.value);
+        announceValue("Decoded", output.textContent);
       });
       document.getElementById("entity-clear").addEventListener("click", () => {
         input.value = "";
@@ -3233,12 +3343,14 @@ if (typeof document !== "undefined") {
         if (picker) picker.value = rgbToHex(opaque);
         if (alpha && except !== "alpha") alpha.value = String(Math.round(current.a * 100));
         if (alphaOut) alphaOut.textContent = Math.round(current.a * 100) + "%";
+        const name = rgbToNamedColor(current);
         if (nameOut) {
-          const name = rgbToNamedColor(current);
           nameOut.innerHTML = name
             ? "CSS name: <b>" + escapeHtml(name) + "</b>"
             : "No exact CSS color name";
         }
+        // Four fields hold the same colour. The hex is the one people quote.
+        announce(FIELDS.hex.format(current) + (name ? ", CSS name " + name + "." : "."));
       }
 
       function apply(text, except) {
@@ -3336,6 +3448,12 @@ if (typeof document !== "undefined") {
         hideError(errorEl);
         const ratio = roundRatio(contrastRatio(p.fg, p.bg));
         ratioEl.textContent = ratio.toFixed(2);
+        // The ratio plus the verdict. The full pass/fail table stays on screen
+        // where it can be read at leisure, not in the live region.
+        const checks = wcagResults(ratio);
+        announce("Contrast ratio " + ratio.toFixed(2) + " to 1. " +
+                 checks.filter((r) => r.pass).length + " of " + checks.length +
+                 " WCAG checks pass.");
         preview.style.backgroundColor = rgbToHex(p.bg);
         preview.style.color = rgbToHex(p.fg);
         if (fgPicker) fgPicker.value = rgbToHex({ r: p.fg.r, g: p.fg.g, b: p.fg.b });
@@ -3349,7 +3467,7 @@ if (typeof document !== "undefined") {
           : "WCAG 2.1 relative luminance, (L1 + 0.05) / (L2 + 0.05).";
 
         listEl.innerHTML = "";
-        wcagResults(ratio).forEach((r) => {
+        checks.forEach((r) => {
           const li = document.createElement("li");
           li.className = "wcag-item";
           const what = document.createElement("span");
@@ -3415,6 +3533,10 @@ if (typeof document !== "undefined") {
             "Walked the text color " + moved.direction + " in OKLCH — same hue, same chroma — to " +
             moved.hex + ", which measures " + moved.ratio.toFixed(2) + ":1.";
           okEl.classList.add("show");
+          // Announced last, so it wins the debounce against the ratio sentence
+          // render() queued a moment ago. The nudge is what the visitor asked
+          // for; the new ratio is inside this sentence anyway.
+          announce(okEl.textContent);
         });
       }
 
@@ -3480,6 +3602,10 @@ if (typeof document !== "undefined") {
         paint(OUT.hex, r.hex);
         paint(OUT.custom, r.custom || "");
         paint(OUT.unsigned, r.unsignedDecimal === null ? r.decimal : r.unsignedDecimal);
+        // Six readonly fields, and a readonly field cannot be a live region.
+        // Decimal and hex are the pair that answers the question; binary at 64
+        // bits is 64 digits read one at a time, so it stays out.
+        announceValue("Converted", "decimal " + r.decimal + ", hex " + r.hex);
 
         if (!noteEl) return;
         const parts = [];
@@ -3566,6 +3692,7 @@ if (typeof document !== "undefined") {
               ? textToBinary(input.value)
               : textToHex(input.value, { uppercase: upper });
             hideError(errorEl);
+            announceValue("Converted", output.value);
             const n = textToBytes(input.value).length;
             if (noteEl) {
               noteEl.textContent = input.value.length === n
@@ -3586,6 +3713,7 @@ if (typeof document !== "undefined") {
             }
             hideError(errorEl);
             output.value = r.value;
+            announceValue("Decoded", r.value);
             if (noteEl && r.value.indexOf("�") !== -1) {
               noteEl.textContent =
                 "The � marks a byte that is not valid UTF-8 — the run is either " +
@@ -3613,6 +3741,9 @@ if (typeof document !== "undefined") {
             : (r.custom === undefined ? formatInBase(r.value, toBase) : r.custom);
           if (upper) text = text.toUpperCase();
           output.value = toBase === 2 || toBase === 16 ? groupDigits(text, toBase) : text;
+          // The output box is a <textarea>, which cannot be a live region at
+          // all, so the answer is announced from here or not at all.
+          announceValue("Converted", output.value);
 
           if (!noteEl) return;
           const parts = [];
