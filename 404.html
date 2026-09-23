@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>404 — devboxkit.com</title>
+<title>Page not found (404) — devboxkit.com</title>
+<meta name="description" content="That page does not exist on devboxkit.com. Use the tool list on this page to find the JSON formatter, the Base64 encoder, the hash generator or any other tool.">
+<link rel="canonical" href="https://devboxkit.com/404.html">
+<meta name="theme-color" content="#090c11">
 <meta property="og:image" content="https://devboxkit.com/assets/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -12,11 +15,112 @@
 <link rel="stylesheet" href="/assets/css/styles.css">
 </head>
 <body>
-<main class="container-narrow" style="text-align:center;">
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="devboxkit.com home">
+      <span class="brand-mark"><span class="bracket">{</span>devbox<span class="bracket">/</span>kit<span class="bracket">}</span></span>
+    </a>
+  </div>
+</header>
+
+<!-- nav:start -->
+<nav class="toolbar" aria-label="Tools">
+  <details class="tb-menu">
+    <summary class="tb-trigger" aria-label="All 15 tools">
+      <span class="tb-glyph" aria-hidden="true">&#9636;</span>
+      <span class="tb-label">All 15<span class="tb-label-long"> tools</span></span>
+    </summary>
+    <div class="tb-sheet">
+      <div class="tb-sheet-cols">
+        <p class="tb-grouplabel" id="tb-g1">Format &amp; validate</p>
+        <ul aria-labelledby="tb-g1">
+          <li><a href="/json-formatter">JSON Formatter</a></li>
+          <li><a href="/regex-tester">Regex Tester</a></li>
+          <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g2">Encode &amp; decode</p>
+        <ul aria-labelledby="tb-g2">
+          <li><a href="/base64-encode-decode">Base64 Encode/Decode</a></li>
+          <li><a href="/url-encoder-decoder">URL Encode/Decode</a></li>
+          <li><a href="/html-entity-encoder">HTML Entity Encoder</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g3">Generate</p>
+        <ul aria-labelledby="tb-g3">
+          <li><a href="/uuid-generator">UUID Generator</a></li>
+          <li><a href="/hash-generator">Hash Generator</a></li>
+          <li><a href="/password-generator">Password Generator</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g4">Inspect</p>
+        <ul aria-labelledby="tb-g4">
+          <li><a href="/unix-timestamp-converter">Timestamp Converter</a></li>
+          <li><a href="/jwt-decoder">JWT Decoder</a></li>
+          <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g5">Color</p>
+        <ul aria-labelledby="tb-g5">
+          <li><a href="/color-converter">Color Converter</a></li>
+          <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+        </ul>
+        <p class="tb-grouplabel" id="tb-g6">Convert</p>
+        <ul aria-labelledby="tb-g6">
+          <li><a href="/number-base-converter">Number Base Converter</a></li>
+        </ul>
+      </div>
+    </div>
+  </details>
+  <div class="tb-scrim"></div>
+  <ul class="tb-rail">
+    <li><a href="/json-formatter">JSON</a></li>
+    <li><a href="/base64-encode-decode">Base64</a></li>
+    <li><a href="/url-encoder-decoder">URL</a></li>
+    <li><a href="/unix-timestamp-converter">Timestamp</a></li>
+    <li><a href="/regex-tester">Regex</a></li>
+    <li><a href="/uuid-generator">UUID</a></li>
+    <li><a href="/hash-generator">Hash</a></li>
+    <li><a href="/jwt-decoder">JWT</a></li>
+  </ul>
+</nav>
+<!-- nav:end -->
+
+<main class="container-narrow">
   <pre style="font-size:14px;line-height:1.2;color:var(--accent);">{ 404 }</pre>
   <h1>Page not found</h1>
+  <p>This address does not match any page on devboxkit.com. The page may have moved, or the link may contain a typo. Every tool is still one click away.</p>
   <p><a href="/">Back to DevBox Kit</a></p>
+
+  <!-- tools:start -->
+  <h2>More developer tools</h2>
+  <ul>
+    <li><a href="/json-formatter">JSON Formatter</a></li>
+    <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
+    <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
+    <li><a href="/unix-timestamp-converter">Unix Timestamp Converter</a></li>
+    <li><a href="/regex-tester">Regex Tester</a></li>
+    <li><a href="/uuid-generator">UUID Generator (v4 / v7)</a></li>
+    <li><a href="/hash-generator">Hash Generator (MD5 / SHA / HMAC)</a></li>
+    <li><a href="/jwt-decoder">JWT Decoder</a></li>
+    <li><a href="/password-generator">Password Generator</a></li>
+    <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
+    <li><a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a></li>
+    <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+    <li><a href="/color-converter">Color Converter (HEX / RGB / HSL / HSV)</a></li>
+    <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+    <li><a href="/number-base-converter">Number Base Converter (any base 2–36)</a></li>
+    <li><a href="/">All tools on one page (home)</a></li>
+  </ul>
+  <!-- tools:end -->
 </main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div>© <span id="year"></span> devboxkit.com</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/terms.html">Terms</a>
+    </div>
+  </div>
+</footer>
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
 <a href="https://erabb.it" class="erabbit-mark" aria-label="erabb.it"><img src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐇</text></svg>" width="10" height="10" alt=""></a>
 </body>
 </html>

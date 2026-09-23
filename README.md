@@ -28,7 +28,21 @@ Every page carries one `<nav class="toolbar">` — a menu trigger plus a single
 non-wrapping row of tool chips — rendered between `<!-- nav:start -->` and
 `<!-- nav:end -->`.
 
-**Do not hand-edit that region.** It is written into all 21 files from
+`sync_nav.py` writes any number of named regions, each delimited by its own
+comment pair. The site uses these:
+
+| Region | What it renders | Source in `nav_data.py` |
+| --- | --- | --- |
+| `nav` | the toolbar: menu trigger, sheet, chip rail | `TOOLS`, `GROUPS`, `HUBS`, `NOUN` |
+| `sizechips` | the directed-conversion chips inside the base converter | `VARIANTS` |
+| `tools` | the in-page "More developer tools" list near the foot of `<main>` | `TOOLS`, `TOOLS_LIST` |
+| `footernav` | a footer tool list (empty on this site) | `FOOTER` |
+
+The `tools` region is body copy, not chrome, so it is the crawl surface that
+spreads link equity between the tools. It was hand-copied into 25 files until
+issue #24: `/number-base-converter` was missing from every one of them.
+
+**Do not hand-edit any marked region.** All of them are written from
 `tools/nav_data.py`:
 
 ```
@@ -36,9 +50,10 @@ python3 tools/sync_nav.py           # rewrite every marked region
 python3 tools/sync_nav.py --check   # exit 1 if any page has drifted
 ```
 
-Adding a tool means an entry in `TOOLS`, a re-run of `sync_nav.py`, a panel on
-the homepage whose id matches `PANEL_FOR` in `assets/js/app.js`, and a sitemap
-entry.
+Adding a tool means an entry in `TOOLS` — with `label`, `long` and `body` text
+— a re-run of `sync_nav.py`, a panel on the homepage whose id matches
+`PANEL_FOR` in `assets/js/app.js`, and a sitemap entry. The toolbar and the
+in-page list both pick the new tool up from that one entry.
 
 The eleven base-conversion pages are generated rather than hand-written — edit
 `tools/build_bases.py`, never the HTML:
@@ -94,14 +109,14 @@ robots.txt / sitemap.xml
 
 ## Custom domain (devboxkit.com)
 
-**Note: `devboxkit.com` has not been registered yet.** The `CNAME` file and the steps below describe the intended setup for once the domain is purchased — until then, the site is only reachable at its default `github.io` Pages URL.
+`devboxkit.com` is registered and live. The site serves from GitHub Pages at that domain and returns HTTP 200.
 
-The `CNAME` file tells GitHub Pages to serve this repo at `devboxkit.com`. Once the domain is registered, you'll need to point DNS at GitHub Pages yourself:
+The `CNAME` file tells GitHub Pages to serve this repo at `devboxkit.com`. The DNS records below are the ones the domain already uses. Keep them if you move the domain to another registrar:
 
 - Apex domain (`devboxkit.com`): four `A` records to `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`.
 - `www` subdomain (optional): `CNAME` record to `<username>.github.io`.
 
-Then enable Pages in the repo's Settings → Pages, and enter `devboxkit.com` as the custom domain (GitHub will offer to enforce HTTPS once DNS propagates).
+Pages is enabled in the repo's Settings → Pages, with `devboxkit.com` as the custom domain and HTTPS enforced.
 
 ## Sanity-checking the core logic
 

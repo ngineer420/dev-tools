@@ -212,10 +212,41 @@ def render_footernav(url):
     return "\n".join(out)
 
 
+def render_tools(url):
+    """The in-page tool list in the body of <main>, not the chrome toolbar.
+
+    The toolbar is navigation and search engines discount it. This list is body
+    copy, so it is the crawl surface that actually distributes link equity
+    across the tools — which is exactly why leaving it hand-written in 25 files
+    is expensive: one tool added and never copied across is one tool with no
+    internal links at all.
+
+    The current page is dropped from its own list, so each page keeps listing
+    the *other* tools and no page links to itself. Tier-2 variant pages are not
+    in TOOLS, so they list the whole tier-1 set — including the parent tool,
+    which is the link those pages most need.
+    """
+    cfg = getattr(D, "TOOLS_LIST", None)
+    if not cfg:
+        return ""
+    items = [t for t in D.TOOLS if t["tier"] == 1 and canon(t["href"]) != url]
+    home = cfg.get("home")
+    if home and canon(home[0]) != url:
+        items = items + [{"href": home[0], "body": home[1]}]
+    if not items:
+        return ""
+    out = ["<h2>%s</h2>" % esc(cfg["heading"]), "<ul>"]
+    for t in items:
+        out.append("  <li>%s</li>" % anchor(t["href"], t.get("body") or t["long"], url))
+    out.append("</ul>")
+    return "\n".join(out)
+
+
 RENDERERS = {
     "nav": render_nav,
     "sizechips": render_sizechips,
     "footernav": render_footernav,
+    "tools": render_tools,
 }
 
 

@@ -187,9 +187,9 @@
     <p>When a pair fails, the <strong>Nudge lightness until it passes</strong> button walks the text color's lightness in <a href="https://www.w3.org/TR/css-color-4/#ok-lab">OKLCH</a> — hue and chroma held fixed — in whichever direction reaches the target first, and reports the hex it landed on. OKLCH rather than HSL because OKLCH's lightness axis is perceptually uniform: darkening a blue in HSL visibly shifts it toward purple, while in OKLCH it stays the same blue, only darker. Every candidate is converted back to sRGB and re-measured before it is offered, so the ratio shown is the ratio of the hex shown — gamut clamping included. If no lightness of that hue can reach the target, the page says so instead of handing you a color that fails.</p>
     <p>A translucent text color is composited onto the background before it is measured, because a ratio is only meaningful for the color the eye actually receives. Everything runs locally in your browser — nothing is uploaded. Need to convert a color rather than check it? The <a href="/color-converter">color converter</a> shares this page's color maths.</p>
 
+    <!-- tools:start -->
     <h2>More developer tools</h2>
     <ul>
-      <li><a href="/color-converter">Color Converter (HEX / RGB / HSL / HSV)</a></li>
       <li><a href="/json-formatter">JSON Formatter</a></li>
       <li><a href="/base64-encode-decode">Base64 Encode / Decode</a></li>
       <li><a href="/url-encoder-decoder">URL Encoder / Decoder</a></li>
@@ -202,8 +202,11 @@
       <li><a href="/json-csv-converter">JSON ⇄ CSV Converter</a></li>
       <li><a href="/html-entity-encoder">HTML Entity Encoder / Decoder</a></li>
       <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
+      <li><a href="/color-converter">Color Converter (HEX / RGB / HSL / HSV)</a></li>
+      <li><a href="/number-base-converter">Number Base Converter (any base 2–36)</a></li>
       <li><a href="/">All tools on one page (home)</a></li>
     </ul>
+    <!-- tools:end -->
   </section>
 </main>
 

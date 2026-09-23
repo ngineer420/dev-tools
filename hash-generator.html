@@ -212,6 +212,7 @@
     <p>Type or paste any text to compute its MD5, SHA-1, SHA-256, SHA-384 and SHA-512 digests side by side, each with its own copy button. <strong>Drop a file</strong> onto the drop zone to hash its raw bytes instead — the file is read as bytes rather than decoded as text, which is what makes the result match the checksum a publisher computed for a download. The <strong>HMAC</strong> field computes a keyed digest over the text input; note there is no HMAC-MD5 here, because <code>crypto.subtle</code> does not implement one. The <strong>compare</strong> box checks two checksums against each other, ignoring case and whitespace, and tells you when a length mismatch means you are comparing digests from two different algorithms.</p>
     <p>The SHA family uses the browser's built-in SubtleCrypto implementation; MD5 has no native browser API, so this page includes a small self-contained MD5 implementation instead. MD5 and SHA-1 are considered broken for security purposes (collision attacks are practical) — they are here for checksums and legacy compatibility, not for hashing passwords or anything security-sensitive. Nothing you type or drop is uploaded; hashing happens entirely on your device.</p>
 
+    <!-- tools:start -->
     <h2>More developer tools</h2>
     <ul>
       <li><a href="/json-formatter">JSON Formatter</a></li>
@@ -227,8 +228,10 @@
       <li><a href="/cron-expression-parser">Cron Expression Explainer</a></li>
       <li><a href="/color-converter">Color Converter (HEX / RGB / HSL / HSV)</a></li>
       <li><a href="/contrast-checker">WCAG Contrast Checker</a></li>
+      <li><a href="/number-base-converter">Number Base Converter (any base 2–36)</a></li>
       <li><a href="/">All tools on one page (home)</a></li>
     </ul>
+    <!-- tools:end -->
   </section>
 </main>
 
