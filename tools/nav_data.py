@@ -224,13 +224,12 @@ SITEMAP = {
 }
 
 # Sibling sites in the portfolio, rendered by the `peers` region into the
-# footer of every page. Three, not nineteen: a footer that lists the whole
+# footer of every page. Two, not nineteen: a footer that lists the whole
 # portfolio reads as a link farm and helps nobody. These are the sites a
-# visitor holding a blob of text or a string of bytes would actually want.
+# visitor holding a blob of text or a colour value would actually want.
 PEERS = [
     ("https://textkitpro.com", "textkitpro.com", "Text cleaning and case conversion"),
-    ("https://inascii.com", "inascii.com", "ASCII art from text and images"),
-    ("https://qrmint.net", "qrmint.net", "QR codes in the browser"),
+    ("https://gamutlens.com", "gamutlens.com", "Color pickers, palettes and contrast"),
 ]
 
 # One-time --migrate: what the legacy markup looked like and where the marker
